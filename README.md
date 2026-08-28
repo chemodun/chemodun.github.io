@@ -1,1 +1,75 @@
 # chemodun.github.io
+
+X4: Foundations modding references and guides, published at <https://chemodun.github.io/>.
+
+Only source lives here. The site is built by GitHub Actions and served from the uploaded artifact, so `_site/` is generated, gitignored and never committed.
+
+## Build
+
+```sh
+npm install
+npm run build      # -> _site/
+npm run serve      # build, then serve _site/ on http://localhost:8080
+npm start          # serve what is already built, without rebuilding
+```
+
+The site is served from the domain root, so every link on it is root-relative. Opening a built `_site/**/index.html` through `file://` therefore resolves `/` to the filesystem root and no link navigates - use `npm run serve`, which is a dependency-free static server (`src/serve.js`) and matches how Pages resolves a directory URL to its `index.html`.
+
+## Layout
+
+```
+src/layout.js        the shared shell - theme, header, breadcrumb, footer
+src/build.js         every src/content/**/*.md -> _site/<url>/index.html
+src/serve.js         a static server for _site/, for local viewing only
+src/content/         the authored pages, mirroring the URL tree
+src/globals/         the Lua Globals Reference pipeline (see below)
+```
+
+### Authored pages
+
+A page is a Markdown file with front matter:
+
+```markdown
+---
+title: Talking with MD and AI scripts
+description: One sentence, shown on the parent page's card and as the meta description.
+order: 2
+wikiPath: Modding Support/UI Modding support/Talking with MD and AI scripts
+---
+```
+
+`order` sorts a page among its siblings. `wikiPath` records where the same content lives on the Egosoft wiki, so a page can still be exported there with `xwiki-md.js`; the site ignores it and uses its own slug.
+
+Two markers are expanded at build time:
+
+- `{{children}}` — the section's child pages as a card list, so an index page never hand-maintains a list of what sits under it.
+- `<!-- xwiki: toc ... -->` — a table of contents built from the headings that follow it.
+
+Links may point at a page by its title (`[Lua Globals Reference](<Lua Globals Reference>)`); the build resolves those against the page tree and fails the build if one does not resolve.
+
+### The Lua Globals Reference
+
+`src/globals/` renders `/x4/modding-support/ui-modding/lua-globals/`. It holds **conversion only** — two inputs and the code that turns them into a published format:
+
+| Input | What it is |
+| --- | --- |
+| `globals.lua` | the 805 declarations, with the prose, parameters and returns for each |
+| `classification.json` | per global: origin, which Lua environments hold it, which versions have it, and the vanilla definition and call sites behind those claims |
+
+Both are produced upstream, in a separate working repository, and land here already finished. Nothing in this repo re-derives them, which is why CI builds the page from a clean checkout with no game files present.
+
+- `build-html.js` → the page on this site
+- `build-wiki.js` + `check-wiki.js` → XWiki 2.1 pages for the Egosoft wiki
+- `page-manifest.js`, `docs.js`, `usage.js`, `badges.js`, `exclusions.js` — shared by both
+
+`globals.lua` doubles as a LuaLS meta file: pointed at as a library, it gives completion and signatures for all 805 globals while writing UI Lua. `build-html.js` therefore copies it into the page's own directory, so it is downloadable from the reference at `/x4/modding-support/ui-modding/lua-globals/globals.lua` and can never drift from the page built beside it.
+
+#### Where it comes from
+
+The reference carries on from two earlier repositories, both built around the same idea - that a description of what X4 exposes to Lua should be written down and shared, instead of being re-derived from the vanilla source by every modder in turn:
+
+- [X4-LuaLSAddonPrep](https://github.com/chemodun/X4-LuaLSAddonPrep) - the source data, kept as Hjson: the documented functions taken from the Egosoft wiki's Lua function overview, plus what the extracted Lua yields on its own - the ffi/C definitions and types, the `Helper` functions, the names exposed through `AddGlobalAccess`, and the undocumented ones.
+- [X4-LuaLSAddon](https://github.com/chemodun/X4-LuaLSAddon) - that data generated into a [Lua Language Server](https://luals.github.io/) addon and published through [LLS-Addons](https://github.com/LuaLS/LLS-Addons), so an editor can offer completion and signatures while UI Lua is being written.
+
+What this reference adds is evidence and scope. It covers the global namespace whole rather than the exposed functions alone, it separates the two Lua environments - a name available to an addon menu is not automatically available to the HUD - and it reports presence per game version. None of that is inferred from reading the code: each claim is what the running game was found to hold. The LuaLS route is unchanged, since `globals.lua` is still a meta file.
+
