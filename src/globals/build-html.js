@@ -66,7 +66,7 @@ const savedOf = (n) => (docs[n] && docs[n].saved) || null;
 
 function verState(n, v) {
   const e = DATA[n], s = e.versions[v];
-  if (!s || !s.present) return { tone: 'no', tick: '—', text: 'absent' };
+  if (!s || !s.present) return { tone: 'no', tick: '✗', text: 'absent' };
   if (e.delta === 'new in ' + v) return { tone: 'new', tick: 'NEW', text: 'NEW in ' + v };
   return { tone: 'ok', tick: '✓', text: 'present' };
 }
@@ -77,7 +77,7 @@ function versCell(n, tick) {
     if (tick) return `<b>${v}</b> ${badge(s.tone, s.tick)}`;
     const areas = DATA[n].versions[v].areas || [];
     return `<b>${v}</b> ${badge(s.tone, s.text)}` +
-      (s.tone === 'no' || !areas.length ? '' : ' — ' + esc(areas.join(' + ')));
+      (s.tone === 'no' || !areas.length ? '' : ' - ' + esc(areas.join(' + ')));
   }).join('<br>');
 }
 
@@ -104,17 +104,17 @@ function originCell(n) {
     const where = VERSIONS.filter((v) => lines[v])
       .map((v) => v + ' ' + lines[v].map((l) => mono(':' + l)).join(' ')).join(', ');
     let s = mono(d.rel);
-    if (d.via === 'AddGlobalAccess') s += ' — <code>AddGlobalAccess</code> → ' + mono(d.impl || '?');
-    else if (d.via === 'MakeGlobalAvailable') s += ' — <code>MakeGlobalAvailable</code>';
-    else if (d.via === 'function') s += ' — top-level <code>function</code>';
-    else if (d.via === 'assignment') s += ' — table assignment';
+    if (d.via === 'AddGlobalAccess') s += ' - <code>AddGlobalAccess</code> → ' + mono(d.impl || '?');
+    else if (d.via === 'MakeGlobalAvailable') s += ' - <code>MakeGlobalAvailable</code>';
+    else if (d.via === 'function') s += ' - top-level <code>function</code>';
+    else if (d.via === 'assignment') s += ' - table assignment';
     bits.push(s + (where ? ' (' + where + ')' : ''));
   }
   if (!sites.size) bits.push('<i>injected by the executable; defined in no <code>.lua</code> file</i>');
 
   if (e.overrides && e.overrides.length) {
     const o = e.overrides[e.overrides.length - 1];
-    bits.push(tint('warn', '⚠ vanilla replaces it at runtime') + ' — ' + mono(o.rel + ':' + o.line));
+    bits.push(tint('warn', '⚠ vanilla replaces it at runtime') + ' - ' + mono(o.rel + ':' + o.line));
   }
   if (docs[n] && docs[n].mapped) bits.push('maps to ' + mono(docs[n].mapped));
   return originBadge(n) + '<br>' + bits.join('<br>');
@@ -130,15 +130,15 @@ function availCell(n) {
 function usageCell(n) {
   const u = verdicts[n], [tone, label] = USAGE[u.verdict];
   const seen = [...new Set(u.sites.map((s) => s.rel + ':' + s.line))];
-  return badge(tone, label) + ' — ' + x(u.detail) +
+  return badge(tone, label) + ' - ' + x(u.detail) +
     (seen.length ? '<br>Seen at ' + seen.map(mono).join(', ') : '');
 }
 
 const paramLine = (p) => mono(p.name) + ' <i>' + x(p.type) + '</i>' +
-  (p.optional ? ' ' + badge('warn', 'optional') : '') + (p.desc ? ' — ' + x(p.desc) : '');
+  (p.optional ? ' ' + badge('warn', 'optional') : '') + (p.desc ? ' - ' + x(p.desc) : '');
 
 const returnLine = (r) => (r.name ? mono(r.name) + ' ' : '') + '<i>' + x(r.type) + '</i>' +
-  (r.desc ? ' — ' + x(r.desc) : '');
+  (r.desc ? ' - ' + x(r.desc) : '');
 
 function signature(n) {
   if (docs[n]) return docs[n].signature;
@@ -333,12 +333,12 @@ const DEFAULT_VERSION = vtok(VERSIONS[VERSIONS.length - 1]);
 function body() {
   return `
 <h1>Lua Globals Reference</h1>
-<p class="lede">Every name X4: Foundations puts into the global namespace of X4 UI Lua code — what creates it, which of the two Lua environments can see it, and which game version has it.</p>
+<p class="lede">Every name X4: Foundations puts into the global namespace of X4 UI Lua code - what creates it, which of the two Lua environments can see it, and which game version has it.</p>
 <p class="lede"><b>${names.length} globals</b> in 9.00: ${counts('engine')} injected by the executable, ${counts('widget')} from <code>widget_fullscreen.lua</code>, ${counts('addon')} from an addon file, ${counts('core')} from a core file. Availability and version presence are <b>verified in the game</b>, not inferred from the code: every row reports what each Lua environment actually holds, on each version.</p>
 
 <div class="dl">
 <a class="btn" href="${URL}globals.lua" download>Download <code>globals.lua</code></a>
-<p>${LUA_KB} KB. The same ${names.length} declarations as a Lua Language Server meta file — every global with its description, parameters and returns. Point an editor at it as a library and X4's globals get completion and signatures while UI Lua is being written.</p>
+<p>${LUA_KB} KB. The same ${names.length} declarations as a Lua Language Server meta file - every global with its description, parameters and returns. Point an editor at it as a library and X4's globals get completion and signatures while UI Lua is being written.</p>
 </div>
 
 <details><summary>Using it in an editor</summary>
@@ -346,7 +346,7 @@ function body() {
 <pre><code>{
   "workspace.library": [ "path/to/globals.lua" ]
 }</code></pre>
-<p>The file declares names only — it is never executed and never loaded by the game. It covers the global namespace; for the wider set of X4 Lua definitions there is a packaged addon, <a href="https://github.com/chemodun/X4-LuaLSAddon">X4-LuaLSAddon</a>, installable through the Lua extension's addon manager.</p>
+<p>The file declares names only - it is never executed and never loaded by the game. It covers the global namespace; for the wider set of X4 Lua definitions there is a packaged addon, <a href="https://github.com/chemodun/X4-LuaLSAddon">X4-LuaLSAddon</a>, installable through the Lua extension's addon manager.</p>
 </details>
 
 <details><summary>How to read a row</summary>
@@ -357,12 +357,12 @@ ${badge('addon', 'addon')} a top-level definition in a <code>ui/addons/*</code> 
 ${badge('new', 'core')} a top-level definition in a <code>ui/core/*</code> HUD file.</td></tr>
 <tr><th>Availability</th><td>${badge('ok', 'addons + core')} present in both Lua environments.<br>
 ${badge('addon', 'addons only')} only where <code>ui/addons/*</code> menus run.<br>
-${badge('new', 'core only')} only in the HUD environment — addon code cannot reach these.<br>
+${badge('new', 'core only')} only in the HUD environment - addon code cannot reach these.<br>
 ${badge('gone', 'absent')} declared, but present in neither version.</td></tr>
 <tr><th>Signature</th><td>${badge('ok', 'confirmed')} vanilla calls it, and every argument count fits the declaration.<br>
-${badge('gone', 'disputed')} vanilla passes a count the declaration cannot take — believe the call site.<br>
+${badge('gone', 'disputed')} vanilla passes a count the declaration cannot take - believe the call site.<br>
 ${badge('warn', 'unverified')} no vanilla code calls it at all.</td></tr>
-<tr><th>Saved</th><td>${badge('warn', 'saved: userdata')} / ${badge('warn', 'saved: savegame')} — a <code>&lt;savedvariable&gt;</code> in the addon’s <code>ui.xml</code>. The engine restores the previous value <i>before</i> that file runs, which is why vanilla creates every one of them with <code>X = X or { }</code>.</td></tr>
+<tr><th>Saved</th><td>${badge('warn', 'saved: userdata')} / ${badge('warn', 'saved: savegame')} - a <code>&lt;savedvariable&gt;</code> in the addon’s <code>ui.xml</code>. The engine restores the previous value <i>before</i> that file runs, which is why vanilla creates every one of them with <code>X = X or { }</code>.</td></tr>
 </table></details>
 
 <h2 id="index">All globals</h2>

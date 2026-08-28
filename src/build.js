@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const MarkdownIt = require('markdown-it');
 
-const { shell, esc } = require('./layout.js');
+const { shell, esc, wikiRef } = require('./layout.js');
 
 const ROOT = __dirname;
 const CONTENT = path.join(ROOT, 'content');
@@ -50,6 +50,7 @@ const pages = walk(CONTENT).map((file) => {
     description: data.description || '',
     order: Number(data.order || 100),
     generated: data.generated === 'true',
+    wiki: data.wiki || '',
   };
 });
 
@@ -60,6 +61,19 @@ const parentUrl = (p) => p.segs.length ? '/' + p.segs.slice(0, -1).join('/') + (
 const childrenOf = (p) => pages
   .filter((c) => c !== p && c.segs.length === p.segs.length + 1 && c.url.startsWith(p.url))
   .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+
+// A section names only its own segment on the Egosoft wiki; the rest is inherited from
+// its parents, so a rename over there is one edit here. Only sections carry one: the
+// wiki's own tree is what a reader follows for anything more, not a single document.
+function wikiSegsFor(p) {
+  if (!p.wiki) return [];
+  const segs = [];
+  for (let i = 0; i <= p.segs.length; i++) {
+    const anc = byUrl.get(i ? '/' + p.segs.slice(0, i).join('/') + '/' : '/');
+    if (anc && anc.wiki) segs.push(...anc.wiki.split('/').filter(Boolean));
+  }
+  return segs;
+}
 
 function trailFor(p) {
   const out = [];
@@ -166,6 +180,10 @@ for (const p of pages) {
   // The editing-copy note and the XWiki toc macro are both source-only markers.
   html = html.replace(/<!--\s*Editing copy[\s\S]*?-->\s*/g, '');
   html = html.replace(/<!--\s*xwiki:\s*toc[^>]*-->/g, (m, at) => toc(headings, html, at));
+
+  // Under the page title, so the way out to the wiki is visible before the content.
+  const wiki = wikiRef(wikiSegsFor(p), p.wiki);
+  if (wiki) html = html.replace('</h1>', () => '</h1>\n' + wiki);
 
   if (env.unresolved.length) unresolvedAll.push({ page: p.url, links: env.unresolved });
 

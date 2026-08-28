@@ -40,16 +40,26 @@ wikiPath: Modding Support/UI Modding support/Talking with MD and AI scripts
 
 `order` sorts a page among its siblings. `wikiPath` records where the same content lives on the Egosoft wiki, so a page can still be exported there with `xwiki-md.js`; the site ignores it and uses its own slug.
 
+A **section** page can also carry `wiki`, naming its own segment of the Egosoft wiki tree and nothing more:
+
+```markdown
+wiki: UI Modding support
+```
+
+The build joins that with the same key on the page's parents, so the section above it holds `wiki: Modding Support` and the one above that `wiki: X4 Foundations Wiki`, and the link comes out as `https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/UI%20Modding%20support/`. A rename over there is then one edit here rather than one per page. It renders as a strip under the page title, using the value itself as the link text, and points a reader at the same section on the wiki for anything more.
+
+Only sections carry it. A document links to the wiki's tree through its section, so the reader lands where every related page is, not on one of them.
+
 Two markers are expanded at build time:
 
-- `{{children}}` — the section's child pages as a card list, so an index page never hand-maintains a list of what sits under it.
-- `<!-- xwiki: toc ... -->` — a table of contents built from the headings that follow it.
+- `{{children}}` - the section's child pages as a card list, so an index page never hand-maintains a list of what sits under it.
+- `<!-- xwiki: toc ... -->` - a table of contents built from the headings that follow it.
 
 Links may point at a page by its title (`[Lua Globals Reference](<Lua Globals Reference>)`); the build resolves those against the page tree and fails the build if one does not resolve.
 
 ### The Lua Globals Reference
 
-`src/globals/` renders `/x4/modding-support/ui-modding/lua-globals/`. It holds **conversion only** — two inputs and the code that turns them into a published format:
+`src/globals/` renders `/x4/modding-support/ui-modding/lua-globals/`. It holds **conversion only** - two inputs and the code that turns them into a published format:
 
 | Input | What it is |
 | --- | --- |
@@ -60,7 +70,7 @@ Both are produced upstream, in a separate working repository, and land here alre
 
 - `build-html.js` → the page on this site
 - `build-wiki.js` + `check-wiki.js` → XWiki 2.1 pages for the Egosoft wiki
-- `page-manifest.js`, `docs.js`, `usage.js`, `badges.js`, `exclusions.js` — shared by both
+- `page-manifest.js`, `docs.js`, `usage.js`, `badges.js`, `exclusions.js` - shared by both
 
 `globals.lua` doubles as a LuaLS meta file: pointed at as a library, it gives completion and signatures for all 805 globals while writing UI Lua. `build-html.js` therefore copies it into the page's own directory, so it is downloadable from the reference at `/x4/modding-support/ui-modding/lua-globals/globals.lua` and can never drift from the page built beside it.
 

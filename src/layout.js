@@ -4,7 +4,7 @@
 // src/globals/build-html.js for the generated reference - so the site has one
 // theme and one navigation, defined here only.
 
-const SITE = { title: 'Chem O’Dun', tagline: 'X4: Foundations modding' };
+const SITE = { title: 'Chem O’Dun', tagline: 'References and Guides' };
 
 const LIGHT = '--bg:#fff;--fg:#1f2328;--dim:#59636e;--line:#d1d9e0;--soft:#f6f8fa;--acc:#0969da';
 const DARK = '--bg:#0d1117;--fg:#e6edf3;--dim:#9198a1;--line:#3d444d;--soft:#161b22;--acc:#4493f8';
@@ -61,6 +61,10 @@ nav.crumb a{text-decoration:none}
 nav.crumb a:hover{text-decoration:underline}
 nav.crumb .sep{padding:0 .45em;opacity:.6}
 
+p.wikiref{margin:1em 0 1.5em;padding:12px 16px;border:1px solid var(--line);
+  border-left:4px solid var(--acc);border-radius:8px;background:var(--soft)}
+p.wikiref a{font-weight:600}
+
 ul.cards{list-style:none;padding:0;margin:1.2em 0;display:grid;gap:10px}
 ul.cards li{border:1px solid var(--line);border-radius:8px;padding:12px 15px}
 ul.cards a{font-weight:600;text-decoration:none;font-size:1.02rem}
@@ -78,6 +82,19 @@ const esc = (s) => String(s ?? '')
 // Root-relative: this is a user site, so the domain root is the site root.
 const href = (p) => '/' + String(p).replace(/^\/+|\/+$/g, '').split('/').filter(Boolean)
   .map(encodeURIComponent).join('/') + (p === '' || p === '/' ? '' : '/');
+
+// The same section on the Egosoft wiki, where the material is also published. A page
+// names only its own wiki segment; the full path is assembled from its parents.
+const WIKI = 'https://wiki.egosoft.com/';
+const wikiUrl = (segs) => WIKI + segs.map(encodeURIComponent).join('/') + '/';
+
+// The link text is the page's own wiki value, so what a reader clicks is the name of
+// the wiki page they land on.
+const wikiRef = (segs, name) => segs.length
+  ? `<p class="wikiref">For more details and additional information, check ` +
+    `<a href="${wikiUrl(segs)}">${esc(name || segs[segs.length - 1])}</a>` +
+    ` on the Egosoft wiki.</p>`
+  : '';
 
 function crumbs(trail) {
   if (!trail.length) return '';
@@ -115,7 +132,7 @@ M.9 8h1.7M13.4 8h1.7M2 14l1.2-1.2M12.8 3.2L14 2"/></svg>`;
 // The page's own js gets its own <script> and its own scope: a parse error or a name
 // clash in it must not take the theme toggle down with it.
 function shell({ title, description = '', trail = [], body, css = '', js = '' }) {
-  const full = title === SITE.title ? title : `${title} — ${SITE.title}`;
+  const full = title === SITE.title ? title : `${title} - ${SITE.title}`;
   return `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -140,4 +157,4 @@ ${js ? `<script>(function(){${js}})();</script>` : ''}
 </body></html>`;
 }
 
-module.exports = { SITE, BASE_CSS, shell, esc, href, crumbs };
+module.exports = { SITE, BASE_CSS, shell, esc, href, crumbs, wikiUrl, wikiRef };

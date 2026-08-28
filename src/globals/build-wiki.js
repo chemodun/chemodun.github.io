@@ -107,7 +107,7 @@ function usageBadge(name) {
 function usageCell(name) {
   const u = verdicts[name];
   const [tone, label] = USAGE[u.verdict];
-  const bits = [badge(tone, label) + ' — ' + x(u.detail)];
+  const bits = [badge(tone, label) + ' - ' + x(u.detail)];
   const seen = [];
   for (const st of u.sites) {
     const at = st.rel + ':' + st.line;
@@ -121,7 +121,7 @@ function usageCell(name) {
 function verState(name, v) {
   const e = DATA[name];
   const s = e.versions[v];
-  if (!s || !s.present) return { tone: 'no', tick: '—', text: 'absent' };
+  if (!s || !s.present) return { tone: 'no', tick: '✗', text: 'absent' };
   if (e.delta === 'new in ' + v) return { tone: 'new', tick: 'NEW', text: 'NEW in ' + v };
   return { tone: 'ok', tick: '✓', text: 'present' };
 }
@@ -132,7 +132,7 @@ function versCell(name, { tick = false } = {}) {
     const s = verState(name, v);
     if (tick) return '**' + v + '** ' + badge(s.tone, s.tick);
     const areas = DATA[name].versions[v].areas || [];
-    const where = areas.length ? ' — ' + areas.join(' + ') : '';
+    const where = areas.length ? ' - ' + areas.join(' + ') : '';
     return '**' + v + '** ' + badge(s.tone, s.text) + (s.tone === 'no' ? '' : where);
   }).join(NL);
 }
@@ -175,17 +175,17 @@ function originCell(name, { compact = false } = {}) {
       .map(v => v + ' ' + lines[v].map(l => mono(':' + l)).join(' '))
       .join(', ');
     let s = mono(d.rel);
-    if (d.via === 'AddGlobalAccess') s += ' — ##AddGlobalAccess## → ' + mono(d.impl || '?');
-    else if (d.via === 'MakeGlobalAvailable') s += ' — ##MakeGlobalAvailable##';
-    else if (d.via === 'function') s += ' — top-level ##function##';
-    else if (d.via === 'assignment') s += ' — table assignment';
+    if (d.via === 'AddGlobalAccess') s += ' - ##AddGlobalAccess## → ' + mono(d.impl || '?');
+    else if (d.via === 'MakeGlobalAvailable') s += ' - ##MakeGlobalAvailable##';
+    else if (d.via === 'function') s += ' - top-level ##function##';
+    else if (d.via === 'assignment') s += ' - table assignment';
     bits.push(s + (where ? ' (' + where + ')' : ''));
   }
   if (!sites.size) bits.push('//injected by the executable; defined in no ##.lua## file//');
 
   if (e.overrides && e.overrides.length) {
     const o = e.overrides[e.overrides.length - 1];
-    bits.push(colorText('warn', '⚠ vanilla replaces it at runtime') + ' — ' + mono(o.rel + ':' + o.line));
+    bits.push(colorText('warn', '⚠ vanilla replaces it at runtime') + ' - ' + mono(o.rel + ':' + o.line));
   }
   const d = docs[name];
   if (d && d.mapped) bits.push('maps to ' + mono(d.mapped));
@@ -205,12 +205,12 @@ function availCell(name, { compact = false } = {}) {
 function paramLine(p) {
   let l = mono(p.name) + ' //' + x(p.type) + '//';
   if (p.optional) l += BSEP + badge('warn', 'optional');
-  return p.desc ? l + ' — ' + x(p.desc) : l;
+  return p.desc ? l + ' - ' + x(p.desc) : l;
 }
 
 function returnLine(r) {
   const head = (r.name ? mono(r.name) + ' ' : '') + '//' + x(r.type) + '//';
-  return r.desc ? head + ' — ' + x(r.desc) : head;
+  return r.desc ? head + ' - ' + x(r.desc) : head;
 }
 
 // Only the declared names have a real signature; for the rest the measurement gives
@@ -345,15 +345,15 @@ const LEGEND = `== The two Lua environments ==
 X4 runs UI Lua in **two separate environments**, and every row below says which of them a global lives in. They are separate global namespaces: a name in one is not automatically in the other.
 
 |=Environment|=Runs|=Runtime
-|**addons**|##ui/addons/*## — the menus, and ##ui/widget/lua/widget~_fullscreen.lua## with them|the **usual LuaJIT** the game embeds
-|**core**|##ui/core/*## — the HUD: target monitor, radar, message ticker, crosshair|**Anark's LuaJIT**, the runtime built into the Anark presentation engine
+|**addons**|##ui/addons/*## - the menus, and ##ui/widget/lua/widget~_fullscreen.lua## with them|the **usual LuaJIT** the game embeds
+|**core**|##ui/core/*## - the HUD: target monitor, radar, message ticker, crosshair|**Anark's LuaJIT**, the runtime built into the Anark presentation engine
 
-That is why the core environment is where the scene-graph API belongs — ##self##, ##getElement##, ##setAttribute##, ##play##, ##Vector## — and why ##ui/core/*## code is written as an element behaviour (##function self:onInitialize()##) rather than as a menu. Most of that API is published into the addons environment as well, so the availability badge, not the origin, is what tells you where you can call something.
+That is why the core environment is where the scene-graph API belongs - ##self##, ##getElement##, ##setAttribute##, ##play##, ##Vector## - and why ##ui/core/*## code is written as an element behaviour (##function self:onInitialize()##) rather than as a menu. Most of that API is published into the addons environment as well, so the availability badge, not the origin, is what tells you where you can call something.
 
 == How to read a row ==
 
 |=Column|=Value|=Meaning
-|(% rowspan="4" %)**Origin**|${cell(ORIGIN.engine())}|Injected by the game executable. Defined in no ##.lua## file — it simply exists. It cannot be replaced or wrapped, and it changes only with a game patch.
+|(% rowspan="4" %)**Origin**|${cell(ORIGIN.engine())}|Injected by the game executable. Defined in no ##.lua## file - it simply exists. It cannot be replaced or wrapped, and it changes only with a game patch.
 |${cell(ORIGIN.widget())}|Written in ##ui/widget/lua/widget~_fullscreen.lua##, then published either with ##AddGlobalAccess()## or as a plain top-level ##function##. That file runs in the addons Lua environment itself, so addon code reaches it directly.
 |${cell(ORIGIN.addon())}|A top-level definition in one of the ##ui/addons/*## files, leaked into the shared addons Lua environment. A later-loading addon can monkey-patch it.
 |${cell(ORIGIN.core())}|A top-level definition in a ##ui/core/*## HUD file, visible only inside the core Lua environment.
@@ -362,25 +362,25 @@ That is why the core environment is where the scene-graph API belongs — ##self
 |${cell(scopeBadge('core'))}|Present only in the core Lua environment. These are the only globals addon code cannot reach.
 |${cell(scopeBadge('none'))}|Declared in ##globals.lua## but absent from both measured Lua environments. See the note on the entry.
 |(% rowspan="3" %)**Versions**|${cell(badge('ok', '✓'))}|Measured present in that version.
-|${cell(badge('new', 'NEW'))}|Introduced in that version. Calling it on the older one is a nil-call crash — guard with ##if Name then##.
-|${cell(badge('no', '—'))}|Measured absent in that version.
+|${cell(badge('new', 'NEW'))}|Introduced in that version. Calling it on the older one is a nil-call crash - guard with ##if Name then##.
+|${cell(badge('no', '✗'))}|Measured absent in that version.
 
 Availability and version presence are **verified in the game, not inferred from the code**: every row here reports what the addons Lua environment and the core one actually hold, on 8.00 and on 9.00.
 
 == What vanilla's own code confirms ==
 
-An engine global is injected by the executable, so no file declares its parameters: the signature shown for one is inherited from the older function list or inferred from how it is used. Every engine card therefore carries one more badge, saying what vanilla's own code proves about that signature. Every ##.lua## and ##.xpl## file of the extracted game was read, and every call of every global counted — together with how many arguments that call passes.
+An engine global is injected by the executable, so no file declares its parameters: the signature shown for one is inherited from the older function list or inferred from how it is used. Every engine card therefore carries one more badge, saying what vanilla's own code proves about that signature. Every ##.lua## and ##.xpl## file of the extracted game was read, and every call of every global counted - together with how many arguments that call passes.
 
 |=Badge|=What it means
 |${cell(badge('ok', 'signature: confirmed'))}|Vanilla calls it, and every argument count it passes fits the parameter list shown. The card names the call sites, so you can read a real call.
-|${cell(badge('gone', 'signature: disputed'))}|Vanilla calls it with an argument count the parameter list cannot take. The declaration is wrong, or an optional parameter is unmarked — believe the call site over the signature.
+|${cell(badge('gone', 'signature: disputed'))}|Vanilla calls it with an argument count the parameter list cannot take. The declaration is wrong, or an optional parameter is unmarked - believe the call site over the signature.
 |${cell(badge('warn', 'signature: unverified'))}|No vanilla code calls it at all. Nothing here backs the signature: treat it as a starting point and check it in game before relying on it.
 
 A variable is never called, so a mention is the only evidence there is; its badge counts vanilla references instead of call sites.
 
 == Saved variables ==
 
-A few of the addon globals carry an extra ${cell(badge('warn', 'saved: userdata'))} or ${cell(badge('warn', 'saved: savegame'))} badge. Those are a special case. The owning addon declares them as a ##<savedvariable>## in its ##ui.xml##, and the engine **restores the previous value before that file runs**. They are the only globals that already hold a value on the first line of the code that creates them, which is why vanilla creates every one of them with the ##X = X or { ... }## idiom instead of a plain assignment — a plain assignment would throw the restored value away.
+A few of the addon globals carry an extra ${cell(badge('warn', 'saved: userdata'))} or ${cell(badge('warn', 'saved: savegame'))} badge. Those are a special case. The owning addon declares them as a ##<savedvariable>## in its ##ui.xml##, and the engine **restores the previous value before that file runs**. They are the only globals that already hold a value on the first line of the code that creates them, which is why vanilla creates every one of them with the ##X = X or { ... }## idiom instead of a plain assignment - a plain assignment would throw the restored value away.
 
 ##userdata## is kept in ##userdata.xml## and belongs to the player profile, so every savegame shares it. ##savegame## is kept inside the save and travels with it. A mod can persist its own globals the same way, by adding a ##<savedvariable>## line to its own ##ui.xml##.`;
 
@@ -396,7 +396,7 @@ function indexPage() {
   const out = [];
   out.push('= ' + WIKI.parent + ' =');
   out.push('');
-  out.push('Every name X4: Foundations puts into the global namespace of X4 UI Lua code — what creates it, which of the two Lua environments can see it, and which game version has it.');
+  out.push('Every name X4: Foundations puts into the global namespace of X4 UI Lua code - what creates it, which of the two Lua environments can see it, and which game version has it.');
   out.push('');
   out.push(`**${names.length} globals** in 9.00: ${counts.engine} injected by the executable, ${counts.widget} from ##widget~_fullscreen.lua##, ${counts.addon} from an addon file, ${counts.core} from a core file. ${names.length - undoc} carry a description; ${undoc} do not.`);
   out.push('');
@@ -444,7 +444,7 @@ write('index', WIKI.parent, indexPage());
 for (const p of content) write(p.id, p.name, contentPage(p));
 
 fs.writeFileSync(path.join(OUT, '_pages.md'),
-  '# Paste map\n\nGenerated by `../build-wiki.js` — do not edit.\n\n' +
+  '# Paste map\n\nGenerated by `../build-wiki.js` - do not edit.\n\n' +
   'Parent page: `' + WIKI.space + '/' + WIKI.parent + '`, renamed from `' + WIKI.renamedFrom + '`. ' +
   'Every content page is a direct child of it. Badge mode `' + MODE + '`, link style `' + LINK_STYLE + '`.\n\n' +
   written.map(w => '- `' + w.file + '` → **' + w.name + '**' +
