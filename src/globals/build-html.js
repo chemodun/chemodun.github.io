@@ -11,9 +11,8 @@ const path = require('path');
 
 const { DATA, names } = require('./page-manifest.js');
 const { docs, summaryOf } = require('./docs.js');
-const { TONES } = require('./badges.js');
 const { verdicts } = require('./usage.js');
-const { shell } = require('../layout.js');
+const { shell, versionRange } = require('../layout.js');
 
 const VERSIONS = ['8.00', '9.00'];
 const URL = '/x4/modding-support/ui-modding/lua-globals/';
@@ -41,24 +40,32 @@ const anchorOf = (n) => 'g-' + n;
 
 const ORIGIN_TONE = { engine: 'engine', widget: 'widget', addon: 'addon', core: 'new' };
 const ORIGIN_LABEL = { engine: 'engine', widget: 'widget_fullscreen', addon: 'addon', core: 'core' };
+// [tone, what a collapsed row says, what an open card says]. A row states availability
+// in one word; only the card has room to name the environments that word stands for.
 const SCOPE = {
-  all: ['ok', 'addons + core'], addons: ['addon', 'addons only'],
-  core: ['new', 'core only'], none: ['gone', 'does not exist'],
+  all: ['ok', 'all', 'all (addons + core)'], addons: ['addon', 'addons', 'addons only'],
+  core: ['new', 'core', 'core only'], none: ['gone', 'absent', 'does not exist'],
 };
 const USAGE = {
   confirmed: ['ok', 'confirmed'], disputed: ['gone', 'disputed'], unverified: ['warn', 'unverified'],
 };
 
-// The index says "widget"; only the card has room for the file name it stands for.
+// A row is a fixed-width column, so it carries the short label and the long one as its
+// tooltip.
+const titled = (tone, label, title) =>
+  `<b class="t-${tone}" title="${esc(title)}">${esc(label)}</b>`;
+
+// The row says "widget"; only the card has room for the file name it stands for.
 const originBadge = (n, short) => {
-  const o = DATA[n].origin;
-  const label = short && o === 'widget' ? 'widget' : (ORIGIN_LABEL[o] || 'engine');
-  return badge(ORIGIN_TONE[o] || 'engine', label);
+  const o = DATA[n].origin, tone = ORIGIN_TONE[o] || 'engine', label = ORIGIN_LABEL[o] || 'engine';
+  return short
+    ? titled(tone, o === 'widget' ? 'widget' : label, 'Origin: ' + label)
+    : badge(tone, label);
 };
 
 const scopeBadge = (n, short) => {
-  const [tone, label] = SCOPE[DATA[n].scope] || SCOPE.none;
-  return badge(tone, short ? label.replace(' only', '').replace('does not exist', 'absent') : label);
+  const [tone, s, long] = SCOPE[DATA[n].scope] || SCOPE.none;
+  return short ? titled(tone, s, 'Availability: ' + long) : badge(tone, long);
 };
 
 const kindBadge = (n) => badge(DATA[n].kind === 'function' ? 'no' : 'warn', DATA[n].kind);
@@ -71,6 +78,14 @@ function verState(n, v) {
   return { tone: 'ok', tick: '✓', text: 'present' };
 }
 
+// Presence as a range: one column per version stops fitting once the game has a few
+// more of them. The card still lists every version, because the areas differ per version.
+const rangeOf = (n) => versionRange(VERSIONS, VERSIONS.filter((v) => (DATA[n].versions[v] || {}).present));
+const versShort = (n) => {
+  const r = rangeOf(n);
+  return `<b class="t-${r.tone}" title="${esc(r.long)}">${esc(r.short)}</b>`;
+};
+
 function versCell(n, tick) {
   return VERSIONS.map((v) => {
     const s = verState(n, v);
@@ -81,10 +96,13 @@ function versCell(n, tick) {
   }).join('<br>');
 }
 
+// A row says only that the global is saved; which store holds it is the card's business.
 function summaryCell(n) {
   if (DATA[n].note) return tint('warn', '⚠ ' + x(DATA[n].note));
   const sv = savedOf(n), s = summaryOf(docs[n]);
-  return (sv ? badge('warn', 'saved: ' + sv) + ' ' : '') + (s ? x(s) : tint('warn', 'undocumented'));
+  return (sv ? titled('warn', 'saved',
+    'A saved variable: the engine restores it before the file that declares it runs') + ' ' : '') +
+    (s ? x(s) : tint('warn', 'undocumented'));
 }
 
 // One line per distinct definition site, every version's line numbers behind it.
@@ -173,10 +191,8 @@ function card(n) {
   const e = DATA[n], d = docs[n], u = verdicts[n];
 
   const head = [kindBadge(n), originBadge(n), scopeBadge(n)];
-  for (const v of VERSIONS) {
-    const s = verState(n, v);
-    head.push(badge(s.tone, v + (s.tick === '✓' ? '' : ' ' + s.tick)));
-  }
+  const vr = rangeOf(n);
+  head.push(badge(vr.tone, vr.short));
   if (savedOf(n)) head.push(badge('warn', 'saved: ' + savedOf(n)));
   if (u && e.origin === 'engine') {
     const [tone, label] = USAGE[u.verdict];
@@ -202,7 +218,7 @@ function card(n) {
   }
   rows.push(['Origin', originCell(n)]);
   rows.push(['Availability', availCell(n)]);
-  rows.push(['Game versions', versCell(n, false)]);
+  rows.push(['Game versions', `${badge(vr.tone, vr.long)}<br>` + versCell(n, false)]);
   if (e.origin === 'engine' && u) rows.push(['Vanilla usage', usageCell(n)]);
 
   const overloads = d && d.overloads.length
@@ -215,8 +231,9 @@ ${d && d.prose ? `<p>${x(d.prose)}</p>` : ''}
 <table>${rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>`;
 
   return `<details class="card" id="${anchorOf(n)}" ${facets(n)}>
-<summary><code class="nm">${esc(n)}</code> ${originBadge(n, true)} ${scopeBadge(n, true)} \
-<span class="vs">${versCell(n, true).replace('<br>', ' ')}</span> \
+<summary class="disc"><code class="nm">${esc(n)}</code>\
+<span class="og">${originBadge(n, true)}</span><span class="sc">${scopeBadge(n, true)}</span>\
+<span class="vs">${versShort(n)}</span>\
 <span class="sum">${summaryCell(n)}</span></summary>
 ${body}</details>`;
 }
@@ -225,63 +242,46 @@ ${body}</details>`;
 
 const counts = (v) => names.filter((n) => DATA[n].origin === v).length;
 
-// Only the badge tones live here; the base theme comes from ../layout.js.
-const tokens = (pick) => Object.entries(TONES).map(([k, t]) => `--t-${k}:${pick(t)};`).join('');
+// Only what is this page's own. The theme, the tone palette and every shared
+// component - the filter bar, the disclosure chevron, the callout strip - come from
+// ../layout.js, so the two generated references are the same object visually.
 
 const CSS = `
-:root{${tokens((t) => t.hue)}}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){${tokens((t) => t.lite)}}}
-:root[data-theme=dark]{${tokens((t) => t.lite)}}
-${Object.keys(TONES).map((k) => `.t-${k}{color:var(--t-${k})}`).join('')}
-b[class^=t-]{font-weight:700;white-space:nowrap}
-.badges{display:flex;flex-wrap:wrap;gap:.15em .9em;margin:.2em 0 .7em;font-size:.86rem}
-.card table{margin:.6em 0;font-size:.92rem}
-.card table th{width:150px;white-space:nowrap;padding:6px 9px}
-.card table td{padding:6px 9px}
+.card table{margin:.6em 0}
+.card table th{width:150px;white-space:nowrap}
 /* the point of a single page: the browser skips layout and paint for offscreen cards */
 .card{content-visibility:auto;contain-intrinsic-size:0 46px;border:1px solid var(--line);
-  border-radius:8px;margin:0 0 8px;scroll-margin-top:76px}
+  border-radius:8px;margin:0 0 8px;padding:0;background:var(--soft);scroll-margin-top:76px}
 .card[open]{contain-intrinsic-size:0 480px;padding-bottom:12px}
-.card>summary{position:relative;padding:9px 14px 9px 32px;display:flex;gap:.6em .9em;
-  align-items:baseline;flex-wrap:wrap;font-size:.92rem;cursor:pointer;border-radius:7px;
-  list-style:none}
-/* display:flex drops the native marker, so the chevron is drawn here instead. It is
-   positioned, not a flex item: in flow it would centre against a wrapped summary and
-   drift off the first line. */
-.card>summary::-webkit-details-marker{display:none}
-.card>summary::before{content:"";position:absolute;left:15px;top:calc(9px + .58em);
-  width:.45em;height:.45em;border-right:2px solid var(--dim);border-bottom:2px solid var(--dim);
-  transform:rotate(-45deg);transition:transform .15s ease}
-.card[open]>summary::before{transform:rotate(45deg)}
-.card>summary:hover{background:var(--soft)}
-.card>summary:hover::before{border-color:var(--acc)}
-.card>summary:hover .nm{color:var(--acc)}
-.card>summary .nm{font-weight:600;background:none;padding:0;font-size:.95rem;overflow-wrap:anywhere}
-.card>summary .vs{font-size:.85rem;white-space:nowrap}
-.card>summary .sum{flex:1 1 22em;color:var(--dim);font-size:.88rem}
+/* Fixed columns, the shape the script commands list already uses: a name that starts in
+   the same place on every row is what makes 805 of them scannable. The three badge
+   columns are their own widest label plus a little; only the description takes the slack.
+   19em covers all but 13 of the 805 names - sizing for the longest would cost every row. */
+.card>summary{display:grid;grid-template-columns:minmax(12em,19em) 3.5em 3.7em 3.4em 1fr;
+  gap:.6em;align-items:baseline}
 .card[open]>summary{border-bottom:1px solid var(--line);border-radius:7px 7px 0 0;margin-bottom:10px}
 .card>*:not(summary){margin-left:14px;margin-right:14px}
-.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
-  padding:10px 0;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.bar input{flex:1;min-width:220px}
-.bar input,.bar select,.bar button{padding:7px 10px;border:1px solid var(--line);
-  border-radius:6px;background:var(--soft);color:var(--fg);font:inherit}
-.bar button{cursor:pointer}
-.bar .n{color:var(--dim);font-size:.86rem;white-space:nowrap}
-.hide{display:none!important}
-.dl{display:flex;flex-wrap:wrap;gap:.6em 1.1em;align-items:center;margin:1.2em 0;
-  padding:13px 16px;border:1px solid var(--line);border-radius:8px;background:var(--soft)}
-.dl a.btn{font-weight:600;text-decoration:none;white-space:nowrap;padding:7px 14px;
-  border:1px solid var(--acc);border-radius:6px;color:var(--acc)}
-.dl a.btn:hover{background:var(--acc);color:var(--bg)}
-.dl a.btn code{background:none;padding:0;color:inherit;font-size:.96em}
-.dl p{flex:1 1 26em;margin:0;color:var(--dim);font-size:.9rem}
-details{border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:1em 0;background:var(--soft)}
-summary{cursor:pointer;font-weight:600}
-@media(max-width:720px){.card table th{width:auto;white-space:normal}.wrap{padding:16px 10px 60px}}
+@media(max-width:720px){.card table th{width:auto;white-space:normal}.wrap{padding:16px 10px 60px}
+  .card>summary{grid-template-columns:1fr;row-gap:.2em}
+  .card>summary .og,.card>summary .sc,.card>summary .vs{display:none}}
 `;
 
 const JS = `
+// The copy row is inserted the first time a card is opened rather than emitted 805
+// times: identical markup on every card is a quarter of a megabyte and 2,400 nodes
+// for something only an open card can use. Every button reads its text out of the
+// card it sits in, so nothing is shipped twice. \`toggle\` does not bubble, but a
+// capturing listener on the document still sees it.
+const COPYROW='<p class="copyrow">'+
+  '<button class="copy" type="button" data-copy-sel="summary .nm">Copy name</button>'+
+  '<button class="copy" type="button" data-copy-sel="pre code">Copy signature</button>'+
+  '<button class="copy" type="button" data-copy-link="">Copy link</button></p>';
+document.addEventListener('toggle',function(e){
+  const d=e.target;
+  if(!d.open||!d.classList||!d.classList.contains('card')||d.querySelector('.copyrow'))return;
+  const pre=d.querySelector('pre');if(pre)pre.insertAdjacentHTML('afterend',COPYROW);
+},true);
+
 const q=document.getElementById('q'),out=document.getElementById('n'),
   sel=[...document.querySelectorAll('.bar select')],
   pairs=[...document.querySelectorAll('.card')].map(c=>({c,h:c.dataset.h,o:c.dataset.o,
@@ -341,7 +341,7 @@ function body() {
 <p>${LUA_KB} KB. The same ${names.length} declarations as a Lua Language Server meta file - every global with its description, parameters and returns. Point an editor at it as a library and X4's globals get completion and signatures while UI Lua is being written.</p>
 </div>
 
-<details><summary>Using it in an editor</summary>
+<details class="box"><summary>Using it in an editor</summary>
 <p>The Lua Language Server reads a meta file when it is listed as a workspace library. In VS Code that is <code>.luarc.json</code> beside the workspace root, or the same key in settings:</p>
 <pre><code>{
   "workspace.library": [ "path/to/globals.lua" ]
@@ -349,20 +349,26 @@ function body() {
 <p>The file declares names only - it is never executed and never loaded by the game. It covers the global namespace; for the wider set of X4 Lua definitions there is a packaged addon, <a href="https://github.com/chemodun/X4-LuaLSAddon">X4-LuaLSAddon</a>, installable through the Lua extension's addon manager.</p>
 </details>
 
-<details><summary>How to read a row</summary>
+<details class="box"><summary>How to read a row</summary>
 <table>
 <tr><th>Origin</th><td>${badge('engine', 'engine')} injected by the game executable, defined in no <code>.lua</code> file.<br>
 ${badge('widget', 'widget_fullscreen')} written in <code>ui/widget/lua/widget_fullscreen.lua</code>.<br>
 ${badge('addon', 'addon')} a top-level definition in a <code>ui/addons/*</code> file.<br>
 ${badge('new', 'core')} a top-level definition in a <code>ui/core/*</code> HUD file.</td></tr>
-<tr><th>Availability</th><td>${badge('ok', 'addons + core')} present in both Lua environments.<br>
-${badge('addon', 'addons only')} only where <code>ui/addons/*</code> menus run.<br>
-${badge('new', 'core only')} only in the HUD environment - addon code cannot reach these.<br>
-${badge('gone', 'absent')} declared, but present in neither version.</td></tr>
+<tr><th>Availability</th><td>${badge('ok', 'all')} present in both Lua environments; an open card spells that out as <b>all (addons + core)</b>.<br>
+${badge('addon', 'addons')} only where <code>ui/addons/*</code> menus run.<br>
+${badge('new', 'core')} only in the HUD environment - addon code cannot reach these.<br>
+${badge('gone', 'absent')} declared, but present in neither version.<br>
+A row carries the short word; hover it, or open the card, for the full wording.</td></tr>
 <tr><th>Signature</th><td>${badge('ok', 'confirmed')} vanilla calls it, and every argument count fits the declaration.<br>
 ${badge('gone', 'disputed')} vanilla passes a count the declaration cannot take - believe the call site.<br>
 ${badge('warn', 'unverified')} no vanilla code calls it at all.</td></tr>
-<tr><th>Saved</th><td>${badge('warn', 'saved: userdata')} / ${badge('warn', 'saved: savegame')} - a <code>&lt;savedvariable&gt;</code> in the addon’s <code>ui.xml</code>. The engine restores the previous value <i>before</i> that file runs, which is why vanilla creates every one of them with <code>X = X or { }</code>.</td></tr>
+<tr><th>Game versions</th><td>${badge('ok', 'all')} in every version covered here (${VERSIONS.join(', ')}).<br>
+${badge('new', '≥ ' + VERSIONS[VERSIONS.length - 1])} from that version onwards, so new since the one before it.<br>
+${badge('gone', '≤ ' + VERSIONS[0])} up to that version, and gone in the next.<br>
+The card still names every version, because which Lua environment holds it can differ between them.</td></tr>
+<tr><th>Copying</th><td>An open card carries <b>Copy name</b>, <b>Copy signature</b> and <b>Copy link</b>; the last gives a URL that reopens that card.</td></tr>
+<tr><th>Saved</th><td>${badge('warn', 'saved')} - a <code>&lt;savedvariable&gt;</code> in the addon’s <code>ui.xml</code>. The engine restores the previous value <i>before</i> that file runs, which is why vanilla creates every one of them with <code>X = X or { }</code>. The card names the store: ${badge('warn', 'saved: userdata')} is per player profile, ${badge('warn', 'saved: savegame')} travels with the save.</td></tr>
 </table></details>
 
 <h2 id="index">All globals</h2>

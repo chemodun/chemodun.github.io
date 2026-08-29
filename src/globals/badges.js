@@ -1,20 +1,10 @@
-// Badge palette and styles, shared by build-xwiki.js and build-badges.js.
+// Badge rendering for the wiki builder.
 //
-// Hue is tied to meaning, not to column:
-//   blue = engine, purple = widget system, teal = addons,
-//   green = all / verified / present, amber = uncertain,
-//   sky = new, red = removed, slate = absent.
+// The palette itself is the site's, in ../layout.js: hue is tied to meaning, not to a
+// column, and both the HTML and the wiki output badge with the same eight tones. Only
+// the wiki's own encoding of a badge lives here.
 
-const TONES = {
-  engine: { hue: '#1d4ed8', pale: '#e5edff', dim: '#152a5e', lite: '#61afef' },  // blue     7.3
-  widget: { hue: '#7c3aed', pale: '#f0e8ff', dim: '#2e1065', lite: '#c678dd' },  // magenta  5.9
-  addon:  { hue: '#0d9488', pale: '#d9f2ef', dim: '#0b3d38', lite: '#56b6c2' },  // cyan     7.3
-  ok:     { hue: '#15803d', pale: '#e3f5e9', dim: '#0d3320', lite: '#98c379' },  // green    8.6
-  warn:   { hue: '#a16207', pale: '#fdf3e0', dim: '#3d2708', lite: '#e5c07b' },  // yellow  10.0
-  gone:   { hue: '#b91c1c', pale: '#fdeaea', dim: '#450a0a', lite: '#e06c75' },  // red      5.4
-  new:    { hue: '#0284c7', pale: '#e0f2fe', dim: '#0c3a52', lite: '#d19a66' },  // orange   7.0
-  no:     { hue: '#475569', pale: '#eef1f3', dim: '#20272f', lite: '#8b929e' },  // grey     5.5
-};
+const { TONES } = require('../layout.js');
 
 // Chosen 2026-08-25: pill shape, roomy padding.
 const PAD = 'padding:.15em .6em;border-radius:999px;font-weight:bold;white-space:nowrap';
