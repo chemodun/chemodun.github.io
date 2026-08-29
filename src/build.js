@@ -51,6 +51,7 @@ const pages = walk(CONTENT).map((file) => {
     order: Number(data.order || 100),
     generated: data.generated === 'true',
     wiki: data.wiki || '',
+    wikiName: data.wikiName || '',
   };
 });
 
@@ -182,7 +183,7 @@ for (const p of pages) {
   html = html.replace(/<!--\s*xwiki:\s*toc[^>]*-->/g, (m, at) => toc(headings, html, at));
 
   // Under the page title, so the way out to the wiki is visible before the content.
-  const wiki = wikiRef(wikiSegsFor(p), p.wiki);
+  const wiki = wikiRef(wikiSegsFor(p), p.wikiName || p.wiki);
   if (wiki) html = html.replace('</h1>', () => '</h1>\n' + wiki);
 
   if (env.unresolved.length) unresolvedAll.push({ page: p.url, links: env.unresolved });

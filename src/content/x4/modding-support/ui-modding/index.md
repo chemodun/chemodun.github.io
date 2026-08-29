@@ -1,7 +1,7 @@
 ---
 title: UI Modding support
 description: X4's interface is Lua, and it is moddable without touching the executable.
-order: 1
+order: 2
 wiki: UI Modding support
 ---
 

@@ -3,7 +3,7 @@
   "private": true,
   "description": "chemodun.github.io - X4: Foundations modding references and guides",
   "scripts": {
-    "build": "node src/build.js && node src/globals/build-html.js",
+    "build": "node src/build.js && node src/globals/build-html.js && node src/commands/build-html.js",
     "clean": "node -e \"require('fs').rmSync('_site',{recursive:true,force:true})\"",
     "serve": "node --run build && node src/serve.js",
     "start": "node src/serve.js"

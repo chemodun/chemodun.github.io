@@ -1,20 +1,48 @@
-// The shared page shell: theme, header, breadcrumb, footer.
+// The shared page shell: theme, tone palette, the shared components, header,
+// breadcrumb and footer.
 //
-// Both builders render through this - src/build.js for the Markdown pages and
-// src/globals/build-html.js for the generated reference - so the site has one
-// theme and one navigation, defined here only.
+// Every builder renders through this - src/build.js for the Markdown pages,
+// src/globals/build-html.js and src/commands/build-html.js for the generated
+// references - so the site has one theme, one navigation and one set of component
+// styles. A page's own CSS adds only what is genuinely its own; anything two pages
+// would both want belongs here.
 
 const SITE = { title: 'Chem O’Dun', tagline: 'References and Guides' };
 
 const LIGHT = '--bg:#fff;--fg:#1f2328;--dim:#59636e;--line:#d1d9e0;--soft:#f6f8fa;--acc:#0969da';
 const DARK = '--bg:#0d1117;--fg:#e6edf3;--dim:#9198a1;--line:#3d444d;--soft:#161b22;--acc:#4493f8';
 
+// Tone palette. Hue is tied to meaning, not to a column:
+//   blue = engine, magenta = widget system, cyan = addons,
+//   green = all / verified / present, yellow = uncertain,
+//   red = removed, orange = new, grey = absent.
+// It lives here because both generated references badge with it; globals/badges.js
+// re-exports it for the wiki builder, which needs the raw values not the CSS tokens.
+const TONES = {
+  engine: { hue: '#1d4ed8', pale: '#e5edff', dim: '#152a5e', lite: '#61afef' },  // blue     7.3
+  widget: { hue: '#7c3aed', pale: '#f0e8ff', dim: '#2e1065', lite: '#c678dd' },  // magenta  5.9
+  addon:  { hue: '#0d9488', pale: '#d9f2ef', dim: '#0b3d38', lite: '#56b6c2' },  // cyan     7.3
+  ok:     { hue: '#15803d', pale: '#e3f5e9', dim: '#0d3320', lite: '#98c379' },  // green    8.6
+  warn:   { hue: '#a16207', pale: '#fdf3e0', dim: '#3d2708', lite: '#e5c07b' },  // yellow  10.0
+  gone:   { hue: '#b91c1c', pale: '#fdeaea', dim: '#450a0a', lite: '#e06c75' },  // red      5.4
+  new:    { hue: '#0284c7', pale: '#e0f2fe', dim: '#0c3a52', lite: '#d19a66' },  // orange   7.0
+  no:     { hue: '#475569', pale: '#eef1f3', dim: '#20272f', lite: '#8b929e' },  // grey     5.5
+};
+
+const toneVars = (pick) => Object.entries(TONES).map(([k, t]) => `--t-${k}:${pick(t)};`).join('');
+const TONE_CLASSES = Object.keys(TONES).map((k) => `.t-${k}{color:var(--t-${k})}`).join('');
+
 // Light is the bare :root so the palette is always complete; dark only redefines
 // tokens, once for the system preference and once for an explicit choice.
 const BASE_CSS = `
-:root{${LIGHT}}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){${DARK}}}
-:root[data-theme=dark]{${DARK}}
+:root{${LIGHT};${toneVars((t) => t.hue)}}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){${DARK};${toneVars((t) => t.lite)}}}
+:root[data-theme=dark]{${DARK};${toneVars((t) => t.lite)}}
+/* One monospace stack for the whole site. Chrome on Windows knows neither ui-monospace
+   nor SFMono-Regular, so whatever comes next is what a Windows reader actually sees. */
+:root{--mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace}
+${TONE_CLASSES}
+b[class^=t-]{font-weight:700;white-space:nowrap}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);
   font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
@@ -24,14 +52,14 @@ h1{font-size:1.9rem;margin:.2em 0 .4em}
 h2{font-size:1.35rem;margin:2em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
 h3{font-size:1.1rem;margin:1.6em 0 .5em}
 h1,h2,h3,h4{line-height:1.3;overflow-wrap:anywhere}
-code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9em;
-  background:var(--soft);padding:.1em .35em;border-radius:4px}
+code{font-family:var(--mono);font-size:.9em;background:var(--soft);padding:.1em .35em;
+  border-radius:4px}
 pre{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:10px 12px;
   overflow-x:auto;margin:.7em 0}
 pre code{background:none;padding:0;font-size:.88em}
 blockquote{margin:.8em 0;padding:.1em 1em;border-left:3px solid var(--line);color:var(--dim)}
-table{border-collapse:collapse;width:100%;margin:.8em 0;font-size:.94rem}
-th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+table{border-collapse:collapse;width:100%;margin:.8em 0;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
 th{background:var(--soft);font-weight:600}
 .tw{overflow-x:auto}
 hr{border:0;border-top:1px solid var(--line);margin:2em 0}
@@ -41,7 +69,7 @@ header.top{border-bottom:1px solid var(--line);background:var(--soft)}
 header.top .in{max-width:1100px;margin:0 auto;padding:11px 16px;display:flex;
   gap:1em;align-items:center;flex-wrap:wrap}
 header.top .brand{font-weight:700;color:var(--fg);text-decoration:none}
-header.top .tag{color:var(--dim);font-size:.88rem;flex:1}
+header.top .tagline{color:var(--dim);font-size:.88rem;flex:1}
 button.theme{display:flex;align-items:center;justify-content:center;width:32px;height:32px;
   padding:0;border:1px solid var(--line);border-radius:6px;background:var(--bg);
   color:var(--dim);cursor:pointer}
@@ -76,8 +104,122 @@ footer.bot{border-top:1px solid var(--line);margin-top:3em;padding:16px 0;
 @media(max-width:720px){.wrap{padding:0 10px 60px}}
 `;
 
+// Components every reference page draws from, so a filter bar, a disclosure header or
+// a callout is the same object wherever it appears. Sizes are set once, here.
+const COMPONENT_CSS = `
+.hide{display:none!important}
+
+/* the filter bar over a long list */
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+  padding:10px 0;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.bar input{flex:1;min-width:220px}
+.bar input,.bar select,.bar button{padding:7px 10px;border:1px solid var(--line);
+  border-radius:6px;background:var(--soft);color:var(--fg);font:inherit}
+.bar button{cursor:pointer}
+.bar button:hover{border-color:var(--acc);color:var(--acc)}
+.bar .n{color:var(--dim);font-size:.86rem;white-space:nowrap}
+
+/* One disclosure control for the whole site. A page decides the header's own layout;
+   the chevron, its gutter, the type sizes and the hover tone are defined only here.
+   It has to work on a <summary> and on a <button>, so an [open] parent and a
+   JS-driven .open parent both turn it. display:flex on a <summary> drops the native
+   marker, which is why the chevron is drawn rather than inherited - and it is
+   positioned, not laid out, or it centres against a wrapped header and leaves the
+   first line. */
+.disc{position:relative;width:100%;margin:0;padding:9px 14px 9px 32px;text-align:left;
+  border:0;background:none;color:inherit;font:inherit;font-size:.92rem;line-height:1.6;
+  cursor:pointer;border-radius:7px;list-style:none}
+.disc::-webkit-details-marker{display:none}
+.disc::before{content:"";position:absolute;left:15px;top:calc(9px + .58em);
+  width:.45em;height:.45em;border:2px solid var(--dim);border-top:0;border-left:0;
+  transform:rotate(-45deg);transition:transform .15s ease}
+[open]>.disc::before,.open>.disc::before{transform:rotate(45deg)}
+.disc:hover{background:var(--soft)}
+.disc:hover::before{border-color:var(--acc)}
+/* The name is what a reader most often wants out of the page, and a header is a
+   button or a summary, both of which swallow a drag. Selectable, explicitly. */
+.disc .nm{font-family:var(--mono);font-weight:600;font-size:.95rem;background:none;
+  padding:0;overflow-wrap:anywhere;user-select:text;-webkit-user-select:text;cursor:text}
+.disc:hover .nm{color:var(--acc)}
+.disc .sum{color:var(--dim);font-size:.88rem}
+
+/* copy controls, in what a header opens */
+p.copyrow{display:flex;flex-wrap:wrap;gap:.45em;align-items:center;margin:.7em 0 0}
+button.copy{font:inherit;font-size:.8rem;line-height:1.5;padding:2px 9px;cursor:pointer;
+  border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--dim)}
+button.copy:hover{border-color:var(--acc);color:var(--acc)}
+button.copy.done{border-color:var(--t-ok);color:var(--t-ok)}
+
+/* version presence: a range in a header, spelled out in what the header opens */
+.vs{white-space:nowrap;font-size:.85rem;font-weight:700}
+.new{color:var(--t-new);font-weight:700;font-size:.72em;letter-spacing:.04em;
+  margin-left:.35em;vertical-align:.12em}
+p.vers{margin:.4em 0 0;font-size:.88rem}
+p.vers .k{color:var(--dim);margin-right:.5em}
+
+/* a row of badges, a small outline chip, a row of link chips */
+.badges{display:flex;flex-wrap:wrap;gap:.15em .9em;margin:.2em 0 .7em;font-size:.86rem}
+.tag{display:inline-block;font-size:.72rem;line-height:1.7;padding:0 .45em;
+  border:1px solid var(--line);border-radius:3px;color:var(--dim);white-space:nowrap}
+.tag.act{border-color:var(--acc);color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:.4em;margin:.4em 0}
+.chips a{border:1px solid var(--line);border-radius:4px;padding:.15em .5em;
+  text-decoration:none;font-family:var(--mono);font-size:.86rem}
+.chips a:hover{background:var(--fg);color:var(--bg)}
+.chips a .c{color:var(--dim)}
+.chips a:hover .c{color:var(--bg)}
+
+/* a callout strip: one action on the left, one sentence of context on the right */
+.dl{display:flex;flex-wrap:wrap;gap:.6em 1.1em;align-items:center;margin:1.2em 0;
+  padding:13px 16px;border:1px solid var(--line);border-radius:8px;background:var(--soft)}
+.dl a.btn{font-weight:600;text-decoration:none;white-space:nowrap;padding:7px 14px;
+  border:1px solid var(--acc);border-radius:6px;color:var(--acc)}
+.dl a.btn:hover{background:var(--acc);color:var(--bg)}
+.dl a.btn code{background:none;padding:0;color:inherit;font-size:.96em}
+.dl p{flex:1 1 26em;margin:0;color:var(--dim);font-size:.9rem}
+
+/* a standalone collapsible box in prose. Scoped to .box: the reference pages build
+   their own cards out of <details> and must not pick this up. */
+details.box{border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:1em 0;
+  background:var(--soft)}
+details.box>summary{cursor:pointer;font-weight:600}
+`;
+
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// Version presence as a range, not a tick per version. One column per version stops
+// fitting as soon as the game has a few more of them, and the two answers a reader
+// actually gets are "all of them" and "all of them from here on". `all` and `none`
+// are named rather than ranged; a set with a hole in it falls back to listing itself,
+// because there is no honest range for that.
+//
+// `all` is every version the reference covers, oldest first; `present` is the subset
+// that has the thing. Returns a short token for a header, a sentence for what the
+// header opens, and the tone both are drawn in.
+function versionRange(all, present) {
+  const on = all.filter((v) => present.includes(v));
+  const last = on[on.length - 1];
+  if (!on.length) return { short: 'none', long: `in none of ${all.join(', ')}`, tone: 'no' };
+  if (on.length === all.length) {
+    return { short: 'all', long: `in every covered version (${all.join(', ')})`, tone: 'ok' };
+  }
+  if (all.indexOf(last) - all.indexOf(on[0]) + 1 !== on.length) {
+    return { short: on.join(', '), long: `in ${on.join(', ')} only`, tone: 'warn' };
+  }
+  if (last === all[all.length - 1]) {
+    return {
+      short: '≥ ' + on[0],
+      long: on.length === 1 ? `new in ${on[0]}` : `from ${on[0]} onwards, not in ${all[0]}`,
+      tone: 'new',
+    };
+  }
+  return {
+    short: '≤ ' + last,
+    long: `up to ${last}, gone in ${all[all.indexOf(last) + 1]}`,
+    tone: 'gone',
+  };
+}
 
 // Root-relative: this is a user site, so the domain root is the site root.
 const href = (p) => '/' + String(p).replace(/^\/+|\/+$/g, '').split('/').filter(Boolean)
@@ -88,8 +230,8 @@ const href = (p) => '/' + String(p).replace(/^\/+|\/+$/g, '').split('/').filter(
 const WIKI = 'https://wiki.egosoft.com/';
 const wikiUrl = (segs) => WIKI + segs.map(encodeURIComponent).join('/') + '/';
 
-// The link text is the page's own wiki value, so what a reader clicks is the name of
-// the wiki page they land on.
+// The link text is the page's own wiki value - or its wikiName, where the wiki page's
+// title is not its URL segment - so what a reader clicks is the name of the page they land on.
 const wikiRef = (segs, name) => segs.length
   ? `<p class="wikiref">For more details and additional information, check ` +
     `<a href="${wikiUrl(segs)}">${esc(name || segs[segs.length - 1])}</a>` +
@@ -123,6 +265,45 @@ const THEME_JS = `
   });
 })();`;
 
+// One clipboard handler for the site, delegated from the document so a card built
+// after load is covered without rewiring. A button carries one of `data-copy` (the
+// text itself), `data-copy-sel` (a selector, read out of the card the button is in,
+// so text already on the page is never shipped twice) or `data-copy-link` (a
+// fragment, joined to this page's URL). navigator.clipboard needs a secure context,
+// so there is an execCommand path for a local file:// view.
+const COPY_JS = `
+(function(){
+  function put(s){
+    if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(s);
+    return new Promise(function(res,rej){
+      var t=document.createElement('textarea');t.value=s;
+      t.style.cssText='position:fixed;top:-1000px';document.body.appendChild(t);
+      t.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}
+      document.body.removeChild(t);ok?res():rej();
+    });
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target.closest?e.target.closest('button.copy'):null;if(!b)return;
+    e.preventDefault();e.stopPropagation();
+    var s=b.dataset.copy||'';
+    if(!s&&b.dataset.copySel){
+      var scope=b.closest('.card,.row,details,section')||document,
+          el=scope.querySelector(b.dataset.copySel);
+      s=el?el.textContent:'';
+    }
+    if(!s&&b.dataset.copyLink!==undefined){
+      var frag=b.dataset.copyLink||('#'+((b.closest('[id]')||{}).id||''));
+      if(frag.length>1)s=location.origin+location.pathname+frag;
+    }
+    if(!s)return;
+    var was=b.getAttribute('data-label')||b.textContent;
+    b.setAttribute('data-label',was);
+    put(s).then(function(){b.textContent='Copied';b.classList.add('done');},
+                function(){b.textContent='Copy failed';})
+      .then(function(){setTimeout(function(){b.textContent=was;b.classList.remove('done');},1400);});
+  });
+})();`;
+
 const ICONS = `<svg class="moon" viewBox="0 0 16 16" aria-hidden="true">\
 <path d="M13.5 9.5A5.6 5.6 0 016.5 2.5a5.6 5.6 0 107 7z"/></svg>\
 <svg class="sun" viewBox="0 0 16 16" aria-hidden="true">\
@@ -139,10 +320,10 @@ function shell({ title, description = '', trail = [], body, css = '', js = '' })
 <title>${esc(full)}</title>
 ${description ? `<meta name="description" content="${esc(description)}">` : ''}
 <script>${THEME_HEAD}</script>
-<style>${BASE_CSS}${css}</style>
+<style>${BASE_CSS}${COMPONENT_CSS}${css}</style>
 </head><body>
 <header class="top"><div class="in">
-<a class="brand" href="/">${esc(SITE.title)}</a><span class="tag">${esc(SITE.tagline)}</span>
+<a class="brand" href="/">${esc(SITE.title)}</a><span class="tagline">${esc(SITE.tagline)}</span>
 <button class="theme" type="button" title="Switch between light and dark"
   aria-label="Switch between light and dark">${ICONS}</button>
 </div></header>
@@ -152,9 +333,10 @@ ${body}
 <footer class="bot">Corrections welcome on
 <a href="https://github.com/chemodun/chemodun.github.io">GitHub</a>.</footer>
 </div>
-<script>${THEME_JS}</script>
+<script>${THEME_JS}${COPY_JS}</script>
 ${js ? `<script>(function(){${js}})();</script>` : ''}
 </body></html>`;
 }
 
-module.exports = { SITE, BASE_CSS, shell, esc, href, crumbs, wikiUrl, wikiRef };
+module.exports = { SITE, TONES, BASE_CSS, COMPONENT_CSS, shell, esc, href, crumbs,
+  wikiUrl, wikiRef, versionRange };
