@@ -118,6 +118,24 @@ const COMPONENT_CSS = `
 .bar button{cursor:pointer}
 .bar button:hover{border-color:var(--acc);color:var(--acc)}
 .bar .n{color:var(--dim);font-size:.86rem;white-space:nowrap}
+/* The bar is sticky, so anything scrolled to by a deep link or an in-page anchor
+   lands under it. --barh is measured by the script below - the bar's height changes as
+   its controls wrap - and is unset on a page that has no bar, which is why the fallback
+   is 0. */
+[id]{scroll-margin-top:calc(var(--barh, 0px) + 10px)}
+
+/* Column legend: the last line of a filter bar, naming the fixed columns of the list
+   under it. It lives inside the bar so it sticks with it - a separate sticky element
+   would need the bar's height, which changes as the controls wrap. The template is the
+   list's own, so a page declares --cols once and the rows and the legend share it, and
+   the font-size has to match the row header's .92rem or the em in that template
+   resolves smaller here and every label drifts off its column. The padding is the
+   disclosure chevron's gutter plus the 1px border of the box the rows sit in. */
+.bar .leg{flex:1 0 100%;display:grid;grid-template-columns:var(--cols);gap:.6em;
+  align-items:baseline;margin:-2px 0 -6px;padding:0 15px 0 33px;font-size:.92rem;
+  color:var(--dim)}
+.bar .leg span{font-size:.72em;letter-spacing:.06em;text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
 
 /* One disclosure control for the whole site. A page decides the header's own layout;
    the chevron, its gutter, the type sizes and the hover tone are defined only here.
@@ -238,6 +256,13 @@ const wikiRef = (segs, name) => segs.length
     ` on the Egosoft wiki.</p>`
   : '';
 
+// The legend over a fixed-column list: [what the column is called here, what the card
+// calls it]. The short label is all the column's width allows, so the long one is its
+// tooltip - the same trick the badges in a row use.
+const legend = (cols) => '<div class="leg">' +
+  cols.map(([short, long]) => `<span${long ? ` title="${esc(long)}"` : ''}>${esc(short)}</span>`).join('') +
+  '</div>';
+
 function crumbs(trail) {
   if (!trail.length) return '';
   const parts = trail.map((c, i) => i === trail.length - 1
@@ -304,6 +329,15 @@ const COPY_JS = `
   });
 })();`;
 
+// Publishes the sticky bar's height as --barh, so scroll-margin-top can clear it at
+// whatever width the controls happen to wrap at.
+const BAR_JS = `
+(function(){
+  var bar=document.querySelector('.bar');if(!bar)return;
+  function set(){document.documentElement.style.setProperty('--barh',bar.offsetHeight+'px');}
+  set();addEventListener('resize',set);
+})();`;
+
 const ICONS = `<svg class="moon" viewBox="0 0 16 16" aria-hidden="true">\
 <path d="M13.5 9.5A5.6 5.6 0 016.5 2.5a5.6 5.6 0 107 7z"/></svg>\
 <svg class="sun" viewBox="0 0 16 16" aria-hidden="true">\
@@ -333,10 +367,10 @@ ${body}
 <footer class="bot">Corrections welcome on
 <a href="https://github.com/chemodun/chemodun.github.io">GitHub</a>.</footer>
 </div>
-<script>${THEME_JS}${COPY_JS}</script>
+<script>${THEME_JS}${COPY_JS}${BAR_JS}</script>
 ${js ? `<script>(function(){${js}})();</script>` : ''}
 </body></html>`;
 }
 
 module.exports = { SITE, TONES, BASE_CSS, COMPONENT_CSS, shell, esc, href, crumbs,
-  wikiUrl, wikiRef, versionRange };
+  wikiUrl, wikiRef, versionRange, legend };

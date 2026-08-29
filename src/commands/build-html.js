@@ -11,7 +11,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { shell, esc, wikiRef, versionRange } = require('../layout.js');
+const { shell, esc, wikiRef, versionRange, legend } = require('../layout.js');
 
 const DATA = path.join(__dirname, 'data');
 const read = (name) => JSON.parse(fs.readFileSync(path.join(DATA, name), 'utf8'));
@@ -67,8 +67,8 @@ const CSS = `
 /* The card is built once and left in the DOM, so collapsing is this rule, not a
    removal: without it the chevron turned and nothing else did. */
 .row:not(.open)>.card{display:none}
-.hd{display:grid;grid-template-columns:minmax(10em,17em) 5.6em 4.2em 5.4em 1fr;gap:.6em;
-  align-items:baseline;border-radius:0}
+:root{--cols:minmax(10em,17em) 5.6em 4.2em 5.4em 1fr}
+.hd{display:grid;grid-template-columns:var(--cols);gap:.6em;align-items:baseline;border-radius:0}
 .row.open>.hd{border-bottom:1px solid var(--line)}
 
 .card{padding:2px 14px 14px}
@@ -95,7 +95,8 @@ ul.ev{margin:.4em 0;padding-left:1.1em;columns:2;column-gap:2em}
 ul.ev li{break-inside:avoid;margin:.1em 0}
 ul.ev code{font-size:.92em}
 ul.ev span{color:var(--dim)}
-@media (max-width:640px){.hd{grid-template-columns:1fr;row-gap:.2em}.hd .vs,.hd .sc,.hd .kd{display:none}ul.ev{columns:1}}
+@media (max-width:640px){:root{--cols:1fr}.hd{row-gap:.2em}.hd .vs,.hd .sc,.hd .kd{display:none}
+  .bar .leg{display:none}ul.ev{columns:1}}
 `;
 
 function typeChip(type) {
@@ -410,6 +411,10 @@ into a script. <b>Copy link</b> gives a URL that reopens this card, filters and 
 <select id="fv" aria-label="Version">${['<option value="">Any version</option>', ...VERSIONS.map((v) => `<option value="${tokenOf(v)}">${esc(v)}</option>`), `<option value="new">New in ${esc(NEWEST)}</option>`].join('')}</select>
 <button id="reset" type="button">Reset</button>
 <span class="n" id="n"></span>
+${legend([['Name'], ['Kind', 'Kind: an action does something, a condition is tested by one'],
+  ['Schema', 'Schema: which of the two script schemas accepts the command'],
+  ['Version', 'Game versions: which of the covered versions have it'],
+  ['Description']])}
 </div>
 <div class="list">
 ${rows}

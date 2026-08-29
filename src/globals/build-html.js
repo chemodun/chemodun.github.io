@@ -12,7 +12,7 @@ const path = require('path');
 const { DATA, names } = require('./page-manifest.js');
 const { docs, summaryOf } = require('./docs.js');
 const { verdicts } = require('./usage.js');
-const { shell, versionRange } = require('../layout.js');
+const { shell, versionRange, legend } = require('../layout.js');
 
 const VERSIONS = ['8.00', '9.00'];
 const URL = '/x4/modding-support/ui-modding/lua-globals/';
@@ -251,19 +251,21 @@ const CSS = `
 .card table th{width:150px;white-space:nowrap}
 /* the point of a single page: the browser skips layout and paint for offscreen cards */
 .card{content-visibility:auto;contain-intrinsic-size:0 46px;border:1px solid var(--line);
-  border-radius:8px;margin:0 0 8px;padding:0;background:var(--soft);scroll-margin-top:76px}
+  border-radius:8px;margin:0 0 8px;padding:0;background:var(--soft)}
 .card[open]{contain-intrinsic-size:0 480px;padding-bottom:12px}
 /* Fixed columns, the shape the script commands list already uses: a name that starts in
    the same place on every row is what makes 805 of them scannable. The three badge
    columns are their own widest label plus a little; only the description takes the slack.
    19em covers all but 13 of the 805 names - sizing for the longest would cost every row. */
-.card>summary{display:grid;grid-template-columns:minmax(12em,19em) 3.5em 3.7em 3.4em 1fr;
-  gap:.6em;align-items:baseline}
+:root{--cols:minmax(12em,19em) 3.5em 3.7em 3.4em 1fr}
+.card>summary{display:grid;grid-template-columns:var(--cols);gap:.6em;align-items:baseline}
 .card[open]>summary{border-bottom:1px solid var(--line);border-radius:7px 7px 0 0;margin-bottom:10px}
 .card>*:not(summary){margin-left:14px;margin-right:14px}
 @media(max-width:720px){.card table th{width:auto;white-space:normal}.wrap{padding:16px 10px 60px}
-  .card>summary{grid-template-columns:1fr;row-gap:.2em}
-  .card>summary .og,.card>summary .sc,.card>summary .vs{display:none}}
+  :root{--cols:1fr}
+  .card>summary{row-gap:.2em}
+  .card>summary .og,.card>summary .sc,.card>summary .vs{display:none}
+  .bar .leg{display:none}}
 `;
 
 const JS = `
@@ -359,7 +361,7 @@ ${badge('new', 'core')} a top-level definition in a <code>ui/core/*</code> HUD f
 ${badge('addon', 'addons')} only where <code>ui/addons/*</code> menus run.<br>
 ${badge('new', 'core')} only in the HUD environment - addon code cannot reach these.<br>
 ${badge('gone', 'absent')} declared, but present in neither version.<br>
-A row carries the short word; hover it, or open the card, for the full wording.</td></tr>
+The column is headed <b>Seen in</b>; a row carries the short word, and hovering it or opening the card gives the full wording.</td></tr>
 <tr><th>Signature</th><td>${badge('ok', 'confirmed')} vanilla calls it, and every argument count fits the declaration.<br>
 ${badge('gone', 'disputed')} vanilla passes a count the declaration cannot take - believe the call site.<br>
 ${badge('warn', 'unverified')} no vanilla code calls it at all.</td></tr>
@@ -380,6 +382,10 @@ ${select('u', 'Signature', [['confirmed', 'confirmed'], ['unverified', 'unverifi
 ${select('k', 'Kind', [['function', 'functions'], ['variable', 'variables']])}
 ${select('v', 'Version', VERSION_OPTS, DEFAULT_VERSION)}
 <button id="clr" type="button">Reset</button><span class="n" id="n">${vcount(DEFAULT_VERSION)} of ${names.length}</span>
+${legend([['Name'], ['Origin', 'Origin: what puts the name in the global namespace'],
+  ['Seen in', 'Availability: which Lua environments hold it'],
+  ['Version', 'Game versions: which of the covered versions have it'],
+  ['Description']])}
 </div>
 ${names.map(card).join('\n')}
 `;
