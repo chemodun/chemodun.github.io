@@ -5,7 +5,7 @@ order: 2
 wikiPath: Modding Support/UI Modding support/Talking with MD and AI scripts
 ---
 
-<!-- Editing copy. Regenerate the .xwiki with: node claude/tools/xwiki-md.js to-xwiki "<this file>" -->
+<!-- Canonical copy; the Egosoft wiki page is exported from it -->
 
 # Talking with MD and AI scripts
 
