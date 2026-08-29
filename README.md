@@ -21,10 +21,16 @@ The site is served from the domain root, so every link on it is root-relative. O
 src/layout.js        the shared shell - theme, header, breadcrumb, footer
 src/build.js         every src/content/**/*.md -> _site/<url>/index.html
 src/serve.js         a static server for _site/, for local viewing only
+src/check-pages.js   loads every built page in headless Chrome, fails on a console error
+src/assets/          files served from the root as they are, currently the icons
 src/content/         the authored pages, mirroring the URL tree
 src/globals/         the Lua Globals Reference pipeline (see below)
 src/commands/        the Script Commands reference (see below)
 ```
+
+`src/build.js` also writes the root-level files: `favicon.ico` (built from the two PNGs in `src/assets/`, so nothing derived is committed), `404.html`, `sitemap.xml` and `robots.txt`.
+
+`npm run check` builds and then loads every page in headless Chrome, failing on any uncaught exception, `console.error` or severe log entry. It also proves the scripts ran rather than merely not throwing: the theme toggle changes `data-theme`, the sticky bar publishes `--barh`, and the filter narrows its counter to zero. The same step runs in CI before anything is uploaded, because a page can build byte-perfect and still be inert.
 
 ### Authored pages
 

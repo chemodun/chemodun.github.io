@@ -7,7 +7,19 @@
 // styles. A page's own CSS adds only what is genuinely its own; anything two pages
 // would both want belongs here.
 
-const SITE = { title: 'Chem O’Dun', tagline: 'References and Guides' };
+// `origin` is the published base, needed wherever a URL cannot be root-relative:
+// sitemap.xml, robots.txt and the canonical link.
+const SITE = {
+  title: 'Chem O’Dun',
+  tagline: 'References and Guides',
+  origin: 'https://chemodun.github.io',
+};
+
+// The icon is the GitHub profile picture, at the sizes GitHub itself resized it to.
+// favicon.ico is built from the two small PNGs so nothing derived is committed.
+const ICON_LINKS = `<link rel="icon" href="/favicon.ico" sizes="16x16 32x32">
+<link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">`;
 
 const LIGHT = '--bg:#fff;--fg:#1f2328;--dim:#59636e;--line:#d1d9e0;--soft:#f6f8fa;--acc:#0969da';
 const DARK = '--bg:#0d1117;--fg:#e6edf3;--dim:#9198a1;--line:#3d444d;--soft:#161b22;--acc:#4493f8';
@@ -353,6 +365,7 @@ function shell({ title, description = '', trail = [], body, css = '', js = '' })
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(full)}</title>
 ${description ? `<meta name="description" content="${esc(description)}">` : ''}
+${ICON_LINKS}
 <script>${THEME_HEAD}</script>
 <style>${BASE_CSS}${COMPONENT_CSS}${css}</style>
 </head><body>

@@ -10,10 +10,11 @@ const fs = require('fs');
 const path = require('path');
 const MarkdownIt = require('markdown-it');
 
-const { shell, esc, wikiRef } = require('./layout.js');
+const { shell, esc, wikiRef, SITE } = require('./layout.js');
 
 const ROOT = __dirname;
 const CONTENT = path.join(ROOT, 'content');
+const ASSETS = path.join(ROOT, 'assets');
 const OUT = path.join(ROOT, '..', '_site');
 
 /* ------------------------------------------------------------------ pages */
@@ -200,7 +201,57 @@ for (const p of pages) {
   written++;
 }
 
+/* ------------------------------------------------------- root-level files */
+
+// Everything in src/assets/ is served from the root, unchanged.
+for (const f of fs.readdirSync(ASSETS)) fs.copyFileSync(path.join(ASSETS, f), path.join(OUT, f));
+
+// An .ico is a container, and since Vista each entry may simply be a PNG. Wrapping
+// the two small ones costs 22 bytes of header apiece and no image library at all.
+function ico(files) {
+  const imgs = files.map((f) => fs.readFileSync(path.join(ASSETS, f)));
+  const dir = Buffer.alloc(6 + 16 * imgs.length);
+  dir.writeUInt16LE(0, 0); dir.writeUInt16LE(1, 2); dir.writeUInt16LE(imgs.length, 4);
+  let offset = dir.length;
+  imgs.forEach((img, i) => {
+    const size = img.readUInt32BE(16);            // width, from the PNG IHDR
+    const at = 6 + 16 * i;
+    dir.writeUInt8(size >= 256 ? 0 : size, at);   // 0 means 256 in an icon directory
+    dir.writeUInt8(size >= 256 ? 0 : size, at + 1);
+    dir.writeUInt16LE(1, at + 4); dir.writeUInt16LE(32, at + 6);
+    dir.writeUInt32LE(img.length, at + 8); dir.writeUInt32LE(offset, at + 12);
+    offset += img.length;
+  });
+  return Buffer.concat([dir, ...imgs]);
+}
+fs.writeFileSync(path.join(OUT, 'favicon.ico'), ico(['favicon-16.png', 'favicon-32.png']));
+
+// GitHub Pages serves /404.html for any path it cannot resolve. It lists the leaf
+// pages rather than the top section, so a reader lands on a document in one click
+// instead of walking the tree down to it.
+const leaves = pages.filter((p) => p.url !== '/' && !childrenOf(p).length);
+fs.writeFileSync(path.join(OUT, '404.html'), shell({
+  title: 'Page not found',
+  body: '<h1>Page not found</h1>\n<p class="lede">That address does not exist here. '
+    + 'It may have been renamed, or the link that brought you may be out of date. '
+    + 'Everything the site carries:</p>\n'
+    + cardList(leaves),
+  css: TOC_CSS,
+}), 'utf8');
+
+// Only real pages belong in a sitemap, so the generated stubs count and nothing else.
+const urls = pages.map((p) => p.url).sort();
+fs.writeFileSync(path.join(OUT, 'sitemap.xml'),
+  '<?xml version="1.0" encoding="UTF-8"?>\n'
+  + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+  + urls.map((u) => `  <url><loc>${SITE.origin}${u}</loc></url>`).join('\n')
+  + '\n</urlset>\n', 'utf8');
+
+fs.writeFileSync(path.join(OUT, 'robots.txt'),
+  `User-agent: *\nAllow: /\n\nSitemap: ${SITE.origin}/sitemap.xml\n`, 'utf8');
+
 console.log(`${written} markdown pages -> ${path.relative(process.cwd(), OUT)}`);
+console.log(`root files: favicon.ico, 404.html, sitemap.xml (${urls.length} urls), robots.txt`);
 for (const p of pages.filter((x) => x.generated)) console.log(`  (generated elsewhere: ${p.url})`);
 if (unresolvedAll.length) {
   console.log('\nunresolved links:');

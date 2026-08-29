@@ -18,6 +18,7 @@ const TYPES = {
   '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.lua': 'text/plain; charset=utf-8', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
 };
 
 // A directory URL serves its index.html, which is what Pages does.
@@ -35,6 +36,13 @@ function createServer() {
   return http.createServer((req, res) => {
     const file = resolve(req.url);
     if (!file || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+      // Pages serves /404.html for anything it cannot resolve; match it, so a local
+      // view of a broken link shows what a reader would actually get.
+      const page = path.join(ROOT, '404.html');
+      if (fs.existsSync(page)) {
+        res.writeHead(404, { 'content-type': TYPES['.html'], 'cache-control': 'no-store' });
+        return fs.createReadStream(page).pipe(res);
+      }
       res.writeHead(404, { 'content-type': 'text/plain' });
       return res.end('404 ' + req.url);
     }

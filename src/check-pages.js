@@ -192,9 +192,7 @@ async function main() {
       found.push('console.' + p.type + ': ' + (p.args || []).map(argText).join(' '));
     } else if (m.method === 'Log.entryAdded' && p.entry.level === 'error'
       // An uncaught error arrives twice, as an exception and as a javascript log entry.
-      && p.entry.source !== 'javascript'
-      // The browser asks for /favicon.ico on its own; no page references it.
-      && !/\/favicon\.ico$/.test(p.entry.url || '')) {
+      && p.entry.source !== 'javascript') {
       found.push(p.entry.source + ': ' + p.entry.text + (p.entry.url ? ' [' + p.entry.url + ']' : ''));
     }
   });
