@@ -26,6 +26,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      # A page can build byte-perfect and still be inert, so nothing is uploaded
+      # until a real browser has loaded every page without a console error.
+      - run: node src/check-pages.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

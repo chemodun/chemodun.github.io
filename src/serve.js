@@ -31,18 +31,33 @@ function resolve(urlPath) {
   return file;
 }
 
-http.createServer((req, res) => {
-  const file = resolve(req.url);
-  if (!file || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
-    res.writeHead(404, { 'content-type': 'text/plain' });
-    return res.end('404 ' + req.url);
-  }
-  res.writeHead(200, {
-    'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
-    'cache-control': 'no-store',
+function createServer() {
+  return http.createServer((req, res) => {
+    const file = resolve(req.url);
+    if (!file || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+      res.writeHead(404, { 'content-type': 'text/plain' });
+      return res.end('404 ' + req.url);
+    }
+    res.writeHead(200, {
+      'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
+      'cache-control': 'no-store',
+    });
+    fs.createReadStream(file).pipe(res);
   });
-  fs.createReadStream(file).pipe(res);
-}).listen(PORT, () => {
-  if (!fs.existsSync(ROOT)) console.log('_site/ is missing - run the build first');
-  console.log('http://localhost:' + PORT + '/');
-});
+}
+
+// Port 0 picks a free one, which is what check-pages.js wants.
+function listen(port = PORT) {
+  return new Promise((res) => {
+    const server = createServer().listen(port, '127.0.0.1', () => res(server));
+  });
+}
+
+if (require.main === module) {
+  listen().then((server) => {
+    if (!fs.existsSync(ROOT)) console.log('_site/ is missing - run the build first');
+    console.log('http://localhost:' + server.address().port + '/');
+  });
+}
+
+module.exports = { ROOT, createServer, listen };
