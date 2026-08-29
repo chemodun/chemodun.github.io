@@ -83,8 +83,7 @@ Links may point at a page by its title (`[Lua Globals Reference](<Lua Globals Re
 Both are produced upstream, in a separate working repository, and land here already finished. Nothing in this repo re-derives them, which is why CI builds the page from a clean checkout with no game files present.
 
 - `build-html.js` → the page on this site
-- `build-wiki.js` + `check-wiki.js` → XWiki 2.1 pages for the Egosoft wiki
-- `page-manifest.js`, `docs.js`, `usage.js`, `badges.js`, `exclusions.js` - shared by both
+- `page-manifest.js`, `docs.js`, `usage.js`, `exclusions.js` - its inputs, copies of the upstream originals
 
 `globals.lua` doubles as a LuaLS meta file: pointed at as a library, it gives completion and signatures for all 805 globals while writing UI Lua. `build-html.js` therefore copies it into the page's own directory, so it is downloadable from the reference at `/x4/modding-support/ui-modding/lua-globals/globals.lua` and can never drift from the page built beside it.
 

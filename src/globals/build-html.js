@@ -3,8 +3,8 @@
 //   node build-html.js                 -> _site/x4/modding-support/ui-modding/lua-globals/
 //   OUT=path/to/index.html node build-html.js
 //
-// Shares every input with build-wiki.js - classification.json and globals.lua, and
-// nothing else - which is why CI can build the page from a clean checkout.
+// Reads classification.json and globals.lua and nothing else, which is why CI can
+// build the page from a clean checkout. The wiki build of the same data is upstream.
 
 const fs = require('fs');
 const path = require('path');
