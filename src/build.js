@@ -64,6 +64,13 @@ const childrenOf = (p) => pages
   .filter((c) => c !== p && c.segs.length === p.segs.length + 1 && c.url.startsWith(p.url))
   .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 
+// Every page that is a document rather than a section, in reading order. A section
+// deep in the tree is a card pointing at another card, so the pages that offer a
+// choice of everything - the home page and the 404 - list these instead.
+const leaves = () => pages
+  .filter((p) => p.url !== '/' && !childrenOf(p).length)
+  .sort((a, b) => a.url.localeCompare(b.url));
+
 // A section names only its own segment on the Egosoft wiki; the rest is inherited from
 // its parents, so a rename over there is one edit here. Only sections carry one: the
 // wiki's own tree is what a reader follows for anything more, not a single document.
@@ -179,6 +186,8 @@ for (const p of pages) {
   // {{children}} expands to the section's child pages, so an index page never
   // hand-maintains a list of what sits under it.
   html = html.replace(/<p>\{\{children\}\}<\/p>/g, cardList(childrenOf(p)));
+  // {{documents}} skips the sections in between and lists what there is to read.
+  html = html.replace(/<p>\{\{documents\}\}<\/p>/g, cardList(leaves()));
   // A note at the top of the source is for whoever edits the file, not for the page.
   // Matched by position, not wording, so renaming the note cannot leak it into the build.
   html = html.replace(/^\s*<!--(?!\s*xwiki:)[\s\S]*?-->\s*/, '');
@@ -227,16 +236,14 @@ function ico(files) {
 }
 fs.writeFileSync(path.join(OUT, 'favicon.ico'), ico(['favicon-16.png', 'favicon-32.png']));
 
-// GitHub Pages serves /404.html for any path it cannot resolve. It lists the leaf
-// pages rather than the top section, so a reader lands on a document in one click
-// instead of walking the tree down to it.
-const leaves = pages.filter((p) => p.url !== '/' && !childrenOf(p).length);
+// GitHub Pages serves /404.html for any path it cannot resolve. Like the home page it
+// lists the documents rather than the top section, so a reader lands on one in a click.
 fs.writeFileSync(path.join(OUT, '404.html'), shell({
   title: 'Page not found',
   body: '<h1>Page not found</h1>\n<p class="lede">That address does not exist here. '
     + 'It may have been renamed, or the link that brought you may be out of date. '
     + 'Everything the site carries:</p>\n'
-    + cardList(leaves),
+    + cardList(leaves()),
   css: TOC_CSS,
 }), 'utf8');
 

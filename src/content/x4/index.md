@@ -1,12 +1,12 @@
 ---
-title: For X4: Foundations
+title: X4: Foundations
 description: References and guides for modding X4: Foundations.
 order: 1
 wiki: X4 Foundations Wiki
 ---
 
-# For X4: Foundations
+# X4: Foundations
 
-Everything here is derived from the shipped game: values measured while it runs, and extensions built against it. Where something is inferred rather than measured, the page says so.
+This section is based on the structure of the X4 Foundations Wiki. But the pages are written here rather than taken from there.
 
 {{children}}

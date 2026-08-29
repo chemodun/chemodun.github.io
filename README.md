@@ -67,6 +67,7 @@ wikiName: Scripting/MD/Libraries/Map
 Two markers are expanded at build time:
 
 - `{{children}}` - the section's child pages as a card list, so an index page never hand-maintains a list of what sits under it.
+- `{{documents}}` - every page that is not a section, skipping the tree in between. The home page uses it, and `404.html` is built from the same list: a section's card points at another card, so a page whose job is to offer everything should offer what there is to read.
 - `<!-- xwiki: toc ... -->` - a table of contents built from the headings that follow it.
 
 Links may point at a page by its title (`[Lua Globals Reference](<Lua Globals Reference>)`); the build resolves those against the page tree and fails the build if one does not resolve.

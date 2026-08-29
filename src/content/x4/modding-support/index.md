@@ -7,6 +7,6 @@ wiki: Modding Support
 
 # Modding Support
 
-How the game is put together, from a mod author's point of view.
+This section contains information and guides for modding X4: Foundations.
 
 {{children}}
