@@ -179,8 +179,9 @@ for (const p of pages) {
   // {{children}} expands to the section's child pages, so an index page never
   // hand-maintains a list of what sits under it.
   html = html.replace(/<p>\{\{children\}\}<\/p>/g, cardList(childrenOf(p)));
-  // The editing-copy note and the XWiki toc macro are both source-only markers.
-  html = html.replace(/<!--\s*Editing copy[\s\S]*?-->\s*/g, '');
+  // A note at the top of the source is for whoever edits the file, not for the page.
+  // Matched by position, not wording, so renaming the note cannot leak it into the build.
+  html = html.replace(/^\s*<!--(?!\s*xwiki:)[\s\S]*?-->\s*/, '');
   html = html.replace(/<!--\s*xwiki:\s*toc[^>]*-->/g, (m, at) => toc(headings, html, at));
 
   // Under the page title, so the way out to the wiki is visible before the content.
