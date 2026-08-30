@@ -1,7 +1,7 @@
 ---
 title: Talking with MD and AI scripts
 description: The channels between UI Lua and the XML side - raise_lua_event, AddUITriggeredEvent, SignalObject and the blackboard - with a working pair of files for each.
-order: 2
+order: 3
 wikiPath: Modding Support/UI Modding support/Talking with MD and AI scripts
 ---
 

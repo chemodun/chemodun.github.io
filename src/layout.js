@@ -75,7 +75,10 @@ th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-alig
 th{background:var(--soft);font-weight:600}
 .tw{overflow-x:auto}
 hr{border:0;border-top:1px solid var(--line);margin:2em 0}
-.lede{color:var(--dim);max-width:72ch;font-size:1.02rem}
+/* A lead is set apart by tone and size, not by a narrower measure: every authored page
+   runs its prose the full width of .wrap, and a reference whose intro stopped short of
+   that read as a different site. */
+.lede{color:var(--dim);font-size:1.02rem}
 
 header.top{border-bottom:1px solid var(--line);background:var(--soft)}
 header.top .in{max-width:1100px;margin:0 auto;padding:11px 16px;display:flex;

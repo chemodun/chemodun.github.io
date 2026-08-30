@@ -26,6 +26,7 @@ src/assets/          files served from the root as they are, currently the icons
 src/content/         the authored pages, mirroring the URL tree
 src/globals/         the Lua Globals Reference pipeline (see below)
 src/commands/        the Script Commands reference (see below)
+src/c-functions-and-structures/  the C functions and structures reference (see below)
 ```
 
 `src/build.js` also writes the root-level files: `favicon.ico` (built from the two PNGs in `src/assets/`, so nothing derived is committed), `404.html`, `sitemap.xml` and `robots.txt`.
@@ -115,3 +116,21 @@ The page has three sections, and the split is the whole point of it. Attribute g
 That is what keeps the page finite. `find` is 89 attributes reused by 19 commands and `action` is 3 attributes reused by over 700, so rendering every card up front would emit the same tables dozens of times over. Instead the list carries one row per command - name, kind, schemas, version ticks, description - and the card is built on demand, linking into the two static sections rather than repeating them. The embedded payload therefore carries commands and child elements in full, but only the *sizes* of groups and types, since the real thing is already on the page.
 
 2,527 KB, 293 KB gzipped. The version filter defaults to the newest version, so the button is Reset rather than Clear, and a deep link drops the filters when its target is hidden.
+
+### The C functions and structures reference
+
+`src/c-functions-and-structures/build-html.js` builds `/x4/modding-support/ui-modding/c-functions-and-structures/` from three JSON files in `src/c-functions-and-structures/data/`.
+
+```text
+data/meta.json       versions covered, counts, and what the in-game probe established
+data/functions.json  2,380 functions, each with its state, signature and evidence
+data/types.json      302 structs and typedefs, with the size measured in the running game
+```
+
+They are produced upstream, in a separate working repository that needs the game files, and land here already finished - the same split as the globals reference, and for the same reason: CI builds the page from a clean checkout with no game installed.
+
+`ffi.C` is a userdata with no `__pairs`, so it can never be enumerated and no list of it can come from the game alone. The names come from the `ffi.cdef` blocks of vanilla's own Lua and from the export table of `X4.exe`; what the game was asked is whether each one resolves, and in which of the two Lua states. That is what the three states mean - **declared**, where vanilla writes the cdef and the signature is known; **exported**, where the engine has the name and no vanilla file declares it; and **restricted**, where the engine refuses it outright with a message of its own.
+
+The layout follows the commands reference, because the shape of the data is the same: types are the shared half - `UniverseID` is a parameter of 871 functions - so they are rendered once, statically, and a function card is assembled in the browser when its row is opened, linking into them. `usedBy` is computed here at build time rather than stored, since storing it would put a list of 871 names in the data file for a number the page can count itself.
+
+2,699 KB, 179 KB gzipped. The version filter defaults to the newest version, and a deep link drops the filters when its target is hidden.
