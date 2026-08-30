@@ -5,6 +5,11 @@
 //   node build-html.js                 -> _site/x4/modding-support/ui-modding/c-functions-and-structures/
 //   OUT=path/to/index.html node build-html.js
 //
+// The page is built from c-functions.lua, which is the reference: a Lua Language Server
+// meta file carrying every declaration, everything the probe measured about it, and the
+// descriptions, which are written into that file and nowhere else. meta.js is the parser,
+// copied here by the extraction half so the two readings of the format cannot drift.
+//
 // Types are the shared half here - UniverseID is a parameter of well over a thousand
 // functions - so they are rendered once, statically, and every function card links into
 // them. A function card is assembled in the browser when its row is opened: 2,380 cards
@@ -13,13 +18,39 @@
 const fs = require('fs');
 const path = require('path');
 const { shell, esc, versionRange, legend } = require('../layout.js');
+const { parse, argNames } = require('./meta.js');
 
 const DATA = path.join(__dirname, 'data');
-const read = (name) => JSON.parse(fs.readFileSync(path.join(DATA, name), 'utf8'));
+const meta = JSON.parse(fs.readFileSync(path.join(DATA, 'meta.json'), 'utf8'));
 
-const meta = read('meta.json');
-const functions = read('functions.json');
-const types = read('types.json');
+const LUA = path.join(__dirname, 'c-functions.lua');
+const LUA_KB = Math.round(fs.statSync(LUA).size / 1024);
+const source = parse(fs.readFileSync(LUA, 'utf8'), meta.versions);
+const { functions, types, docs } = source;
+
+// What the meta file parses to has to be what the extraction measured. Anything else
+// means an edit reshaped an entry, and the page would publish the damage silently.
+const problems = [];
+const tally = (label, got, want) => {
+  if (got !== want) problems.push(`${label}: ${got} in c-functions.lua, ${want} in meta.json`);
+};
+const stateCount = (s) => Object.values(functions).filter((f) => f.state === s).length;
+tally('functions', Object.keys(functions).length, meta.counts.functions);
+tally('declared', stateCount('declared'), meta.counts.declared);
+tally('exported', stateCount('exported'), meta.counts.exported);
+tally('restricted', stateCount('restricted'), meta.counts.restricted);
+tally('types', Object.keys(types).length, meta.counts.types);
+tally('types with a size', Object.values(types).filter((t) => t.size !== undefined).length, meta.counts.typesSized);
+// A description whose name is neither a function nor a type. gen-meta.js parks these at
+// the end of the file rather than deleting them, and they are a build failure here.
+for (const name of Object.keys(docs.orphans)) {
+  problems.push(`a description for ${name}, which is neither a function nor a type`);
+}
+if (problems.length) {
+  console.error('c-functions.lua does not agree with meta.json:');
+  for (const p of problems) console.error('  ' + p);
+  process.exit(1);
+}
 
 const URL = '/x4/modding-support/ui-modding/c-functions-and-structures/';
 const OUT = process.env.OUT || path.join(__dirname, '..', '..', '_site', ...URL.split('/').filter(Boolean), 'index.html');
@@ -97,6 +128,8 @@ const CSS = `
 .card table th{width:150px;white-space:nowrap;text-align:left;vertical-align:top}
 .card pre{margin:.6em 0}
 .card .none{color:var(--dim);font-style:italic}
+.card p.d,.shared p.d{margin:.6em 0;color:inherit;font-size:1em}
+.card p.d.none,.shared p.d.none{color:var(--dim)}
 
 .shared{border:1px solid var(--line);border-radius:6px;padding:.6em .9em;margin:.7em 0;
   content-visibility:auto;contain-intrinsic-size:auto 120px}
@@ -140,6 +173,7 @@ const typeCards = Object.keys(types)
   .sort()
   .map((name) => {
     const t = types[name];
+    const doc = docs.types[name] || {};
     const users = usedBy.get(name) || [];
     const facts = [];
     if (t.size !== undefined) facts.push(`<code>ffi.sizeof</code> ${t.size} byte${t.size === 1 ? '' : 's'}${t.sizeFrom ? ` in ${esc(t.sizeFrom)}` : ''}`);
@@ -147,9 +181,14 @@ const typeCards = Object.keys(types)
     facts.push(ENV[t.env] ? ENV[t.env][2] : 'declared nowhere');
     facts.push(`used by ${users.length} function${users.length === 1 ? '' : 's'}`);
 
+    // A third column only where a field has been described, so an undescribed type
+    // keeps the two-column shape it had.
+    const fdoc = doc.fields || {};
+    const described = t.fields && t.fields.some((f) => fdoc[f.name]);
     const fields = t.fields
-      ? `<table><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>${t.fields
-          .map((f) => `<tr><td class="n"><code>${esc(f.name)}</code></td><td class="t">${typeChip(f.type)}</td></tr>`)
+      ? `<table><thead><tr><th>Field</th><th>Type</th>${described ? '<th>What it is</th>' : ''}</tr></thead><tbody>${t.fields
+          .map((f) => `<tr><td class="n"><code>${esc(f.name)}</code></td><td class="t">${typeChip(f.type)}</td>` +
+            (described ? `<td>${esc(fdoc[f.name] || '')}</td>` : '') + '</tr>')
           .join('')}</tbody></table>`
       : '';
 
@@ -162,9 +201,11 @@ const typeCards = Object.keys(types)
 
     return `<section class="shared" id="${id('t', name)}">
 <h3>${esc(name)} <span class="tag">${esc(t.kind)}</span>${isNew(t) ? '<span class="new">NEW</span>' : ''}</h3>
+${doc.detailed ? `<p class="d">${esc(doc.detailed)}</p>` : ''}
 <p>${facts.join(' &middot; ')}</p>
 ${t.v ? versionLine(t) : ''}
 <pre><code>${esc(t.decl)}</code></pre>
+${doc.notes ? `<p class="d"><span class="t-warn">&#9888; ${esc(doc.notes)}</span></p>` : ''}
 ${fields}
 ${list}
 <p>Declared in ${t.sites.map((s) => `<code>${esc(s.file)}:${s.line}</code>`).join(', ')}</p>
@@ -179,6 +220,7 @@ const rows = names
   .map((name) => {
     const f = functions[name];
     const facets = [f.state, 'e' + (f.env || 'none'), f.uses ? 'called' : 'uncalled',
+      (docs.functions[name] || {}).detailed ? 'described' : 'undescribed',
       ...versionsOf(f).split(' '), isNew(f) ? 'new' : ''].filter(Boolean).join(' ');
     const sig = f.params
       ? `<code>${esc(f.ret)}</code> ${esc(paramText(f))}`
@@ -200,6 +242,10 @@ const rows = names
 const payload = Object.fromEntries(
   Object.entries(functions).map(([n, f]) => {
     const { decl, ...rest } = f;
+    const d = docs.functions[n];
+    // The meta file keys a parameter's text by the name its annotation carries; a card
+    // knows parameters by position, so the two are lined up once, here.
+    if (d) rest.doc = { ...d, params: d.params && f.params ? argNames(f.params).map((a) => d.params[a] || '') : undefined };
     return [n, rest];
   })
 );
@@ -207,6 +253,8 @@ const payload = Object.fromEntries(
 const counts = meta.counts;
 const countOf = (pred) => names.filter((n) => pred(functions[n])).length;
 const uncalled = countOf((f) => f.decl && !f.uses);
+const describedFns = names.filter((n) => (docs.functions[n] || {}).detailed).length;
+const describedTypes = Object.keys(types).filter((n) => (docs.types[n] || {}).detailed).length;
 
 // ---- the page script -------------------------------------------------------
 
@@ -235,7 +283,10 @@ var sigOf=function(n,f){return f.ret+' '+n+'('+(f.params.length?f.params.map(fun
 
 function card(name){
   var f=D[name]; if(!f) return '';
-  var out=[];
+  var d=f.doc||{};
+  // Nothing describes a C. function anywhere, so an empty card is the normal case and
+  // says so plainly rather than leaving the reader wondering what is missing.
+  var out=[d.detailed?'<p class="d">'+E(d.detailed)+'</p>':'<p class="d none">No description yet.</p>'];
   if(f.params){
     out.push('<pre><code>'+E(sigOf(name,f))+'</code></pre>');
     out.push('<p class="copyrow"><button class="copy" type="button" data-copy="'+E(name)+'">Copy name</button>'+
@@ -249,13 +300,16 @@ function card(name){
       '<button class="copy" type="button" data-copy-link="#'+ID('f',name)+'">Copy link</button></p>');
   }
 
+  if(d.notes) out.push('<p class="d"><span class="t-warn">⚠ '+E(d.notes)+'</span></p>');
+
   var rows=[['State',says(STATE,f.state)+(f.vState?'<br>'+Object.keys(f.vState).map(function(v){
     return 'in '+E(v)+' it was '+E(STATE[f.vState[v]][1]);}).join(', '):'')]];
   if(f.params&&f.params.length){
-    rows.push(['Parameters',f.params.map(function(p){
-      return chip(p.type)+(p.name?' <code>'+E(p.name)+'</code>':'');}).join('<br>')]);
+    rows.push(['Parameters',f.params.map(function(p,i){
+      var t=(d.params||[])[i];
+      return chip(p.type)+(p.name?' <code>'+E(p.name)+'</code>':'')+(t?' - '+E(t):'');}).join('<br>')]);
   }else if(f.params){rows.push(['Parameters','<i>none</i>']);}
-  if(f.ret) rows.push(['Returns',chip(f.ret)]);
+  if(f.ret) rows.push(['Returns',chip(f.ret)+(d.ret?' - '+E(d.ret):'')]);
   // A name vanilla has since dropped still has declaration sites; they are just no longer
   // the current version's, so the whole cell has to read in the past tense.
   if(f.env) rows.push(['Declared in',(f.declFrom
@@ -292,7 +346,9 @@ list.addEventListener('click',function(e){
 var q=document.getElementById('q'),n=document.getElementById('n'),
     sel=Array.prototype.slice.call(document.querySelectorAll('.bar select')),
     rows=Array.prototype.slice.call(list.children).map(function(r){
-      return {r:r,f:' '+r.dataset.f+' ',h:r.dataset.n.toLowerCase()};});
+      var d=(D[r.dataset.n]||{}).doc||{};
+      return {r:r,f:' '+r.dataset.f+' ',
+        h:(r.dataset.n+' '+(d.detailed||'')+' '+(d.notes||'')).toLowerCase()};});
 function apply(){
   var text=q.value.trim().toLowerCase(),shown=0;
   var want=sel.map(function(s){return s.value;}).filter(Boolean);
@@ -339,12 +395,21 @@ the namespace a UI mod works in, beside the <a href="/x4/modding-support/ui-modd
 Read out of the <code>ffi.cdef</code> blocks of the game's own Lua, the export table of <code>X4.exe</code>, and a probe
 run inside the game, for ${VERSIONS.join(' and ')}.</p>
 <p class="lede">${counts.functions} functions - ${counts.declared} declared, ${counts.exported} exported, ${counts.restricted} restricted -
-and ${counts.types} structs and typedefs, ${counts.typesSized} of them with a size measured in game.</p>
+and ${counts.types} structs and typedefs, ${counts.typesSized} of them with a size measured in game.
+Nothing in the game files describes any of them, so the descriptions are written by hand and there are
+${describedFns} on a function and ${describedTypes} on a type so far.</p>
 
 <div class="dl">
 <a class="btn" href="#functions">Browse</a>
 <p>Open a row for the full declaration, where it is declared, what vanilla does with it and which versions have it.
 The types are listed once, further down, and every card links into them.</p>
+</div>
+
+<div class="dl">
+<a class="btn" href="${URL}c-functions.lua" download>Download <code>c-functions.lua</code></a>
+<p>${LUA_KB} KB. This page as a Lua Language Server meta file, which is also the file it is built from: every
+declaration with its state, its environment and its versions above it. Point an editor at it as a library and
+<code>C.</code> gets completion and signatures while UI Lua is being written.</p>
 </div>
 
 <details class="box"><summary>What this covers, and what a state means</summary>
@@ -384,12 +449,49 @@ signature vanilla had for it.</td></tr>
 a URL that reopens that card.</td></tr>
 </table></details>
 
+<details class="box"><summary>Where a description comes from, and how to write one</summary>
+<p>Nothing in the game files, and nothing anywhere else, describes a <code>C.</code> function. The names are
+self-documenting and that is the whole of what exists, which is why most cards below say so. What descriptions there
+are have been written by hand into <code>c-functions.lua</code> itself: the file offered above is both what this page
+is built from and where its prose lives, so a description and the declaration it belongs to are never apart.</p>
+<p>An entry takes three authored things, and nothing else in it is authored:</p>
+<pre><code>--- The running game version, as the launcher shows it.
+-- Note: addons only. Vanilla cdefs it in ego_debuglog alone, so a core
+--   script that calls it raises a missing declaration.
+-- State: declared
+-- Environment: addons
+-- Versions: ${VERSIONS.join(', ')}
+-- Declared: ui/addons/ego_debuglog/debuglog.lua:26
+---@return GameVersion # \`GameVersion\` the version struct
+function C.GetGameVersion() end</code></pre>
+<p>The <code>---</code> lines are the description, <code>-- Note:</code> is a caveat kept apart from it, and the text
+after the backticked C type on a <code>---@param</code>, <code>---@return</code> or <code>---@field</code> says what
+that one value is. Everything reading <code>-- Key: value</code> is generated from the extraction and rewritten
+whenever the game moves on; the three authored kinds are carried across untouched.
+<a href="https://github.com/chemodun/chemodun.github.io/blob/main/src/c-functions-and-structures/c-functions.lua">The
+file is on GitHub</a>, and a description added to it is a pull request against that one file.</p>
+</details>
+
+<details class="box"><summary>Using it in an editor</summary>
+<p>The Lua Language Server reads a meta file when it is listed as a workspace library. In VS Code that is
+<code>.luarc.json</code> beside the workspace root, or the same key in settings:</p>
+<pre><code>{
+  "workspace.library": [ "path/to/c-functions.lua" ]
+}</code></pre>
+<p>Every annotation carries the exact C declaration in backticks beside the Lua type: <code>integer</code> is not a
+<code>uint32_t</code>, <code>const char*</code> is not a type name at all, and a pointer reads as an array because
+that is what the caller sizes and passes. The file declares names only, is never executed and is never loaded by the
+game. For the wider set of X4 Lua definitions there is a packaged addon,
+<a href="https://github.com/chemodun/X4-LuaLSAddon">X4-LuaLSAddon</a>.</p>
+</details>
+
 <h2 id="functions">Functions</h2>
 <div class="bar">
-<input id="q" type="search" placeholder="Filter by name…" autocomplete="off">
+<input id="q" type="search" placeholder="Filter by name or description…" autocomplete="off">
 ${select('State', [['declared', 'declared'], ['exported', 'exported'], ['restricted', 'restricted']])}
 ${select('Declared in', [['eaddons', 'addons'], ['ecore', 'core only'], ['eboth', 'both'], ['enone', 'nowhere']])}
 ${select('Vanilla use', [['called', 'called by vanilla'], ['uncalled', 'never called']])}
+${select('Description', [['described', `described (${describedFns})`], ['undescribed', `not described yet (${counts.functions - describedFns})`]])}
 ${select('Version', VERSION_OPTS, tokenOf(NEWEST))}
 <button id="clr" type="button">Reset</button><span class="n" id="n"></span>
 ${legend([['Name'], ['State', 'State: declared, exported or restricted'],
@@ -427,5 +529,9 @@ const html = shell({
 
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, html, 'utf8');
+// The meta file ships beside the page: it is the download, and it is the source.
+fs.copyFileSync(LUA, path.join(path.dirname(OUT), 'c-functions.lua'));
 console.log('wrote ' + OUT + ' (' + (fs.statSync(OUT).size / 1024).toFixed(0) + ' KB)');
-console.log(`${names.length} functions, ${Object.keys(types).length} types`);
+console.log('wrote ' + path.join(path.dirname(OUT), 'c-functions.lua') + ' (' + LUA_KB + ' KB)');
+console.log(`${names.length} functions, ${Object.keys(types).length} types, read from c-functions.lua`);
+console.log(`described: ${describedFns} functions, ${describedTypes} types`);
