@@ -12,57 +12,18 @@ const MarkdownIt = require('markdown-it');
 
 const { shell, esc, wikiRef, SITE } = require('./layout.js');
 
+// What pages there are, and how they sit under one another, is nav.js's - the
+// navigation panel needs the same tree, and the generated references build in separate
+// processes that never run this file.
+const { pages, byUrl, childrenOf, wikiSegsFor } = require('./nav.js');
+
 const ROOT = __dirname;
-const CONTENT = path.join(ROOT, 'content');
 const ASSETS = path.join(ROOT, 'assets');
 const OUT = path.join(ROOT, '..', '_site');
 
 /* ------------------------------------------------------------------ pages */
 
-// Minimal front matter: `key: value` lines between --- fences. No YAML needed.
-function frontMatter(text) {
-  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/.exec(text);
-  if (!m) return { data: {}, body: text };
-  const data = {};
-  for (const line of m[1].split(/\r?\n/)) {
-    const kv = /^([A-Za-z_][\w-]*)\s*:\s*(.*)$/.exec(line.trim());
-    if (kv) data[kv[1]] = kv[2].replace(/^["']|["']$/g, '');
-  }
-  return { data, body: text.slice(m[0].length) };
-}
-
-function walk(dir, acc = []) {
-  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) walk(p, acc);
-    else if (e.name.endsWith('.md')) acc.push(p);
-  }
-  return acc;
-}
-
-const pages = walk(CONTENT).map((file) => {
-  const { data, body } = frontMatter(fs.readFileSync(file, 'utf8'));
-  const rel = path.relative(CONTENT, file).split(path.sep).join('/');
-  const segs = rel.replace(/\.md$/, '').split('/').filter((s) => s !== 'index');
-  return {
-    file, body, segs,
-    url: segs.length ? '/' + segs.join('/') + '/' : '/',
-    title: data.title || segs[segs.length - 1] || 'Home',
-    description: data.description || '',
-    order: Number(data.order || 100),
-    generated: data.generated === 'true',
-    wiki: data.wiki || '',
-    wikiName: data.wikiName || '',
-  };
-});
-
-const byUrl = new Map(pages.map((p) => [p.url, p]));
 const byTitle = new Map(pages.map((p) => [p.title, p]));
-
-const parentUrl = (p) => p.segs.length ? '/' + p.segs.slice(0, -1).join('/') + (p.segs.length > 1 ? '/' : '') : null;
-const childrenOf = (p) => pages
-  .filter((c) => c !== p && c.segs.length === p.segs.length + 1 && c.url.startsWith(p.url))
-  .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 
 // Every page that is a document rather than a section, in reading order. A section
 // deep in the tree is a card pointing at another card, so the pages that offer a
@@ -70,19 +31,6 @@ const childrenOf = (p) => pages
 const leaves = () => pages
   .filter((p) => p.url !== '/' && !childrenOf(p).length)
   .sort((a, b) => a.url.localeCompare(b.url));
-
-// A section names only its own segment on the Egosoft wiki; the rest is inherited from
-// its parents, so a rename over there is one edit here. Only sections carry one: the
-// wiki's own tree is what a reader follows for anything more, not a single document.
-function wikiSegsFor(p) {
-  if (!p.wiki) return [];
-  const segs = [];
-  for (let i = 0; i <= p.segs.length; i++) {
-    const anc = byUrl.get(i ? '/' + p.segs.slice(0, i).join('/') + '/' : '/');
-    if (anc && anc.wiki) segs.push(...anc.wiki.split('/').filter(Boolean));
-  }
-  return segs;
-}
 
 function trailFor(p) {
   const out = [];
@@ -205,6 +153,7 @@ for (const p of pages) {
     title: p.title,
     description: p.description,
     trail: trailFor(p),
+    url: p.url,
     body: html,
     css: TOC_CSS,
   }), 'utf8');

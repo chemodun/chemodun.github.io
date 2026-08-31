@@ -1,0 +1,299 @@
+{
+  "fetched": "2026-08-31",
+  "root": "X4 Foundations Wiki",
+  "branch": "Modding Support",
+  "pages": [
+    {
+      "segs": [
+        "Modding Support"
+      ],
+      "title": "Modding Support"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding"
+      ],
+      "title": "Assets Modding"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Community Guides"
+      ],
+      "title": "Community Guides"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Community Guides",
+        "Converting and seperating color channels of newer models"
+      ],
+      "title": "Converting and seperating color channels of newer models"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Community Guides",
+        "Glowing engines on ships when accelerating (like on Boron and Timelines S and M ships)"
+      ],
+      "title": "Glowing engines on ships when accelerating (like on Boron and Timelines S and M ships)"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Community Guides",
+        "Making custom ships"
+      ],
+      "title": "Making custom ships"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Community Guides",
+        "Making custom turrets"
+      ],
+      "title": "Making custom turrets"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Community Guides",
+        "Paintmods"
+      ],
+      "title": "Modifying Paintmods"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Community Guides",
+        "User Generated Logos - Usage"
+      ],
+      "title": "User Generated Logos - Usage"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Community Guides",
+        "Working with Multimats (Reverse Engineering)"
+      ],
+      "title": "Working with Multimats (Reverse Engineering)"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Community Guides",
+        "Working with Multimats (Work in Progress)"
+      ],
+      "title": "Working with Multimats (Applying)"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Guides"
+      ],
+      "title": "Guides"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Guides",
+        "Attachment"
+      ],
+      "title": "Attachment"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Guides",
+        "Dockingbay"
+      ],
+      "title": "Dockingbay"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Guides",
+        "Elevator setup"
+      ],
+      "title": "Elevator setup"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Guides",
+        "JPMFlight"
+      ],
+      "title": "Flight Parameter Setup on Ships, Engines, and Thrusters"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Guides",
+        "Tags and flags"
+      ],
+      "title": "Tags and flags"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Assets Modding",
+        "Guides",
+        "Using patchactions.xml to fix surface elements"
+      ],
+      "title": "Using patchactions.xml to fix surface elements"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Breaking Changes"
+      ],
+      "title": "Breaking Changes"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "ScriptingMD"
+      ],
+      "title": "Scripting/MD/Libraries/Map"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "ScriptingMD",
+        "Community Guides"
+      ],
+      "title": "Community Guides"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "ScriptingMD",
+        "Community Guides",
+        "Changing Game Music"
+      ],
+      "title": "Changing Game Music"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "ScriptingMD",
+        "Community Guides",
+        "Highways Modding Guide"
+      ],
+      "title": "Highways Modding Guide"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "ScriptingMD",
+        "Community Guides",
+        "Mechanics of X4's Map Design"
+      ],
+      "title": "Mechanics of X4's Map Design"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "ScriptingMD",
+        "Community Guides",
+        "Reducing the x4.log to more relevant informations"
+      ],
+      "title": "Reducing the x4.log to more relevant informations"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "ScriptingMD",
+        "Guides"
+      ],
+      "title": "Guides"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "ScriptingMD",
+        "Guides",
+        "Debug Manager Usage (Work in Progress)"
+      ],
+      "title": "Debug Manager Usage (Work in Progress)"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Text File Pages Being Used by Modders"
+      ],
+      "title": "Text File Pages Being Used by Modders"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "UI Modding support"
+      ],
+      "title": "UI Modding support",
+      "implied": true
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "UI Modding support",
+        "Talking with MD and AI scripts"
+      ],
+      "title": "Talking with MD and AI scripts"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "X Catalog Tool"
+      ],
+      "title": "X Catalog Tool"
+    }
+  ],
+  "branches": [
+    {
+      "segs": [
+        "Downloadable Content"
+      ],
+      "title": "Downloadable Content"
+    },
+    {
+      "segs": [
+        "Game Updates and Patch History"
+      ],
+      "title": "Game Updates and Patch History"
+    },
+    {
+      "segs": [
+        "Manual and Guides"
+      ],
+      "title": "Manual and Guides"
+    },
+    {
+      "segs": [
+        "Multiverse Team Seasons"
+      ],
+      "title": "Multiverse Team Seasons"
+    },
+    {
+      "segs": [
+        "Troubleshooting"
+      ],
+      "title": "Troubleshooting"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+name: Wiki drift
+
+# The navigation panel's wiki half is committed as src/wiki/tree.json, and a deploy
+# refreshes it before building. Nothing, though, tells anyone when the Egosoft wiki
+# gains a page, renames one or moves a branch - between two deploys that change is
+# invisible. This runs the same fetch weekly, compares, and says so in an issue.
+#
+# It reports; it does not commit. The refresh is `npm run wiki:fetch`, and what it
+# rewrites is meant to be read before it is pushed.
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: wiki-drift
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # No npm ci: the fetcher is node builtins and fetch, and nothing it needs is
+      # installed. A network failure here is a failed run, not a drift report - the
+      # difference matters, or a wiki outage opens an issue every Monday.
+      - id: check
+        run: |
+          set +e
+          npm run wiki:check > drift.txt 2>&1
+          code=$?
+          cat drift.txt
+          if [ $code -eq 0 ]; then
+            echo "state=clean" >> "$GITHUB_OUTPUT"
+          elif grep -q 'wiki fetch failed' drift.txt; then
+            echo "state=unreachable" >> "$GITHUB_OUTPUT"
+          else
+            echo "state=drift" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.check.outputs.state == 'unreachable'
+        run: |
+          echo "::warning::the Egosoft wiki could not be read; no drift report this run"
+
+      # One issue for the subject, reopened and commented rather than duplicated, so a
+      # month of Mondays is one thread instead of four issues.
+      - if: steps.check.outputs.state == 'drift'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: The Egosoft wiki no longer matches src/wiki/tree.json
+        run: |
+          {
+            echo "The weekly check found the wiki's Modding Support tree has changed."
+            echo
+            echo '```'
+            sed 's/^/  /' drift.txt
+            echo '```'
+            echo
+            echo "To take the change: \`npm run wiki:fetch\`, read the diff, commit it."
+            echo "Until then the panel keeps showing the committed snapshot, and each"
+            echo "deploy publishes the wiki's current tree without recording it here."
+            echo
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > body.md
+          n=$(gh issue list --state all --limit 100 --json number,title \
+                --jq "map(select(.title == \"$TITLE\")) | .[0].number // empty")
+          if [ -n "$n" ]; then
+            gh issue reopen "$n" 2>/dev/null || true
+            gh issue comment "$n" --body-file body.md
+          else
+            gh issue create --title "$TITLE" --body-file body.md
+          fi

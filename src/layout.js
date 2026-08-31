@@ -85,12 +85,13 @@ header.top .in{max-width:1100px;margin:0 auto;padding:11px 16px;display:flex;
   gap:1em;align-items:center;flex-wrap:wrap}
 header.top .brand{font-weight:700;color:var(--fg);text-decoration:none}
 header.top .tagline{color:var(--dim);font-size:.88rem;flex:1}
-button.theme{display:flex;align-items:center;justify-content:center;width:32px;height:32px;
+button.theme,button.navt{display:flex;align-items:center;justify-content:center;
+  width:32px;height:32px;
   padding:0;border:1px solid var(--line);border-radius:6px;background:var(--bg);
   color:var(--dim);cursor:pointer}
-button.theme:hover{color:var(--acc);border-color:var(--acc)}
-button.theme svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;
-  stroke-linecap:round}
+button.theme:hover,button.navt:hover{color:var(--acc);border-color:var(--acc)}
+button.theme svg,button.navt svg{width:16px;height:16px;fill:none;stroke:currentColor;
+  stroke-width:1.6;stroke-linecap:round}
 /* Show the theme you would switch TO. Default (no attribute) follows the system, so
    the swap has to be expressed once per media state and once per explicit choice. */
 button.theme .sun{display:none}
@@ -218,6 +219,92 @@ details.box{border:1px solid var(--line);border-radius:8px;padding:10px 14px;mar
 details.box>summary{cursor:pointer;font-weight:600}
 `;
 
+// The navigation panel. The page keeps its 1100px measure and the panel is added
+// beside it rather than taken out of it, so the reference tables are exactly as wide
+// as they were before the panel existed; --sw going to 0 restores the old layout
+// pixel for pixel. The header's own block is widened to match, so its left edge lines
+// up with the panel and its right edge with the content, at either width.
+const NAV_CSS = `
+:root{--sw:300px}
+.layout{max-width:calc(1100px + var(--sw));margin:0 auto;
+  display:grid;grid-template-columns:var(--sw) minmax(0,1fr)}
+/* Both columns are named rather than left to auto-placement. Hiding the panel takes it
+   out of the grid entirely, and the content then auto-places into what is now a
+   zero-width first column: 1100px of layout with the page squeezed to 273px inside it,
+   and no sign of it on a page whose tables are wide enough to overflow the column.
+   The page's own auto margins go with it. They centred .wrap when it was a block in
+   the body, but an auto margin on a grid item cancels the stretch it would otherwise
+   get, so prose pages took their content's width and stopped short of the column.
+   The layout box is what is centred now, and the page fills its column. */
+.layout>nav.side{grid-column:1}
+.layout>.wrap{grid-column:2;margin-inline:0}
+header.top .in{max-width:calc(1100px + var(--sw))}
+
+nav.side{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+  padding:14px 12px 40px;font-size:.9rem;border-right:1px solid var(--line)}
+nav.side ul{list-style:none;margin:0;padding:0}
+nav.side>ul>li,nav.side details{margin:1px 0}
+/* Depth is a rule to the left of the nesting, not an indent that disappears the moment
+   a title wraps to a second line. */
+nav.side ul ul{margin:1px 0 3px .55em;padding-left:.75em;border-left:1px solid var(--line)}
+nav.side a{flex:1 1 auto;min-width:0;overflow-wrap:break-word;color:var(--fg);
+  text-decoration:none;border-radius:5px;padding:1px 4px}
+nav.side a:hover{color:var(--acc);background:var(--soft)}
+nav.side a.here{color:var(--acc);font-weight:600;background:var(--soft)}
+/* A page that is only on the wiki is still a real destination, so it is dimmed rather
+   than greyed out: the tree reads as this site's pages first, at a glance, without
+   having to read a chip on every row. */
+nav.side a.ext{color:var(--dim)}
+nav.side a.ext:hover{color:var(--acc)}
+nav.side li{padding:2px 0;line-height:1.45}
+/* Title and chips are a row, not a run of text: a title long enough to wrap must take
+   the width it needs and leave its chips where every other row's chips are. */
+nav.side li.leaf,nav.side summary{display:flex;align-items:flex-start;gap:.35em}
+/* A leaf lines up with the titles above it, not with their chevrons. */
+nav.side li.leaf{padding-left:17px}
+nav.side summary{list-style:none;cursor:pointer;position:relative;padding-left:17px;
+  border-radius:5px}
+nav.side summary::-webkit-details-marker{display:none}
+nav.side summary::before{content:"";position:absolute;left:4px;top:.42em;
+  width:.4em;height:.4em;border:2px solid var(--dim);border-top:0;border-left:0;
+  transform:rotate(-45deg);transition:transform .15s ease}
+nav.side details[open]>summary::before{transform:rotate(45deg)}
+nav.side summary:hover::before{border-color:var(--acc)}
+
+/* Where the page can be read. currentColor takes the tone class's colour into the
+   border, so one rule covers both chips in both themes. */
+nav.side .mk{flex:0 0 auto;padding-top:.15em}
+nav.side .nb{display:inline-block;padding:0 .3em;
+  border:1px solid currentColor;border-radius:3px;
+  font-size:.6rem;font-weight:600;line-height:1.6;letter-spacing:.03em;
+  text-transform:uppercase;white-space:nowrap;opacity:.8;cursor:default}
+
+/* The desktop toggle is a preference and is remembered; the mobile drawer is not, so
+   the two are separate attributes and the panel cannot be left hidden on a phone by a
+   choice made on a desktop. */
+@media(min-width:901px){
+  :root[data-nav=off]{--sw:0px}
+  :root[data-nav=off] nav.side{display:none}
+}
+@media(max-width:900px){
+  :root{--sw:0px}
+  .layout{display:block;max-width:1100px}
+  header.top .in{max-width:1100px}
+  /* align-self has to go back to auto with the sticky layout it belongs to. It applies
+     to a fixed box as much as to a grid item, and an explicit alignment makes the box
+     shrink to its content instead of filling top:0/bottom:0 - which left the drawer
+     ending halfway down the screen with the page showing under it. */
+  nav.side{position:fixed;z-index:20;top:0;left:0;bottom:0;width:min(82vw,320px);
+    align-self:auto;max-height:none;padding-top:16px;background:var(--bg);
+    transform:translateX(-100%);transition:transform .18s ease;
+    box-shadow:0 6px 24px rgba(0,0,0,.3)}
+  :root[data-navopen=on] nav.side{transform:none}
+  :root[data-navopen=on] body::after{content:"";position:fixed;inset:0;z-index:10;
+    background:rgba(0,0,0,.4)}
+}
+@media(prefers-reduced-motion:reduce){nav.side{transition:none}}
+`;
+
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -290,8 +377,11 @@ function crumbs(trail) {
 // other theme. localStorage throws in some embedding contexts - never let it break
 // the page. The IIFE is not decoration: a bare `var` here is a global binding, and a
 // page script that later declares the same name with let/const fails to parse whole.
-const THEME_HEAD = `(function(){try{var t=localStorage.getItem('theme');
-if(t)document.documentElement.dataset.theme=t}catch(e){}})()`;
+// The navigation panel is read here too: a collapsed panel that paints and then
+// vanishes is the same flash as the wrong theme, and it moves the whole page sideways.
+const THEME_HEAD = `(function(){try{var d=document.documentElement,
+t=localStorage.getItem('theme');if(t)d.dataset.theme=t;
+if(localStorage.getItem('nav')==='off')d.dataset.nav='off'}catch(e){}})()`;
 
 const THEME_JS = `
 (function(){
@@ -353,6 +443,38 @@ const BAR_JS = `
   set();addEventListener('resize',set);
 })();`;
 
+// One button, two jobs, because a panel means something different at each width: on a
+// desktop it is a preference that persists, on a phone it is a drawer that opens over
+// the page and is closed again by anything - the backdrop, Escape, following a link.
+const NAV_JS = `
+(function(){
+  var b=document.querySelector('button.navt'),side=document.querySelector('nav.side');
+  if(!b||!side)return;
+  var d=document.documentElement;
+  var narrow=function(){return matchMedia('(max-width:900px)').matches;};
+  var open=function(){return narrow()?d.dataset.navopen==='on':d.dataset.nav!=='off';};
+  function set(v){
+    if(narrow())d.dataset.navopen=v?'on':'off';
+    else{d.dataset.nav=v?'on':'off';try{localStorage.setItem('nav',d.dataset.nav)}catch(e){}}
+    b.setAttribute('aria-expanded',String(v));
+  }
+  set(open());
+  b.addEventListener('click',function(e){e.stopPropagation();set(!open());});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&narrow()&&open())set(false);});
+  document.addEventListener('click',function(e){
+    if(!narrow()||!open())return;
+    if(e.target.closest('nav.side'))return;
+    set(false);});
+  // The title of a section is a link and a fold at once. A click on the link is going
+  // somewhere, so it must not also fold the section on the way out.
+  side.addEventListener('click',function(e){
+    if(e.target.closest('summary a'))e.stopPropagation();});
+})();`;
+
+const NAV_ICON = `<svg viewBox="0 0 16 16" aria-hidden="true">\
+<path d="M2 4h12M2 8h12M2 12h12"/></svg>`;
+
 const ICONS = `<svg class="moon" viewBox="0 0 16 16" aria-hidden="true">\
 <path d="M13.5 9.5A5.6 5.6 0 016.5 2.5a5.6 5.6 0 107 7z"/></svg>\
 <svg class="sun" viewBox="0 0 16 16" aria-hidden="true">\
@@ -361,7 +483,16 @@ M.9 8h1.7M13.4 8h1.7M2 14l1.2-1.2M12.8 3.2L14 2"/></svg>`;
 
 // The page's own js gets its own <script> and its own scope: a parse error or a name
 // clash in it must not take the theme toggle down with it.
-function shell({ title, description = '', trail = [], body, css = '', js = '' }) {
+// `url` is the page's own address, which the navigation panel marks as where the reader
+// is. Every builder already ends its trail there, so only a page with no trail - the
+// home page, the 404 - has to say so itself.
+//
+// nav.js is required here rather than at the top because it requires this file back,
+// for the escaping and the wiki URLs. By the time a page is rendered this module is
+// fully loaded, so the cycle never resolves to a half-built object.
+function shell({ title, description = '', trail = [], body, css = '', js = '',
+                 url = trail.length ? trail[trail.length - 1].href : '' }) {
+  const { navHtml } = require('./nav.js');
   const full = title === SITE.title ? title : `${title} - ${SITE.title}`;
   return `<!doctype html>
 <html lang="en"><head>
@@ -370,20 +501,25 @@ function shell({ title, description = '', trail = [], body, css = '', js = '' })
 ${description ? `<meta name="description" content="${esc(description)}">` : ''}
 ${ICON_LINKS}
 <script>${THEME_HEAD}</script>
-<style>${BASE_CSS}${COMPONENT_CSS}${css}</style>
+<style>${BASE_CSS}${COMPONENT_CSS}${NAV_CSS}${css}</style>
 </head><body>
 <header class="top"><div class="in">
+<button class="navt" type="button" aria-controls="side" aria-expanded="true"
+  title="Show or hide the navigation" aria-label="Show or hide the navigation">${NAV_ICON}</button>
 <a class="brand" href="/">${esc(SITE.title)}</a><span class="tagline">${esc(SITE.tagline)}</span>
 <button class="theme" type="button" title="Switch between light and dark"
   aria-label="Switch between light and dark">${ICONS}</button>
 </div></header>
+<div class="layout">
+${navHtml(url)}
 <div class="wrap">
 ${crumbs(trail)}
 ${body}
 <footer class="bot">Corrections welcome on
 <a href="https://github.com/chemodun/chemodun.github.io">GitHub</a>.</footer>
 </div>
-<script>${THEME_JS}${COPY_JS}${BAR_JS}</script>
+</div>
+<script>${THEME_JS}${COPY_JS}${BAR_JS}${NAV_JS}</script>
 ${js ? `<script>(function(){${js}})();</script>` : ''}
 </body></html>`;
 }

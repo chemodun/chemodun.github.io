@@ -25,6 +25,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # The navigation panel's wiki half is a committed snapshot, refreshed here so a
+      # deploy publishes the wiki's tree as it is today. The snapshot is the fallback,
+      # not the fetch: wiki.egosoft.com being unreachable must not fail a deploy of
+      # this site, so the build carries on with what is in the repository.
+      - run: npm run wiki:fetch ||
+          echo "::warning::the Egosoft wiki is unreachable; building from the committed tree.json"
       - run: npm run build
       # A page can build byte-perfect and still be inert, so nothing is uploaded
       # until a real browser has loaded every page without a console error.

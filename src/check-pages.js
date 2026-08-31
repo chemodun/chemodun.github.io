@@ -114,8 +114,8 @@ function connect(url) {
 }
 
 // Runs in the page after load. Proves the scripts are alive, not merely quiet:
-// the shell's theme toggle, the sticky bar's measured height, and the page's own
-// filter actually narrowing the counter to nothing.
+// the shell's theme toggle, its navigation toggle, the sticky bar's measured height,
+// and the page's own filter actually narrowing the counter to nothing.
 const PROBE = `(async () => {
   const fail = [], ran = [];
   const doc = document.documentElement;
@@ -130,6 +130,21 @@ const PROBE = `(async () => {
     else ran.push('theme');
     if (was === null) doc.removeAttribute('data-theme'); else doc.setAttribute('data-theme', was);
     try { localStorage.removeItem('theme'); } catch (e) {}
+  }
+
+  const nav = document.querySelector('button.navt'), side = document.querySelector('nav.side');
+  if (!nav || !side) fail.push('no navigation panel in the shell');
+  else if (!side.querySelector('a[href^="https://wiki.egosoft.com/"]')) {
+    fail.push('the navigation panel carries no wiki pages');
+  } else {
+    // The panel is the one part of the shell that moves the page when it fails, so the
+    // toggle is exercised rather than trusted, and the reader's own choice is put back.
+    const was = doc.getAttribute('data-nav');
+    nav.click();
+    if (doc.getAttribute('data-nav') === was) fail.push('the navigation toggle did nothing');
+    else ran.push('nav');
+    if (was === null) doc.removeAttribute('data-nav'); else doc.setAttribute('data-nav', was);
+    try { localStorage.removeItem('nav'); } catch (e) {}
   }
 
   if (document.querySelector('.bar')) {

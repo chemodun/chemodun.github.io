@@ -4,6 +4,8 @@
   "description": "chemodun.github.io - X4: Foundations modding references and guides",
   "scripts": {
     "build": "node src/build.js && node src/globals/build-html.js && node src/commands/build-html.js && node src/c-functions-and-structures/build-html.js",
+    "wiki:fetch": "node src/wiki/fetch-tree.js",
+    "wiki:check": "node src/wiki/fetch-tree.js --check",
     "check": "node --run build && node src/check-pages.js",
     "clean": "node -e \"require('fs').rmSync('_site',{recursive:true,force:true})\"",
     "serve": "node --run build && node src/serve.js",
