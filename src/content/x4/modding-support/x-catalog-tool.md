@@ -26,6 +26,11 @@ What the Egosoft wiki has on the subject is short enough to carry here in full. 
 
 The Workshop tool that citation mentions is `WorkshopTool.exe`, and it is not covered here. It is described in the guide linked as *here* above: [Steam Workshop for X Rebirth and X4](https://steamcommunity.com/sharedfiles/filedetails/?id=245117855).
 
+**XRCatTool** is not the only way in and out of the format. **X4 Cat Suite** by z1ppeh(z1p) - [Nexus Mods](https://www.nexusmods.com/x4foundations/mods/2142), source on [GitHub](https://github.com/z1ppeh/X4CatSuite):
+
+- Is an unofficial alternative that puts both halves of the job in one window: a multi-threaded unpacker with extension and regex filters, live size estimates and a hash check that skips files already extracted, and a catalog builder with a drag-and-drop tree, an inline XML/Lua editor, atomic writes and post-write MD5 verification.
+- It is the faster route for bulk extraction, and everything this page says about the format itself holds whichever tool produced the archive.
+
 <a id="toc"></a>
 
 ## Contents
