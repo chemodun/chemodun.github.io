@@ -162,8 +162,15 @@ for (const p of pages) {
 
 /* ------------------------------------------------------- root-level files */
 
-// Everything in src/assets/ is served from the root, unchanged.
-for (const f of fs.readdirSync(ASSETS)) fs.copyFileSync(path.join(ASSETS, f), path.join(OUT, f));
+// Everything in src/assets/ is served from the root, unchanged. Sub-folders keep their
+// shape, so a page's screenshots can sit together under one name.
+(function copyTree(from, to) {
+  fs.mkdirSync(to, { recursive: true });
+  for (const e of fs.readdirSync(from, { withFileTypes: true })) {
+    const src = path.join(from, e.name), dst = path.join(to, e.name);
+    if (e.isDirectory()) copyTree(src, dst); else fs.copyFileSync(src, dst);
+  }
+})(ASSETS, OUT);
 
 // An .ico is a container, and since Vista each entry may simply be a PNG. Wrapping
 // the two small ones costs 22 bytes of header apiece and no image library at all.

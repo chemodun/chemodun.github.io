@@ -70,6 +70,12 @@ pre{background:var(--soft);border:1px solid var(--line);border-radius:6px;paddin
   overflow-x:auto;margin:.7em 0}
 pre code{background:none;padding:0;font-size:.88em}
 blockquote{margin:.8em 0;padding:.1em 1em;border-left:3px solid var(--line);color:var(--dim)}
+/* A screenshot is a figure: framed, never wider than the column, with its caption
+   carrying what the picture cannot say on its own. */
+img{max-width:100%;height:auto}
+figure{margin:1.4em 0}
+figure img{display:block;border:1px solid var(--line);border-radius:6px;background:#fff}
+figcaption{color:var(--dim);font-size:.88rem;margin-top:.5em}
 table{border-collapse:collapse;width:100%;margin:.8em 0;font-size:.92rem}
 th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
 th{background:var(--soft);font-weight:600}
