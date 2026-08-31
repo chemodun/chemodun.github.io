@@ -1,0 +1,59 @@
+{
+ "generated": "2026-08-31",
+ "repo": "kuertee/x4-mod-ui-extensions",
+ "versions": [
+  {
+   "version": "8.0.4.10",
+   "source": "kuertee/x4-mod-ui-extensions@8.0.4.10",
+   "counts": {
+    "files": 20,
+    "sites": 273,
+    "callbacks": 256,
+    "byAggregation": {
+     "none": 160,
+     "chained": 12,
+     "short-circuit": 15,
+     "last-wins": 55,
+     "multi-value": 13,
+     "unanimous": 1
+    },
+    "byKind": {
+     "event": 160,
+     "override": 96
+    },
+    "byHolder": {
+     "menu": 241,
+     "Helper": 15
+    }
+   }
+  },
+  {
+   "version": "9.0.0.12",
+   "source": "kuertee/x4-mod-ui-extensions@9.0.0.12",
+   "counts": {
+    "files": 20,
+    "sites": 294,
+    "callbacks": 276,
+    "byAggregation": {
+     "none": 170,
+     "chained": 12,
+     "short-circuit": 15,
+     "last-wins": 64,
+     "multi-value": 14,
+     "unanimous": 1
+    },
+    "byKind": {
+     "event": 170,
+     "override": 106
+    },
+    "byHolder": {
+     "menu": 260,
+     "uix_menu": 1,
+     "Helper": 15
+    }
+   }
+  }
+ ],
+ "callbacks": 276,
+ "menus": 18
+}

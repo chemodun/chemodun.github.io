@@ -34,6 +34,7 @@ src/content/         the authored pages, mirroring the URL tree
 src/globals/         the Lua Globals Reference pipeline (see below)
 src/commands/        the Script Commands reference (see below)
 src/c-functions-and-structures/  the C functions and structures reference (see below)
+src/uix-callbacks/    the UIX callbacks reference (see below)
 ```
 
 `src/build.js` also writes the root-level files: `favicon.ico` (built from the two PNGs in `src/assets/`, so nothing derived is committed), `404.html`, `sitemap.xml` and `robots.txt`.
@@ -168,3 +169,23 @@ They are produced upstream, in a separate working repository that needs the game
 The layout follows the commands reference, because the shape of the data is the same: types are the shared half - `UniverseID` is a parameter of 871 functions - so they are rendered once, statically, and a function card is assembled in the browser when its row is opened, linking into them. `usedBy` is computed here at build time rather than stored, since storing it would put a list of 871 names in the data file for a number the page can count itself.
 
 2,699 KB, 179 KB gzipped. The version filter defaults to the newest version, and a deep link drops the filters when its target is hidden.
+
+### The UIX callbacks reference
+
+`src/uix-callbacks/build-html.js` builds `/x4/modding-support/ui-modding/uix-callbacks/` from `src/uix-callbacks/uix-callbacks.lua`.
+
+```text
+uix-callbacks.lua  the reference itself: 276 callbacks in 18 menus, one table per menu
+meta.js            the parser, copied here by the extraction half
+data/meta.json     the releases covered, and the counts the extraction measured
+```
+
+kuertee's [UI Extensions and HUD](https://github.com/kuertee/x4-mod-ui-extensions) ships patched copies of the vanilla menu files with callback dispatch points added, and a mod registers a function against one by name. The mod's own readme says no list of them exists and to search the code, so this is that list, read out of its `.xpl` files at two release tags.
+
+**The `.lua` file is the reference, not a rendering of it.** It is a Lua Language Server meta file, which means it is also an editor library: point a language server at it and a handler gets completion and signatures. The descriptions live in it and nowhere else, so a description and the hook it belongs to are never apart, and adding one is a pull request against a single file. Everything reading `-- Key: value` is generated and rewritten whenever UIX moves on; the `---` prose and the text after a `---@param` or `---@return` `#` are authored and carried across untouched. `Since:` is neither: it is stamped once, when a callback first appears, and then owned by the file.
+
+The version axis is the **mod's** release tags, not the game's, because a callback appears when kuertee adds it. `Aggregation` is the field the page exists for: nothing at a dispatch site says what happens when two mods register against the same hook, and the answer is one of six contracts.
+
+The layout follows the C functions page - a filter bar over a flat list, with each card assembled in the browser when its row is opened. Facets are menu, kind, aggregation, holder, whether a description has been written, and release. 366 KB.
+
+The extraction half lives outside this repo, in a working copy of the UIX sources; it writes `uix-callbacks.lua`, `meta.js` and `data/meta.json` here and nothing else.
