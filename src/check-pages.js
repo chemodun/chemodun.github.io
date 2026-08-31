@@ -8,39 +8,19 @@
 // while every statically rendered part still looked right. Only a browser reports it.
 //
 // So: serve _site/ the way Pages does, drive a real browser over the DevTools
-// protocol (no dependency - Node 22 has WebSocket, and Chrome is on the runner),
-// collect uncaught exceptions, console.error and severe log entries, and prove the
-// scripts actually ran rather than merely not throwing.
+// protocol (src/cdp.js - no dependency, Node 22 has WebSocket and Chrome is on the
+// runner), collect uncaught exceptions, console.error and severe log entries, and
+// prove the scripts actually ran rather than merely not throwing.
+//
+// What this cannot see is where anything landed. src/measure-layout.js does that.
 
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
-const { spawn } = require('child_process');
 const { ROOT, listen } = require('./serve');
+const { wait, findBrowser, launch, connect, openPage } = require('./cdp');
 
 const KEEP_OPEN = process.argv.includes('--keep-open');
 const PAGE_TIMEOUT = 20000;
-
-const BROWSERS = {
-  linux: ['/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium',
-    '/usr/bin/chromium-browser', '/opt/google/chrome/chrome'],
-  win32: ['C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
-    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'],
-  darwin: ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    '/Applications/Chromium.app/Contents/MacOS/Chromium'],
-};
-
-function findBrowser() {
-  const listed = [process.env.CHROME, ...(BROWSERS[process.platform] || [])].filter(Boolean);
-  const found = listed.find((p) => fs.existsSync(p));
-  if (!found) {
-    throw new Error('no Chrome or Edge found. Set CHROME to the executable.\nLooked at:\n  '
-      + listed.join('\n  '));
-  }
-  return found;
-}
 
 // Every built page, as the URL path Pages would serve it under.
 function pageUrls(dir = ROOT, base = '') {
@@ -51,66 +31,6 @@ function pageUrls(dir = ROOT, base = '') {
     else if (e.name.endsWith('.html')) out.push(base + '/' + e.name);
   }
   return out;
-}
-
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-
-async function launch(exe) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'x4docs-check-'));
-  const child = spawn(exe, [
-    '--headless=new', '--disable-gpu', '--no-sandbox', '--no-first-run',
-    '--no-default-browser-check', '--disable-extensions', '--disable-background-networking',
-    '--disable-search-engine-choice-screen', '--window-size=1280,900',
-    '--user-data-dir=' + dir, '--remote-debugging-port=0', 'about:blank',
-  ], { stdio: ['ignore', 'ignore', 'pipe'] });
-
-  let stderr = '';
-  child.stderr.on('data', (d) => { stderr += d; });
-
-  // Chrome writes the chosen port and the browser endpoint here once it is up.
-  const portFile = path.join(dir, 'DevToolsActivePort');
-  for (let i = 0; i < 200; i++) {
-    if (child.exitCode !== null) throw new Error('browser exited (' + child.exitCode + ')\n' + stderr);
-    if (fs.existsSync(portFile)) {
-      const [port, endpoint] = fs.readFileSync(portFile, 'utf8').split('\n');
-      if (endpoint) return { child, dir, url: 'ws://127.0.0.1:' + port + endpoint.trim() };
-    }
-    await wait(50);
-  }
-  throw new Error('browser did not open a debugging port in 10s\n' + stderr);
-}
-
-function connect(url) {
-  return new Promise((resolve, reject) => {
-    const ws = new WebSocket(url);
-    const pending = new Map();
-    const listeners = [];
-    let id = 0;
-
-    ws.onerror = () => reject(new Error('cannot reach the browser at ' + url));
-    ws.onmessage = (ev) => {
-      const m = JSON.parse(ev.data);
-      if (m.id && pending.has(m.id)) {
-        const { ok, fail } = pending.get(m.id);
-        pending.delete(m.id);
-        m.error ? fail(new Error(m.method + ': ' + m.error.message)) : ok(m.result);
-      } else if (m.method) {
-        for (const fn of listeners) fn(m);
-      }
-    };
-    ws.onopen = () => resolve({
-      send(method, params = {}, sessionId) {
-        return new Promise((ok, fail) => {
-          const msg = { id: ++id, method, params };
-          if (sessionId) msg.sessionId = sessionId;
-          pending.set(msg.id, { ok, fail });
-          ws.send(JSON.stringify(msg));
-        });
-      },
-      on: (fn) => listeners.push(fn),
-      close: () => ws.close(),
-    });
-  });
 }
 
 // Runs in the page after load. Proves the scripts are alive, not merely quiet:
@@ -187,14 +107,9 @@ async function main() {
   const exe = findBrowser();
   const server = await listen(0);
   const origin = 'http://127.0.0.1:' + server.address().port;
-  const browser = await launch(exe);
+  const browser = await launch(exe, { width: 1280, height: 900 });
   const cdp = await connect(browser.url);
-
-  const { targetId } = await cdp.send('Target.createTarget', { url: 'about:blank' });
-  const { sessionId } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
-  await cdp.send('Page.enable', {}, sessionId);
-  await cdp.send('Runtime.enable', {}, sessionId);
-  await cdp.send('Log.enable', {}, sessionId);
+  const sessionId = await openPage(cdp, ['Page', 'Runtime', 'Log']);
 
   let found = [];
   let onLoad = null;

@@ -12,6 +12,7 @@ npm run build      # -> _site/
 npm run serve      # build, then serve _site/ on http://localhost:8080
 npm run wiki:fetch # refresh the Egosoft wiki snapshot the navigation panel is built from
 npm run wiki:check # compare that snapshot with the wiki; exit 1 on drift, write nothing
+npm run measure    # report where the shell's parts land, at three widths, and check they line up
 npm start          # serve what is already built, without rebuilding
 ```
 
@@ -25,7 +26,9 @@ src/nav.js           the page model, and the navigation panel every page carries
 src/wiki/            the Egosoft wiki snapshot and the fetcher that writes it
 src/build.js         every src/content/**/*.md -> _site/<url>/index.html
 src/serve.js         a static server for _site/, for local viewing only
+src/cdp.js           headless Chrome over the DevTools protocol, shared by the two below
 src/check-pages.js   loads every built page in headless Chrome, fails on a console error
+src/measure-layout.js  measures the shell's boxes and checks the header lines up with the page
 src/assets/          files served from the root as they are, currently the icons
 src/content/         the authored pages, mirroring the URL tree
 src/globals/         the Lua Globals Reference pipeline (see below)
@@ -36,6 +39,8 @@ src/c-functions-and-structures/  the C functions and structures reference (see b
 `src/build.js` also writes the root-level files: `favicon.ico` (built from the two PNGs in `src/assets/`, so nothing derived is committed), `404.html`, `sitemap.xml` and `robots.txt`.
 
 `npm run check` builds and then loads every page in headless Chrome, failing on any uncaught exception, `console.error` or severe log entry. It also proves the scripts ran rather than merely not throwing: the theme toggle changes `data-theme`, the navigation toggle changes `data-nav` on a panel that carries wiki links, the sticky bar publishes `--barh`, and the filter narrows its counter to zero. The same step runs in CI before anything is uploaded, because a page can build byte-perfect and still be inert.
+
+`npm run measure` is the hand tool beside it, and answers a different question: not whether a page works, but where its parts landed. It reports the boxes of the header, the panel and the page at 1280, 1520 and 760 pixels wide, in both panel states, and checks the rules the shell is built to keep - the title starts where the page starts, the theme button ends where the page ends, and with the panel hidden the toggle leads instead. Pass a path for another page, or a full URL to measure the published site rather than `_site/`. It is deliberately **not** part of `npm run check` and not in CI: the geometry it asserts is a design decision, and a layout choice should not fail a deploy. It exists because the title once shipped sitting 16px past the page's left edge, close enough to look deliberate in every screenshot - `header.top .in` carries `gap:1em` from its flex rule, and `gap` applies to a grid container just as well.
 
 ### Authored pages
 

@@ -7,6 +7,7 @@
     "wiki:fetch": "node src/wiki/fetch-tree.js",
     "wiki:check": "node src/wiki/fetch-tree.js --check",
     "check": "node --run build && node src/check-pages.js",
+    "measure": "node src/measure-layout.js",
     "clean": "node -e \"require('fs').rmSync('_site',{recursive:true,force:true})\"",
     "serve": "node --run build && node src/serve.js",
     "start": "node src/serve.js"
