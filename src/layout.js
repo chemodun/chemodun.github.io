@@ -83,6 +83,10 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 header.top{border-bottom:1px solid var(--line);background:var(--soft)}
 header.top .in{max-width:1100px;margin:0 auto;padding:11px 16px;display:flex;
   gap:1em;align-items:center;flex-wrap:wrap}
+/* Everything but the panel toggle is one group, so the header can be split into the
+   layout's two columns without the title and the theme button drifting apart. */
+header.top .ttl{flex:1;min-width:0;display:flex;gap:1em;align-items:center;
+  flex-wrap:wrap}
 header.top .brand{font-weight:700;color:var(--fg);text-decoration:none}
 header.top .tagline{color:var(--dim);font-size:.88rem;flex:1}
 button.theme,button.navt{display:flex;align-items:center;justify-content:center;
@@ -285,6 +289,14 @@ nav.side .nb{display:inline-block;padding:0 .3em;
 @media(min-width:901px){
   :root[data-nav=off]{--sw:0px}
   :root[data-nav=off] nav.side{display:none}
+  /* The title reads as the page's, not the panel's, so the header takes the layout's
+     own two columns: the toggle keeps the panel's column and everything else starts
+     where the page does. With the panel hidden there is no column to line up with, so
+     the row closes back up behind the toggle. */
+  header.top .in{display:grid;grid-template-columns:var(--sw) minmax(0,1fr);
+    column-gap:0}
+  :root[data-nav=off] header.top .in{grid-template-columns:auto minmax(0,1fr);
+    column-gap:1em}
 }
 @media(max-width:900px){
   :root{--sw:0px}
@@ -506,9 +518,11 @@ ${ICON_LINKS}
 <header class="top"><div class="in">
 <button class="navt" type="button" aria-controls="side" aria-expanded="true"
   title="Show or hide the navigation" aria-label="Show or hide the navigation">${NAV_ICON}</button>
+<div class="ttl">
 <a class="brand" href="/">${esc(SITE.title)}</a><span class="tagline">${esc(SITE.tagline)}</span>
 <button class="theme" type="button" title="Switch between light and dark"
   aria-label="Switch between light and dark">${ICONS}</button>
+</div>
 </div></header>
 <div class="layout">
 ${navHtml(url)}
