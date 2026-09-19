@@ -8,18 +8,58 @@
 // parameter list globals.lua declares, that yields one of three verdicts:
 //
 //   confirmed   vanilla calls it, and every argument count it passes fits the
-//               declaration
+//               declaration - or, where vanilla never calls it, the global was
+//               called in the running game and the row's "Probed:" line says
+//               with what
 //   disputed    vanilla passes a count the declaration cannot take - so the
 //               declaration is wrong, or an optional parameter is unmarked
-//   unverified  no vanilla call site at all: the signature is inherited from
-//               the old wiki list or inferred, and nothing here backs it
+//   unverified  neither: no vanilla call site, and no probe reading either
 //
 // A variable is never called, so its evidence is a mention instead.
+//
+// A probe reading is evidence vanilla cannot supply - the global answered in the
+// running game - so it settles a signature the same way a call site does. PARKED
+// is the exception: those probes ran and came back without a usable reading.
 
 const DATA = require('./classification.json');
 const { docs } = require('./docs.js');
 
 const NEWEST = '9.00', OLDER = '8.00';
+
+// Probed names whose reading is not a measurement. Each stays unverified, with the
+// reason kept here rather than in a session note, because the row's own "Probed:"
+// line reads like every other one.
+const PARKED = new Set([
+  // Arity 1 settled, but every target returned an empty array, and empty is not a
+  // measured return.
+  'GetEfficiencyUpgrades',
+  // Arity from the engine only: no tagged connection has ever been reachable to ask on.
+  'GetTradesAtConnection',
+  // UNSUPPORTED by Egosoft, and the one bare call printed a signature rather than
+  // answering a call.
+  'SetMainMissiontargetMessage',
+  // What the probe measured is the deprecation, not the signature: "" on every call
+  // on both versions, and 9.00 stops checking the argument at all.
+  'GetRadarModuleName',
+  // Same shape: the engine answers `Obsolete since version 3.20, returns empty data!`,
+  // so the declared return is the documentation's and no call has confirmed it.
+  'GetTradeRestrictions',
+]);
+
+// Called in the running game, with a reading worth having.
+const probed = (name) => !!(docs[name] && docs[name].probed) && !PARKED.has(name);
+
+// Evidence from outside vanilla, for a name vanilla never calls. Another mod's call
+// site is weaker than a probe - it is a reading of someone else's code, not of the
+// engine - so the verdict stays unverified and the detail says where it came from.
+// It lives here because write-meta.js owns the "Usage:" and "Seen at:" lines and
+// drops anything hand-written into them on its next run.
+const EXTERNAL = {
+  FindJumpRoute: {
+    detail: 'no vanilla call site; signature and return confirmed against kuertee_ui_extensions',
+    sites: [{ rel: 'kuertee_ui_extensions ui/addons/ego_detailmonitor/menu_map.xpl', line: 34321 }],
+  },
+};
 
 // What the declaration accepts. A trailing "..." makes the maximum open, and a
 // parameter marked optional in its ---@param line lowers the minimum.
@@ -53,14 +93,21 @@ function usageOf(name) {
 
   if (isVar) {
     const refs = e.refs[v] || 0;
-    return refs
-      ? { verdict: 'confirmed', detail: plural(refs, 'vanilla reference') + only, sites, kind: 'variable' }
+    if (refs) return { verdict: 'confirmed', detail: plural(refs, 'vanilla reference') + only, sites, kind: 'variable' };
+    return probed(name)
+      ? { verdict: 'confirmed', detail: 'in-game probe, no vanilla reference', sites: [], kind: 'variable' }
       : { verdict: 'unverified', detail: 'no vanilla reference', sites: [], kind: 'variable' };
   }
 
   const a = e.args[v] || { counts: {}, open: 0, unreadable: 0 };
   const n = total(v);
-  if (!n) return { verdict: 'unverified', detail: 'no vanilla call site', sites: [], kind: 'function' };
+  if (!n) {
+    if (probed(name))
+      return { verdict: 'confirmed', detail: 'in-game probe, no vanilla call site', sites: [], kind: 'function' };
+    const ex = EXTERNAL[name];
+    if (ex) return { verdict: 'unverified', detail: ex.detail, sites: ex.sites, kind: 'function' };
+    return { verdict: 'unverified', detail: 'no vanilla call site', sites: [], kind: 'function' };
+  }
 
   const seen = Object.keys(a.counts).map(Number).sort((x, y) => x - y);
   const decl = arity(d);

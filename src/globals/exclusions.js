@@ -37,6 +37,9 @@ const HARDCODED = {
 
   // Decoda. The debugger stamps the running chunk's name into this global.
   decoda_name: 'Decoda debugger - the script name it stamps on each chunk',
+
+  // The globals_probe extension's own resume marker, a userdata savedvariable.
+  __GLOBALS_PROBE_DONE: 'globals_probe - the arity sweep resume marker',
 };
 
 // NOT excluded, and worth recording so nobody adds them by pattern-matching:

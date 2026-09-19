@@ -29,6 +29,15 @@ const META = [
   [/^Versions:\s*(.+)$/, 'versions'],
   [/^Usage:\s*(.+)$/, 'usage'],
   [/^Seen at:\s*(.+)$/, 'seenAt'],
+  // Hand-written, unlike the four above: what was measured by calling the global
+  // in the running game. Evidence a static sweep of vanilla cannot produce, so it
+  // is deliberately outside write-meta.js's OWNED set.
+  // The only free-text tag written by hand, and the only one long enough to wrap.
+  [/^Probed:\s*(.+)$/, 'probed', true],
+  // Also hand-written: the game version that deprecated the name, and what the engine
+  // says when it is called. Orthogonal to the verdict - a deprecated name can still
+  // have a measured signature, and a live one can have none.
+  [/^Deprecated:\s*(.+)$/, 'deprecated', true],
 ];
 
 // Three description separators occur in the file: " -- ", LuaLS's " # ", and
@@ -74,6 +83,11 @@ function parse() {
   // A ---@class block sits above the doc comment with a blank line between, so
   // it has to outlive the block reset and clear only when a name is emitted.
   let classes = [];
+  // A tag's value can run past one line. Its continuation is a plain "--" line matching no
+  // META pattern, which without this lands in the prose instead - it truncated every multi-line
+  // "Probed:" tag in the published reference and leaked the rest into the description. Only tags
+  // flagged multi-line in META continue: a "--" line under "Saved variable:" is prose, not a tag.
+  let lastMeta = null;
 
   for (const raw of lines) {
     const line = raw.trim();
@@ -81,6 +95,7 @@ function parse() {
     // "--- @param" with a space parses in LuaLS and used to land here as prose,
     // taking the parameter list of 71 entries with it. Read both forms.
     if (/^---\s*@/.test(line)) {
+      lastMeta = null;
       const [, tag, rest = ''] = line.match(/^---\s*@(\w+)\s*([\s\S]*)$/) || [];
       if (tag === 'param') { const p = parseParam(rest); if (p) b.params.push(p); }
       else if (tag === 'return') b.returns.push(parseReturn(rest));
@@ -95,12 +110,15 @@ function parse() {
 
     if (line.startsWith('--')) {
       const text = line.replace(/^-{2,}\s?/, '').trim();
-      if (!text) continue;
+      if (!text) { lastMeta = null; continue; }
       const hit = META.find(([re]) => re.test(text));
-      if (hit) b.meta[hit[1]] = text.match(hit[0])[1].trim();
+      if (hit) { b.meta[hit[1]] = text.match(hit[0])[1].trim(); lastMeta = hit[2] ? hit[1] : null; }
+      else if (lastMeta) b.meta[lastMeta] += ' ' + text;
       else b.prose.push(text);
       continue;
     }
+
+    lastMeta = null;
 
     const fn = line.match(/^function\s+([A-Za-z_][\w]*)\s*\(([^)]*)\)/);
     const va = line.match(/^([A-Za-z_][\w]*)\s*=\s*(.+)$/);
@@ -124,6 +142,8 @@ function parse() {
         versions: b.meta.versions || null,
         usage: b.meta.usage || null,
         seenAt: b.meta.seenAt ? b.meta.seenAt.split(/,\s*/) : [],
+        probed: b.meta.probed || null,
+        deprecated: b.meta.deprecated || null,
       };
       b = fresh();
       classes = [];

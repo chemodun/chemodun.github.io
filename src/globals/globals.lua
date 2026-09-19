@@ -347,15 +347,49 @@ function AddTradeToShipQueue(tradeOfferID, shipID, amount, immediate, fromTrader
 function AddUITriggeredEvent(menuName, eventName, ...) end
 
 
---- Adds units - drones, marines - to a component, by unit macro and amount. No vanilla code
---- calls it; `RemoveAmmo` is the one the ware exchange uses on the way out.
+--- Adds units to a defensible - `amount` of `unitMacro`, the drone and police ships its unit
+--- storage holds - or removes that many when `amount` is negative. Arity 4, returns nothing. MD's
+--- `<add_units>` and `<remove_units>` (`common.xsd:20866`) are the same operation from the script
+--- side, and their attributes name these arguments one for one.
+---
+--- Argument 1 must be a **defensible** - the engine says so itself, answering
+--- `Invalid argument #1 <defensible> (got cdata, expected component ID)` to anything else, the
+--- player person included.
+---
+--- **Argument 2 is a macro, never a category.** The MD action takes either a `macro` or a
+--- `category` plus `mk`; the Lua form has only the macro half, and `"transport"` is refused with
+--- the same `Cannot find XML file component macro '...' in index 'index\macros'` a nonsense
+--- string gets. A bad macro therefore names itself rather than failing silently.
+---
+--- **It clamps at `units.maxcount` and fills partially rather than refusing.** Asked for 500 with
+--- 87 free, it added 87 and stopped; vanilla's hand-computed `maxcount - count` at
+--- `story_paranid.xml:2885` is belt and braces rather than necessity.
+---
+--- **`unavailable` puts the added units in the unavailable pool**, which `C.GetNumUnavailableUnits`
+--- reads back and MD states as `units.count - availableunits.count`. A negative `amount` removes
+--- from whichever pool the flag names, so the call undoes itself in each pool separately.
+---
+--- **A non-unit macro is accepted as well and lands in its own storage** - a missile, torpedo or
+--- mine goes to missile or deployable storage, never to unit storage - **but how much is added
+--- still depends on the unit storage's free space.** At `units.free` 0 the call adds nothing
+--- whatever the macro is, so the free-space check gates the whole call before anything is routed.
+--- `C.IsUnitMacroCompatible` does not predict either behaviour: it answered false for all three
+--- consumable macros the engine then accepted.
+---
+--- The units it adds are ships - `libraries/loadoutrules.xml` declares every `<unit>` macro as a
+--- `ship_*` macro. **Marines are not units and cannot be added from Lua at all**; mines and
+--- satellites are `<deployable>`, a separate enum reached through ammo storage.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param componentID any -- The ID of the component to add units to.
----@param macro string -- The macro name of the unit to add.
----@param amount number -- The number of units to add.
-function AddUnits(componentID, macro, amount) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - three ships, both storages read back per macro either side of every call;
+-- the amount, the unavailable flag, the consumable path and the fill-to-maxcount clamp are 9.00
+-- measurements, where 8.00 only carried them
+---@param defensibleID any The defensible whose unit storage is written. Not any component.
+---@param unitMacro string A unit macro name. A category name is refused; another macro type is accepted and routed to its own storage.
+---@param amount number How many to add; a negative amount removes. Clamped to the unit storage's free space.
+---@param unavailable boolean Whether the units are added to, or removed from, the unavailable pool.
+function AddUnits(defensibleID, unitMacro, amount, unavailable) end
 
 
 -- Adjusts a multi-line string, likely for formatting or word wrapping.
@@ -367,14 +401,42 @@ function AddUnits(componentID, macro, amount) end
 ---@return string -- The adjusted string.
 function AdjustMultilineString(text) end
 
--- This function is likely called by the engine when AI-related ranges are updated. No direct Lua call sites were found.
--- Its parameters and purpose are inferred from its name.
+--- Tells a controllable's subordinates that their operational range setting has changed. The
+--- name is past tense and it is exact: this **notifies, it does not set**. It raises the object
+--- signal `range_setting_updated` on every subordinate of argument 1 and carries no value with
+--- it, so the range itself has to be in place before the call.
+---
+--- The setting lives on the commander's control entity as the blackboard variable
+--- `$config_subordinate_range`, and **nothing in vanilla ever writes it** - twelve read sites in
+--- 9.00, no writer, in neither MD nor Lua. It is a modder's hook, and this function is the
+--- paired doorbell for it. A range is a **sector, cluster or zone**, or one of the keywords
+--- `'cluster'`, `'sector'`, `'zone'` (`aiscripts/order.mining.routine.xml:534-560`) - never a
+--- number.
+---
+--- **Measured, 8.00.** The subordinates are signalled and the object in argument 1 is not; a
+--- controllable with no subordinates is a silent no-op rather than an error; the raise is
+--- **synchronous**, so a listener has run before the call returns. `param2` is **always null**,
+--- measured with `$config_subordinate_range` deliberately seeded on the commander entity. So for
+--- vanilla's two listeners - `order.mining.routine.xml:99` and `order.trade.routine.xml:127`,
+--- both `if @event.param2 then event.param2 else …commanderentity.$config_subordinate_range` -
+--- a signal raised from Lua can only ever take the **else** branch. The `if` half is there for
+--- MD raisers, which do supply a param2.
+---
+--- **Calling this on a live mining or trade subordinate sets its `$range` to null** whenever the
+--- commander entity's variable is unset, which is its shipped state. That is recoverable rather
+--- than destructive - the order's Ranges block logs `range is null. attempting to recover.` and
+--- falls back to `jobmainsector`, then `sector` - but set the variable first.
+---
+--- Argument 2 must be class `entity` and is otherwise **inert**: a subordinate's control entity
+--- and the player entity both produce the same signalled set and the same null payload.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param component any -- The component whose AI range was updated. (inferred)
----@param range number -- The new range value. (inferred)
-function AIRangeUpdated(component, range) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - witnessed with an MD group listener, against a positive control; the
+-- subordinates-but-not-the-commander asymmetry reproduced on both versions
+---@param controllable any The controllable whose subordinates are signalled.
+---@param entity any A control entity. Mandatory, and not read.
+function AIRangeUpdated(controllable, entity) end
 
 
 --- The Anark data port, the runtime's data-table interface.
@@ -396,13 +458,34 @@ AKDataPort = nil
 AKGameplan = nil
 
 
--- Called when the "Attack Enemies" setting is changed for a ship or fleet.
+--- Raises the object signal `update config` on a defence NPC entity. **That is the whole
+--- effect**, measured: the signal goes out on every call, carries no `param2` or `param3`, and
+--- reaches the entity passed in and nothing else - not its `assignedcontrolled`, which was in
+--- the same listening group and never fired.
+---
+--- **No vanilla script listens for `update config`**, so the only consumer is a mod's own
+--- `event_object_signalled` cue. A station's defence manager, `fight.attack.object.station.xml`,
+--- does listen on itself - for `'reset'`, which this call never raises.
+---
+--- **Argument 1 is checked for the class `entity` and nothing narrower.** `GetComponentData(obj,
+--- "defencenpc")` is the documented source and its `computer` entity is accepted; so is an
+--- unrelated `npc`, silently. A controllable is refused with `Component '<name>' is not of class
+--- entity` and a `C.GetPlayerID` cdata with `Invalid argument #1 <defencenpc> (got cdata,
+--- expected component ID)` - the engine's own parameter name. Both refusals print while `pcall`
+--- returns OK.
+---
+--- **Takes one argument, not two.** The raise is unaffected by the NPC blackboard variable
+--- `$config_attackenemies` that `helper.lua` reads to pick the displayed command text: calls with
+--- it absent and set to `true` were identical.
+--- Note `GetControlEntity` is the same entity as `defencenpc` on a station but the pilot on a
+--- ship, so it is not a substitute for the lookup.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param controllableID any -- The ID of the controllable entity.
----@param enabled boolean -- The new state of the setting.
-function AttackEnemySettingChanged(controllableID, enabled) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - a player station and a capital ship, an MD group listener with no param
+-- filter as the witness; 'update config' raised on the defence entity on both versions
+---@param defencenpcID any The defence NPC entity to signal. Any entity is accepted; a controllable is not.
+function AttackEnemySettingChanged(defencenpcID) end
 
 
 --- Computes the bounding box of a scene element.
@@ -482,13 +565,27 @@ function CallUpdateScripts() end
 function CallWidgetEventScripts(widgetID, eventName, ...) end
 
 
--- Checks if a controllable can be a subordinate to a commander.
+--- Answers whether **this kind of thing can command that kind of thing**. The argument order is
+--- proved by reversal rather than inferred: the same station and ship gave `false` as
+--- (station, ship) and `true` as (ship, station), and only the declared reading fits both, since
+--- a ship can be subordinate to a station and a station can be subordinate to nothing. Vanilla
+--- agrees twice - `libraries/assignments.xml` gives `defence`, `mining`, `trade` and
+--- `supplyfleet` a `<station>` element beside `<ship>`, and the MD analogue
+--- `canuseassignment.{$assignment}.{$controllable}` is a property *on the subordinate* taking
+--- the commander as its parameter.
+---
+--- **It is a class-level compatibility test, not an assignability test, and a mod must not gate
+--- a UI action on it alone.** It ignores ownership - a scavenger-owned Manticore returned `true`
+--- against a player Erlking - and it ignores identity, returning `true` for a ship paired with
+--- itself. It looks at neither faction relations, distance nor current assignment. The MD
+--- `canuseassignment` takes an actual `$assignment` and is the stricter question.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param subordinateID any -- The ID of the potential subordinate.
----@param commanderID any -- The ID of the potential commander.
----@return boolean -- True if the assignment is possible, false otherwise.
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - four pairs including the same two objects in both orders, arity 2
+---@param subordinateID any The controllable that would be subordinate.
+---@param commanderID any The controllable that would command it.
+---@return boolean canBeSubordinate True when the two classes are compatible - not that the assignment is allowed.
 function CanBeSubordinateOf(subordinateID, commanderID) end
 
 
@@ -603,12 +700,23 @@ function ClearErrors() end
 function ClearLogbook(age, category) end
 
 
---- Clears a ship's queued trades. No vanilla code calls it; the map menu removes trades one at
---- a time instead.
+--- Clears a ship's queued trades: every entry of the queue `GetTradeShipData` reports, which is
+--- the only view of it Lua has. Returns nothing. No vanilla code calls it; the map menu removes
+--- trades one at a time instead.
+---
+--- **The queue is empty by the next line.** Measured on a player L trader carrying two queued
+--- trades, the count read 0 immediately after the call - so a caller can clear and re-read in the
+--- same frame. The community reference warns the clear is not instantaneous, especially with a
+--- trade already in progress; that is untested rather than contradicted here, since a trade the
+--- ship has already begun is not the same thing as the queue behind it.
+---
+--- Only a ship has been tested. The community reference types the argument `containerID`, which
+--- would take a station as well, and nothing here confirms or denies that.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param shipID any -- The ID of the ship whose trade queue should be cleared.
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - read back through GetTradeShipData, before and twice after
+---@param shipID any The ship whose trade queue should be cleared.
 function ClearTradeQueue(shipID) end
 
 
@@ -672,15 +780,29 @@ function CloseFrame(frameID, hasPlayerControls, startAnimation, useMiniWidgetSys
 function CloseMenusUponMouseClick() end
 
 
---- Reports whether two jump routes are the same. No vanilla code calls it, nor `FindJumpRoute`
---- which would produce the routes.
+--- Reports whether the first route is **strictly shorter** than the second. Takes four plain
+--- numbers, not two routes: the gate transitions and jumps of one route, then of the other,
+--- which is exactly the pair `FindJumpRoute` returns for each. No game object is involved.
+---
+--- The comparison is strict. **Equal routes return `false`**, so this is a `<` and not a
+--- `<=`, and it cannot be used to test two routes for being the same - which is what this row
+--- claimed until it was measured, because every call ever made compared a route with its own
+--- reverse and `false` was the only answer it could give.
+---
+--- **A jump counts for less than a gate transition.** One jump against one gate returns
+--- `true`, one gate against one jump returns `false`, and the same asymmetry holds at two of
+--- each - so the two halves are not simply added together. An empty route beats any non-empty
+--- one, and two empty routes return `false` like any other tie.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param routeA any -- The first jump route.
----@param routeB any -- The second jump route.
----@return boolean -- True if the routes are identical.
-function CompareJumpRoute(routeA, routeB) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - a ten-case truth table over literal numbers, both orders of every pair
+---@param numgates number Gate transitions of the first route.
+---@param numjumps number Jumps of the first route.
+---@param othernumgates number Gate transitions of the second route.
+---@param othernumjumps number Jumps of the second route.
+---@return boolean shorter True when the first route is strictly shorter than the second.
+function CompareJumpRoute(numgates, numjumps, othernumgates, othernumjumps) end
 
 
 --- The widget system's configuration table.
@@ -787,18 +909,32 @@ function ConvertStringTo64Bit(idString) end
 function ConvertStringToLuaID(idString) end
 
 
--- Formats a time value in seconds into a human-readable string.
+--- Formats a time in seconds into a string, using the format specifiers below. The default
+--- format is `%T`, which takes the time format from the TextDB and shows days only past one
+--- day. Vanilla calls it 63 times and never passes more than two arguments, so `separators`
+--- and `precision` are marked optional: their names and meanings are documented, but whether
+--- the engine accepts them is unverified here.
+---
+--- Specifiers: `%s` all seconds, `%S` seconds 00-59, `%m` all minutes, `%M` minutes 00-59,
+--- `%h` all hours, `%H` hours 00-23, `%d` all days, `%T` the TextDB time format, `%%` a literal
+--- percent sign. `%s`, `%S` and `%T` also take a precision override written as `%.#`, with `#`
+--- from 1 to 9 - `%.3T`, for example.
+---
+--- `separators` turns on thousand separators and applies only to `%s`, `%m`, `%h` and `%d`.
+--- `precision` is the number of fractional digits for `%s`, `%S` and `%T`, defaulting to 0; -1
+--- selects automatic display and cannot be combined with separators. A `%.#` in the format
+--- string overrides it.
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 63 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1524, ui/addons/ego_detailmonitor/menu_docked.lua:1343
----@param time number -- The time in seconds to format.
----@param format? string -- A format string (e.g., "%h:%M:%S", "%T").
----@param isFloat? boolean -- Treat the time as a float for formatting, allowing fractional seconds. (inferred)
----@param accuracy? integer -- The number of decimal places to show if isFloat is true. (inferred)
+---@param time number The time in seconds to format.
+---@param format? string A format string, e.g. `"%h:%M:%S"` or `"%T"`. Defaults to `"%T"`.
+---@param separators? boolean Use thousand separators.
+---@param precision? integer Fractional digits, or -1 for automatic.
 ---@return string -- The formatted time string.
-function ConvertTimeString(time, format, isFloat, accuracy) end
+function ConvertTimeString(time, format, separators, precision) end
 
 
 -- Copies the default order parameters for a component to be used in the planning map.
@@ -1039,26 +1175,60 @@ function CreateGraph(properties) end
 function CreateIcon(icon, properties) end
 
 
--- Creates a descriptor for a player interaction. (Legacy)
--- Note: CreateInteractionDescriptor2 is now preferred.
+--- Builds a **legacy** interaction descriptor and returns it as **userdata**. Deprecated since
+--- 3.00 Beta 6 in favour of `CreateInteractionDescriptor2`, and the deprecation is not cosmetic:
+--- the descriptor *type* changed, and **nothing in 8.00 consumes the old one**. Measured -
+--- `RaisePlayerInteractionEvent`, `TargetMonitorInteractionShown2` and
+--- `TargetMonitorInteractionHidden2` each refuse the userdata (`invalid arguments`, `invalid
+--- parameters`), and the only call that accepts it is `ReleaseInteractionDescriptor`. The
+--- function still allocates; what it allocates cannot be used for anything. Vanilla says the
+--- same in prose at `ui/addons/ego_targetmonitor/targetmonitor.lua:1037` - the
+--- `interactionDescriptor` field was **dropped** rather than preserved.
+---
+--- Both arguments are mandatory: the name alone answers `Invalid number of arguments (1,
+--- expected 2)`. Argument 2 is **not validated** - a component id, a `ConvertStringToLuaID`
+--- userdata and a plain table were all accepted, each returning its own descriptor.
 -- Source: Game Engine
 -- Environment: addons only
--- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param interaction string -- The name of the interaction (e.g., "PlayerDockShip").
----@return any -- The interaction descriptor.
-function CreateInteractionDescriptor(interaction) end
+-- Versions: none - present in both, but deprecated in 3.00 Beta 6
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Deprecated: 3.00 Beta 6 - superseded by `CreateInteractionDescriptor2`; the descriptor type
+-- changed with it, so nothing in the current pipeline accepts what this one returns
+-- Probed: 8.00, 9.00 - created, then refused by every consumer in the current pipeline, on both
+-- versions
+---@param interaction string The interaction name, e.g. "object interaction".
+---@param payload any That interaction's payload. Mandatory, unvalidated.
+---@return userdata descriptor A legacy descriptor no current call accepts.
+function CreateInteractionDescriptor(interaction, payload) end
 
 
--- Creates a descriptor for a player interaction with a specific component.
+--- Creates a player interaction and returns its **id as a small integer**, not a descriptor
+--- object - measured, and the counterpart cdef says the same: `void
+--- ReleaseInteractionDescriptor(int32_t id)`, `ui/core/lua/monitors.lua:103`. Ids are handed out
+--- in ascending order through a session and the engine calls them **notifications** internally:
+--- a raise against a freed one answers `Cannot find notification with ID 'N'`.
+---
+--- Argument 1 is a name, and vanilla's own four - `"object interaction"`, `"platform
+--- interaction"`, `"missionoffer interaction"` and `"encyclopedia interaction"` - are just the
+--- names its four MD handlers listen for (`md/conversations.xml:1789-1830`). **The vocabulary is
+--- open**: a name nothing listens for is created and raised without complaint, which is how a mod
+--- adds its own interaction without touching a vanilla handler.
+---
+--- Argument 2 is that handler's **payload**, not necessarily a component: three of vanilla's four
+--- pass a component or a mission id and the encyclopedia one passes a `{ library, component }`
+--- table. It reaches MD as `event.param2`, **unresolved** - a component id arrives as a plain
+--- number that MD has to turn back into an object with `component.{...}`.
+---
+--- The id is consumed by `RaisePlayerInteractionEvent`, `TargetMonitorInteractionShown2` and
+--- `TargetMonitorInteractionHidden2`, and freed with `C.ReleaseInteractionDescriptor`.
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_targetmonitor/targetmonitor.lua:1046
----@param interaction string -- The name of the interaction (e.g., "PlayerDockShip").
----@param component any -- The component that is the target of the interaction.
----@return any -- The interaction descriptor.
+---@param interaction string The interaction name the MD handler listens for.
+---@param component any The payload handed to that handler as event.param2.
+---@return integer interactionID
 function CreateInteractionDescriptor2(interaction, component) end
 
 
@@ -1451,27 +1621,58 @@ function EnableCameraEffectSync() end
 function ExecuteDebugCommand(command, parameter) end
 
 
---- Reports whether a text entry exists, so a missing one can be handled instead of read. No
---- vanilla code calls it, and the declaration takes a single ID where `ReadText` needs a page
---- and an entry - so how the entry is addressed here is unverified.
+--- Reports whether a text entry exists, and hands back the text when it does - one call answers
+--- both questions. It takes a page and a line exactly like `ReadText`: the engine rejects the
+--- single-argument form in words, `Invalid number of arguments (1, expected 2)`, which is the
+--- most explicit the arity oracle has ever been. A missing page or line returns `nil`, silently,
+--- and `if ExistsText(page, line) then` is therefore correct Lua - an entry holding an empty
+--- string is still truthy.
+---
+--- **This is the only way to detect missing text.** `ReadText` never fails and never complains:
+--- asked for text that does not exist it returns the placeholder string `"=ReadText1001-999999="`,
+--- so the alternative to this call is pattern-matching that shape.
+---
+--- Ids are coerced from strings and bounded at 32 bits - `(-1, -1)` draws
+--- `ReadTextHelper(): pageid (-1, -1) exceeds 32-bit` and returns **no value at all**, where an
+--- in-range miss returns one `nil`. Both read as `nil` at the call site; `select("#", ...)`
+--- separates "called it wrong" from "not there". The complaint is a log line, not a Lua error,
+--- so `pcall` reports success either way.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param textID integer
----@return boolean
-function ExistsText(textID) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - seven calls, arity stated by the engine in words
+---@param page integer|string The text page id. Strings are coerced - `("1001", "2954")` works.
+---@param line integer|string The text line id within that page.
+---@return string? text The text when it exists, `nil` when it does not.
+function ExistsText(page, line) end
 
 
---- Returns a jump route between two sectors, up to `maxJumps` jumps. No vanilla code calls it,
---- so the shape of the returned table is unverified - the map menu builds its routes elsewhere.
+--- Returns how far apart two sectors are, as **two** numbers: gate transitions first, then
+--- jumps. Takes the two sectors as 64-bit component IDs and nothing else - the engine answers
+--- any other count with `Invalid number of arguments (n, expected 2)`, so the `maxJumps` this
+--- row used to declare does not exist.
+---
+--- The hop count was measured as a ladder over sector pairs: 0 for a sector against itself,
+--- then 1, 2, 3, 4, 6 and 7, symmetric in both directions at every step. The second return has
+--- been 0 in all 19 samples taken, so what separates a jump from a gate transition is not yet
+--- measured. **0 gate transitions is also what a sector returns against itself**, so a caller
+--- cannot read 0 as "no route" without testing for that case first.
+---
+--- A rejected call - wrong arity, or a `UniverseID` cdata where a component ID belongs -
+--- returns nothing at all rather than 0, and the engine writes the reason to the log.
+---
+--- That mod also shows how it fails: given a destroyed component it is reached with 0 and logs
+--- `FindJumpRoute(): Component 0 does not exist any more`. Guard the sectors with
+--- `IsValidComponent` before calling, which the Distance Tool does not.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param startSector any
----@param endSector any
----@param maxJumps integer
----@return table
-function FindJumpRoute(startSector, endSector, maxJumps) end
+-- Usage: unverified - no vanilla call site; signature and return confirmed against kuertee_ui_extensions
+-- Seen at: kuertee_ui_extensions ui/addons/ego_detailmonitor/menu_map.xpl:34321
+---@param startSector any The sector to start from, as a 64-bit component ID.
+---@param endSector any The sector to reach, as a 64-bit component ID.
+---@return number numgates The gate transitions between the two sectors.
+---@return number numjumps The jumps needed. 0 in every sample measured so far.
+function FindJumpRoute(startSector, endSector) end
 
 
 --- Raises a named event on a scene element.
@@ -1615,34 +1816,75 @@ function GetAlignment(fontStringID) end
 function GetAllCommanders(controllable) end
 
 
---- Returns the settings of every installed extension as one table. The options menu reads it
---- when it builds the extensions page and clears its own changed flag at the same time.
+---@meta
+---@class ExtensionSetting
+---@field enabled boolean Whether the extension is enabled.
+---@field sync boolean Whether the extension is synced.
+
+--- Returns the per-extension settings, keyed by the `index` of the matching `GetExtensionList`
+--- entry rather than by extension id. Key 0 is not an extension: it holds the global sync
+--- setting, which `gameoptions.lua:3365` reads on its own. Either field can be absent, and
+--- vanilla treats a missing one as "use the extension's own default" - `enabledbydefault` or
+--- `syncbydefault` - so every read is guarded twice, for the entry and for the field. The
+--- options menu refetches the whole table after each change rather than editing it in place.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 5 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2979
----@return table
+---@return table<integer, ExtensionSetting>
 function GetAllExtensionSettings() end
 
 
---- Returns every statistics ID the game keeps, as a flat list. The player information menu
---- walks it to build the statistics page; the value behind an ID comes from `GetStatValue`.
+--- Returns every statistics ID the game keeps, as a flat array of id strings. The player
+--- information menu walks it to build the statistics page; everything behind an ID, the raw
+--- value included, comes from `GetStatData`.
+---
+--- The IDs are the `id` attributes of `libraries/stats.xml`, and the set is exactly that file:
+--- it declares 126 statistics of which two are commented out, and the measured return is
+--- **124 strings**, so the engine keeps nothing the file does not declare. That file is
+--- byte-identical in 8.00 and 9.00 and no extension ships a copy. It is also the only
+--- existence test there is: `GetStatData` answers an unknown ID with no return values at all
+--- rather than with `exists = false`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_playerinfo.lua:2525
----@return table
+-- Probed: 8.00, 9.00 - 124 ids on both versions, matching libraries/stats.xml exactly
+---@return string[] statIDs Every statistics ID, as declared in libraries/stats.xml.
 function GetAllStatIDs() end
 
 
---- Returns the weapons of a component as a table. The target monitor reads it for the weapon
---- systems block, next to the check that weapon information is unlocked for the player at all.
+---@meta
+---@class WeaponEntry
+---@field component any The weapon component id.
+---@field macro string The weapon macro name.
+---@field name string The weapon's displayed name.
+---@field range number Bullet range.
+---@field dps number Hull and shield damage per second.
+
+---@meta
+---@class MissileEntry
+---@field macro string The missile macro name.
+---@field name string The missile's displayed name.
+---@field speed number Missile range.
+---@field damage number Explosion damage.
+---@field amount number Number carried.
+
+---@meta
+---@class WeaponData
+---@field weapons WeaponEntry[] The primary weapons.
+---@field missiles MissileEntry[] The missiles.
+
+--- Returns the primary weapons and missiles of a destructible, in two separate arrays. The
+--- target monitor reads it for the weapon systems block, next to the check that weapon
+--- information is unlocked for the player at all; it counts both arrays and shows nothing
+--- when they are empty, so both are always present and may be empty tables.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_targetmonitor/targetmonitor.lua:1199
----@param component any
----@return table
+---@param component any The destructible to inspect.
+---@return WeaponData
 function GetAllWeapons(component) end
 
 
@@ -1688,13 +1930,27 @@ function GetAutorollOption() end
 function GetAutosaveOption() end
 
 
+---@meta
+---@class BonusContentEntry
+---@field appid integer The Steam app id of the bonus content.
+---@field name string The displayed name.
+---@field owned boolean Whether the player owns it.
+---@field installed boolean Whether it is currently installed.
+---@field optional boolean Whether it can be installed and uninstalled at will.
+---@field changed boolean Its installation state has already been changed and cannot be changed again this session.
+---@field description? string Documented; vanilla does not read it.
+---@field path? string Path to the content. Documented; vanilla does not read it.
+
 --- Returns the bonus content entries as a list. The options menu only asks for it when
---- `IsSteamworksEnabled` is true, and walks the result to build the page.
+--- `IsSteamworksEnabled` is true, and walks the result to build the page: it shows the page at
+--- all only if some entry is `owned`, then renders each entry's status from `installed`, and
+--- offers Install or Uninstall only where `optional` is set and `changed` is not - the engine
+--- allows one change per entry per session.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:10474
----@return table
+---@return BonusContentEntry[]
 function GetBonusContentData() end
 
 
@@ -1708,14 +1964,30 @@ function GetBonusContentData() end
 function GetBoostToggleOption() end
 
 
---- Returns a table of budget data for a station. No vanilla code calls it, so neither the shape
---- of that table nor what counts as the station argument is confirmed here.
+--- Returns properties of a container's budget, one value per key asked and in that order. It is
+--- a variadic property getter of the same family as `GetComponentData`, `GetMacroData`,
+--- `GetStatData` and `GetWareData`, not a table getter: called bare it returns nothing at all,
+--- because nothing was asked for.
+---
+--- Two keys exist, `"min"` and `"max"`. A wrong key is answered
+--- `Invalid argument N, got unknown key 'X'` - the engine names the key it rejected, numbers the
+--- argument 1-based including the container, puts `nil` in that slot and **still returns the good
+--- keys beside it**. So a bad key costs nothing and identifies itself, which makes the whole
+--- `Get*Data` family enumerable by trial.
+---
+--- The budget is a different source from the container's own account. A player factory reading
+--- `money=2000000` with `minmoney` and `maxmoney` both `nil` through `GetAccountData` answered
+--- `min=2000000, max=3000000` here while being its own account holder, so
+--- `scriptproperties.xml`'s "has a budget or is its own account holder" is not an exclusive or,
+--- and a budget needs no precondition beyond class `container`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param station any
----@return table
-function GetBudgetData(station) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - a player factory, bare, with each key alone and with all three together
+---@param container any The container to ask about.
+---@param ... string Property names, `"min"` or `"max"`.
+---@return ... number One value per requested property, in order.
+function GetBudgetData(container, ...) end
 
 
 --- Returns the build anchor of a component, or nothing when it has none. The target monitor
@@ -1729,35 +2001,63 @@ function GetBudgetData(station) end
 function GetBuildAnchor(component) end
 
 
---- Returns how long a build order will take at a container. No vanilla code calls it.
+--- Returns the build duration of the component's own macro, in seconds. It is a **constant from
+--- the ware table, not remaining build time**: every measured figure is the exact
+--- `<production time>` of that component's ware in `wares.xml`, and a *finished* Asgard still
+--- answered its 516. A component whose ware carries no production entry, a station for one,
+--- answers `0`, and so does a station with a construction plan pending.
+---
+--- Arity is 3 and the engine insists on it - one argument is answered
+--- `Invalid number of arguments (1, expected 3)` - but arguments 2 and 3 are inert. A wharf,
+--- given a macro from its own `GetBuilderMacros` and that macro's real
+--- `GetBuildProductionMethod`, still answered `0`. The `(containerid, order)` this row used to
+--- declare was borrowed from the FFI function of the same name, which is a different function.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param containerid any
----@param order any
----@return number
-function GetBuildDuration(containerid, order) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - six ships of four races, every figure matching its ware to the second
+---@param component any The component to ask about.
+---@param unused1 any Inert, but the call needs three arguments.
+---@param unused2 any Inert, but the call needs three arguments.
+---@return number seconds The macro's `<production time>`, or 0 if its ware has none.
+function GetBuildDuration(component, unused1, unused2) end
 
 
---- Returns the builder ship macros matching a set of tags and a race. No vanilla code calls it,
---- so neither the form of `tags` nor the shape of the returned table is confirmed here.
+---@meta
+---@class BuilderMacro
+---@field macro string The macro name.
+---@field name string The macro's displayed name.
+
+--- Returns the macros a container or build module can build, as a list of macro and name pairs.
+--- It is **per build module**, and a station is the union of its bays: one shipyard's three
+--- fabrication bays returned 107 (S/M), 29 (L) and 5 (XL) entries, and the station itself
+--- returned the aggregate, its first entry matching the S/M bay's. A build module is class
+--- `module`, not `container`, so a guard written for containers silently skips the target this
+--- call is really about.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param tags any
----@param race any
----@return table
-function GetBuilderMacros(tags, race) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - a shipyard and each of its three bays, arity 1
+---@param containerID any The container or build module to ask about.
+---@return BuilderMacro[]
+function GetBuilderMacros(containerID) end
 
 
---- Returns the production method of a build macro. No vanilla code calls it, so the form of the
---- result is unverified.
+--- Returns the production method a builder would use for a macro, as a string shaped
+--- `<macro without its _macro suffix>.<method>` - `"ship_arg_m_bomber_01_a.default"`. Argument 1
+--- is the builder, either the station or one of its build modules; argument 2 is a macro from
+--- that builder's `GetBuilderMacros`.
+---
+--- The method belongs to the **macro's own build recipe, not to the builder's race**: a Terran
+--- ATF Asgard built at an Argon shipyard still returned `.default`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param macro any
----@return any
-function GetBuildProductionMethod(macro) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - a shipyard and its three bays, four macros, arity 2
+---@param containerID any The container or build module that would build it.
+---@param macro string A macro the builder can build, from `GetBuilderMacros`.
+---@return string method The production method, `<macro>.<method>`.
+function GetBuildProductionMethod(containerID, macro) end
 
 
 --- Returns the colour of a button widget as four values - red, green, blue and alpha.
@@ -2001,12 +2301,18 @@ function GetCellContent(tableObj, row, col) end
 function GetCellText(tableObj, row, col) end
 
 
---- Returns the character density setting. No vanilla code calls it, and neither is
---- `SetCharacterDensityOption` called.
+--- Returns the density of characters on station platforms - the value `SetCharacterDensityOption`
+--- writes and MD reads as `player.chardensity`. No vanilla code calls either half.
+---
+--- Reads the persisted setting, not save state: it matches `<chardensity>` in `config.xml` and
+--- survives a reload. Returns the stored 32-bit float widened to a Lua number, so a value that
+--- is not exactly representable comes back approximate - `0.8` reads as `0.80000001192093`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return number
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - the read-back witness for SetCharacterDensityOption across four values, on
+-- both versions
+---@return number density Characters on platforms. 0 to 1 by convention; the setter does not clamp.
 function GetCharacterDensityOption() end
 
 
@@ -2043,14 +2349,36 @@ function getChildren(element) end
 function GetClusters(includeHighways) end
 
 
---- Returns what a collectable object holds: a table with a `type` (`ammo` and the rest) and a
---- `wares` list the map menu walks to show what is out there to pick up.
+---@meta
+---@class CollectableWare
+---@field ware string The ware id.
+---@field amount number The amount held.
+
+---@meta
+---@class CollectableData
+---@field type string `"ammo"`, `"wares"` or `"shieldrestore"` - which other fields are present.
+---@field macro? string Ammo macro name. Ammo only.
+---@field name? string Ammo name. Ammo only.
+---@field icon? string Ammo icon. Ammo only.
+---@field amount? number Ammo amount. Ammo only.
+---@field wares? CollectableWare[] The wares held. Wares only.
+---@field money? number Credits held. Wares only.
+---@field isdroppedcontainer? boolean Whether this is a dropped container rather than loose materials. Wares only.
+---@field restoretype? string `"duration"`, `"hp"` or `"percent"`. Shield restore only.
+---@field value? number The restore value, meaning set by `restoretype`. Shield restore only.
+
+--- Returns what a collectable holds. `type` selects which of three disjoint field sets is
+--- filled in, and the target monitor branches on it exactly that way: `ammo` gives `name` and
+--- `amount`, `wares` gives the `wares` array plus `money` and `isdroppedcontainer`, and
+--- `shieldrestore` gives `restoretype` with the `value` it scales. `value` is a floating point
+--- number, not an integer. `targetmonitor.lua:1221` reads `isdroppedcontainer` to choose
+--- between the "cannot collect container" and "cannot collect materials" warnings.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 3 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:20221, ui/addons/ego_targetmonitor/targetmonitor.lua:689
----@param component any
----@return table
+---@param component any The collectable to inspect.
+---@return CollectableData
 function GetCollectableData(component) end
 
 
@@ -2110,28 +2438,73 @@ function getColumnNames(table) end
 function GetCommander(controllableid, fleetUnitID) end
 
 
---- Returns the commander entity of a controllable - the NPC in command rather than the ship
---- above it, which is what `GetCommander` returns. No vanilla code calls it.
+--- Returns the **pilot character of the direct commander**, class `npc` - not the commanding
+--- ship, which is what `GetCommander` returns, and not the top of the chain. One hop per call:
+--- a Katana returns the pilot of its Tokyo, that Tokyo returns the pilot of its Syn, and the
+--- Syn leads the fleet and returns nothing. To reach the fleet leader, resolve the npc back to
+--- its ship and call again until the result is empty.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param controllableid any
----@return any
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - one three-ship fleet, every returned handle's class resolved
+---@param controllableid any The controllable whose commander to ask about.
+---@return any commanderNPC The direct commander's pilot, class `npc`; nothing at the top of the chain.
 function GetCommanderEntity(controllableid) end
 
 
 --- Reads named properties off a component, and is the workhorse of the whole UI. Every argument
 --- after the component is a property name, and it returns one value per name, in the order
 --- asked: `GetComponentData(id, "isshipyard", "iswharf", "istradestation")` returns three
---- booleans. Vanilla asks for anything from one property to thirteen at a time, and one call
---- for several is cheaper than several calls for one.
+--- booleans. Vanilla asks for anything from one property to fifteen at a time, and one call for
+--- several is cheaper than several calls for one.
+---
+--- The 193 keys below are the ones 9.00 vanilla actually passes, in order of how often it asks
+--- for them. It is not necessarily the whole set the engine accepts, but every one of them is
+--- confirmed in use, which no published list of keys is:
+---
+--- `isplayerowned`, `name`, `macro`, `assignedpilot`, `classid`, `isdeployable`, `owner`,
+--- `money`, `primarypurpose`, `idcode`, `isdocked`, `hullpercent`, `sector`, `shiptype`, `icon`,
+--- `cargo`, `productionmoney`, `shiptrader`, `isonlineobject`, `realclassid`, `sectorid`,
+--- `ishacked`, `assignedaipilot`, `ismissiontarget`, `pilot`, `subordinategroup`, `buildstorage`,
+--- `isdock`, `isenemy`, `isfunctional`, `ownername`, `size`, `postname`, `skills`, `ismodule`,
+--- `tradenpc`, `aicommand`, `aicommandparam`, `isactive`, `aicommandaction`,
+--- `aicommandactionparam`, `aicommandstack`, `ishostile`, `isshipyard`, `poststring`,
+--- `basestation`, `buildingprocessor`, `description`, `destinationsector`, `entrygate`,
+--- `fleetname`, `isdocking`, `isfemale`, `ismissingresources`, `iswharf`, `missilecapacity`,
+--- `policefaction`, `products`, `shieldpercent`, `uirelation`, `wantedmoney`, `allresources`,
+--- `assignment`, `boardingresistance`, `countermeasurecapacity`, `issuperhighway`,
+--- `issupplyship`, `istugweapon`, `canequipships`, `combinedskill`, `destination`,
+--- `hasterraforming`, `hull`, `hullmax`, `isally`, `isfleetlead`, `ispausedmanually`,
+--- `isreallyenemy`, `isshowroommodule`, `isunit`, `maxradarrange`, `ownericon`, `systemid`,
+--- `tradesubscription`, `wares`, `zoneid`, `aipilot`, `canbuildships`, `caninitiatecomm`,
+--- `clusterid`, `hasanymod`, `hasshipdockingbays`, `hasturret`, `isequipmentdock`, `islocked`,
+--- `paintmodlocked`, `prestigename`, `recyclingwares`, `shiptypename`, `sourcesector`,
+--- `sunlight`, `tradewares`, `typename`, `typestring`, `cansupplyships`, `cluster`,
+--- `containsthewave`, `defencenpc`, `deployablecapacity`, `docksizes`, `hiringdiscounts`,
+--- `individualtrainee`, `isattachedaslimpet`, `iscovered`, `isdatavault`, `isdefencestation`,
+--- `isdockingenabled`, `isinternallystored`, `isknown`, `islandmark`, `isorphaned`,
+--- `isradarvisible`, `isreallyplayerowned`, `issellable`, `istradestation`, `iswreck`,
+--- `modulesets`, `numdockingbays`, `occupationname`, `populationworkforcefactor`,
+--- `pureresources`, `shieldmax`, `shipstoragecapacity`, `agenticon`, `aicommandactionraw`,
+--- `assigneddock`, `assignmentname`, `availableproducts`, `basename`, `blacklistgroup`,
+--- `boardingstrength`, `buildcomponents`, `canbeclaimed`, `canhavetradeoffers`, `container`,
+--- `currentyield`, `datavaultunlockstate`, `discounts`, `engineer`, `formation`,
+--- `hasavailablemarines`, `haswaveprotectionmodule`, `height`, `image`, `intermediatewares`,
+--- `isbusy`, `iscapturable`, `isdefendingfromboardingoperation`, `isdockedinternally`,
+--- `isfriend`, `isinliveview`, `isinnormalspace`, `ismasstraffic`, `ismissionactor`,
+--- `isnpcassignmentrestricted`, `isstorageallowed`, `length`, `makerraceid`, `moddingdiscounts`,
+--- `npcfacecutscenekey`, `numlocks`, `numlockslots`, `numtrips`, `ownershortname`, `parent`,
+--- `rawdescription`, `rawname`, `recyclingcomponents`, `repairdiscounts`, `resourcebuffer`,
+--- `resourcedetectionrange`, `revealpercent`, `rolename`, `roomtype`, `scrapbuffer`, `shield`,
+--- `tradercommissions`, `traderdiscounts`, `typeicon`, `venturetransactionid`, `ventureuserid`,
+--- `width`, `workforcebonus`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 832 vanilla call sites, 2-16 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:488, ui/addons/ego_detailmonitor/menu_crafting.lua:228
 ---@param component any
----@param ... string
----@return ... any
+---@param ... string One or more property names.
+---@return ... any One value per name, in the order asked.
 function GetComponentData(component, ...) end
 
 
@@ -2187,26 +2560,43 @@ function GetContainedBuildStoragesByOwner(owner) end
 function GetContainedObjectsByOwner(owner, container) end
 
 
---- Returns the ships inside a container, whoever owns them. No vanilla code calls it - the
---- menus want the owner filter and use `GetContainedShipsByOwner` or
---- `GetContainedObjectsByOwner`.
+--- Returns the ships in a space, whoever owns them. No vanilla code calls it - the menus want
+--- the owner filter and use `GetContainedShipsByOwner` or `GetContainedObjectsByOwner`.
+--- Argument 1 is a **space**, a sector or a zone, the family `GetGates`, `HasShipyard` and
+--- `HasWharf` also belong to; omitting it resolves universe-wide and hands back every ship in
+--- the game, 9,595 on one save and 13,814 on an older one.
+---
+--- `showOnMap` is a filter that is **off** by default, matching `GetGates`: `true` narrows the
+--- result to what the player's map actually shows, and `false` is identical to omitting it. In
+--- an unexplored sector the bare call returned 149 ships and `true` returned 0. **The
+--- unfiltered call leaks undiscovered objects** - 149 ships with their owners named, in a
+--- sector the player has never visited - so any mod that puts this in front of the player must
+--- pass `true`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param container any
----@return table
-function GetContainedShips(container) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - both arguments measured in-game, the class named by the engine
+---@param space? any The sector or zone whose ships to list. Omitted, it covers the whole universe.
+---@param showOnMap? boolean True to return only ships shown on the player's map. Defaults to off.
+---@return table ships Array of ship components.
+function GetContainedShips(space, showOnMap) end
 
 
---- Returns the ships of one owner inside a container. No vanilla code calls it, so the form of
---- `owner` - a faction ID string - is taken from the declaration rather than from usage.
+--- Returns the ships of one owner, as a list. `space` really is optional, and dropping it makes
+--- the call **galaxy-wide** rather than dropping the owner filter: `("player")` returned 1,411
+--- ships where `("player", Ore Belt)` returned 12, and a bare `GetContainedShips()` returned
+--- 9,595 over the same save, so the faction form is a filtered subset of the same universe.
+--- Argument 2 is a **space**, a sector or a zone - a ship in that slot draws
+--- "is not of class space" from the engine and the call still reports success with an empty
+--- table, so the result is only readable against the log line above it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param owner string
----@param container? any
----@return table
-function GetContainedShipsByOwner(owner, container) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - both forms measured in-game, the class named by the engine
+---@param owner string The faction id, e.g. `"player"`.
+---@param space? any The sector or zone to limit the search to. Omitted, it covers the whole galaxy.
+---@return table ships Array of ship components.
+function GetContainedShipsByOwner(owner, space) end
 
 
 --- Returns the spaces belonging to one owner. No vanilla code calls it, so the shape of the
@@ -2289,25 +2679,53 @@ function GetContextByClass(componentid, classname, includeSelf) end
 function GetControlEntity(component) end
 
 
---- Returns which input device the player is currently using, as a string - `mouseCursor`,
---- `gamepad` or `joystick`. Menus branch on it to show the right button prompts and to decide
---- whether an input bar is needed at all.
+--- Returns which input device the player is currently using, and the joystick input angle.
+--- The mode is one of `mouseSteering`, `mouseCursor`, `gamepad`, `touch` or `joystick`. Menus
+--- branch on it to show the right button prompts and to decide whether an input bar is needed
+--- at all; every vanilla call site uses the mode alone and discards the angle.
+---
+--- The angle is only meaningful in `touch`, `joystick` and `gamepad` mode. It is -1 while the
+--- stick sits in its safe area, and otherwise an angle in radians from 0 to 2π, with 0 pointing
+--- upwards and rotation running clockwise.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 21 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:20560, ui/addons/ego_detailmonitor/menu_scenario_selection.lua:326
----@return string, number?
+---@return string mode, number? angle
 function GetControllerInfo() end
 
 
---- Returns a table of data about a control post. No vanilla code calls it, so the shape of that
---- table is unverified.
+--- Reads a row of `libraries/posts.xml` by its `id`, in the same shape as
+--- `GetComponentData`: the key, then one property name per return value. The twin of
+--- `GetEntityTypeData`, down to the closed property set and the two traps below.
+---
+--- `controlPost` is the **db key string** - `playerpilot`, `aipilot`, `defence`, `manager`,
+--- `engineer`, `shadyguy`, `shiptrader`, `tradeagent`, `tradecomputer`, `trainee_individual` -
+--- never a component and never a person. No game object is involved.
+---
+--- **Only `name` and `icon` exist.** Every other column of the xml row - `femalename`,
+--- `description`, `type`, `tag`, `control`, `task`, even `id` - is refused with
+--- `Invalid argument 2, got unknown key '<name>'` and a `nil`. `control` and `task` in
+--- particular are not readable from Lua; MD reads them off the person instead.
+---
+--- `icon` returns the **active** variant of the icon group the row names, from
+--- `libraries/icons.xml` - never the group name itself, and never a predictable suffix:
+--- `defence` names group `defenceofficer` and reads back as `defenseofficer_active`, the
+--- spelling changing with it. Always use the returned string as-is.
+---
+--- Measured on 8.00: `playerpilot` and `aipilot` both -> `Captain`, `pilot_active`;
+--- `defence` -> `Defence Coordinator`, `defenseofficer_active`; `manager` -> `Manager`,
+--- `manager_active`; `engineer` -> `Engineer`, `engineer_active`; `shiptrader` ->
+--- `Ship Trader`, `shipdealer_active`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param controlpost any
----@return table
-function GetControlPostData(controlpost) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - six post ids answered for "name" and "icon"; every other column of the row
+-- was refused by name, and a person returns nothing
+---@param controlPost string An id from libraries/posts.xml.
+---@param ... string One or more of "name", "icon". At least one, or nothing is returned.
+---@return ... any One value per name, in the order asked.
+function GetControlPostData(controlPost, ...) end
 
 
 --- Returns whether crash reporting is on, and pairs with `SetCrashReportOption` on the privacy
@@ -2385,16 +2803,19 @@ function GetDate(format, timestamp) end
 function GetDeadzoneOption() end
 
 
---- Returns one option of the running dialog, by index: its text, whether it is selectable,
---- whether it is immediate, its shortcut key and its mouse-over text - five values in that
---- order. The core dialog menu walks the indexes and treats an empty text as an inactive
---- button.
+--- Returns one option of the running dialog, by index. The core dialog menu walks the indexes
+--- and treats an empty text as an inactive button.
+---
+--- Five values come back, in this order: the text, whether the option is selectable, whether it
+--- is immediate, its shortcut key and its mouse-over text. `dialogmenu.lua:850` takes all five
+--- and uses each of them - the mouse-over text reaches `GetTextNumLines` at line 953, so the
+--- fifth value really is the text and not something internal.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/dialogmenu.lua:850
 ---@param index integer
----@return string, boolean, boolean, string, string
+---@return string text, boolean selectable, boolean immediate, string shortcutKey, string mouseOverText
 function GetDialogOption(index) end
 
 
@@ -2495,14 +2916,25 @@ function GetEditBoxTextColor(editBoxID) end
 function GetEffectDistanceOption() end
 
 
---- Returns the efficiency upgrades of a ware. No vanilla code calls it, so the shape of the
---- result is unverified.
+--- Returns the efficiency upgrades of a destructible. Argument 1 is measured - arity 1, and the
+--- engine accepts a station, a ship and a station module alike without complaint - but **the
+--- return shape is not**: every call so far has given an empty array, including one to a genuine
+--- production module derived through `GetProductionModules` rather than clicked.
+---
+--- The engine knows the concept: `scriptproperties.xml` gives datatype `object` an
+--- `efficiencyupgrades.<state>.list`, whose elements are typed `destructible` rather than the
+--- strings the community library declares. But no vanilla MD script, AI script or UI file reads
+--- that family, and the two siblings the library documents beside this one, `GetAllUpgrades` and
+--- `GetNotUpgradesByClass`, are in neither 8.00 nor 9.00. So this is the last survivor of a
+--- family X4 does not use, and an always-empty array is plausible - but an empty array is not a
+--- measured return, so what a populated one holds is still unknown.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
----@param ware any
----@return table
-function GetEfficiencyUpgrades(ware) end
+-- Probed: 8.00 - arity 1; empty on every target tried, a production module included
+---@param destructible any The destructible to ask about.
+---@return table upgrades Empty in every measured case; the element type is unmeasured.
+function GetEfficiencyUpgrades(destructible) end
 
 
 --- Returns the type name of a scene element.
@@ -2515,14 +2947,47 @@ function GetEfficiencyUpgrades(ware) end
 function getElementType(element) end
 
 
---- Returns a table describing an entity type. No vanilla code calls it, so neither the argument
---- nor the shape of the result is confirmed here.
+--- Reads a row of `libraries/entitytypes.xml` by its `id`. Takes the same shape as
+--- `GetComponentData`: the key, then one property name per return value, in the order asked.
+--- A call with no property name returns nothing at all, which is what made this name look
+--- unusable for so long.
+---
+--- `entityType` is the **db key string** - `officer`, `trader`, `factionrepresentative`,
+--- `shadyguy`, `crowd`, `agent` - not a component and not a person. No game object is
+--- involved, so it can be called from any menu at any time.
+---
+--- `name` comes back resolved through text page 20208 and is the **male form**; the row's
+--- `femalename` is a separate field. For a person's own gendered title use
+--- `GetComponentData(npc, "typename")` instead, which is what vanilla does.
+---
+--- **Only `name` and `icon` exist.** Every other column of the xml row - `femalename`,
+--- `description`, `platformpriority`, even `id` - is refused with
+--- `Invalid argument 2, got unknown key '<name>'` and a `nil`.
+---
+--- `icon` returns the **active** variant of the icon group the row names, from
+--- `libraries/icons.xml` - never the group name itself, and never a predictable suffix; the
+--- sibling `GetControlPostData` has a group whose active variant is spelled differently again.
+--- Always use the returned string as-is.
+--- Measured on 8.00: `officer` -> `Crewman`, `pilot_active`; `trader` -> `Trader`,
+--- `trader_active`; `factionrepresentative` -> `Faction Representative`,
+--- `factionrepresentative_active`; `shadyguy` -> `Black Marketeer`, `shadyguy_active`;
+--- `crowd` -> `Individual`, `pilot_active`; `agent` -> `Agent`, `factionrepresentative_active`.
+---
+--- **The two failure modes do not look alike, and neither is catchable.** A bad *property*
+--- complains by name and returns `nil`. A bad *key* - including the right key in the wrong
+--- case, `"Officer"` - returns **nothing at all**, silently, exactly as a call with no property
+--- name does. So a caller cannot tell an unknown key from its own mistake by the return value;
+--- validate the key before calling. Keys are case sensitive.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param entityType any
----@return table
-function GetEntityTypeData(entityType) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - all six entity type ids answered for "name" and "icon"; every other column of
+-- the row was refused by name; a person plus each of ten property names returned nothing, so
+-- argument 1 is the key, never a component
+---@param entityType string An id from libraries/entitytypes.xml.
+---@param ... string One or more property names. At least one, or nothing is returned.
+---@return ... any One value per name, in the order asked.
+function GetEntityTypeData(entityType, ...) end
 
 
 --- Returns an error message by ID. No vanilla code calls it; the UI reports its own errors
@@ -2535,14 +3000,16 @@ function GetEntityTypeData(entityType) end
 function GetError(messageID) end
 
 
---- Returns the severity of a logged error. The debug log turns it into the prefix each line
---- gets - Info, Warning, Error - so severity is what separates a note from a real fault.
+--- Returns the severity of a logged error, as a number. The scale runs 0 to 5 and the debug
+--- log turns it into the prefix each line gets: 0 is plain info and does not even trigger the
+--- error callback, 1 is master info, 2 is an error, 3 an optional assertion, 4 an assertion and
+--- 5 a panic. `debuglog.lua:928` skips everything at 0 and raises its popup only for 2, 3 and 4.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 3 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:809
 ---@param messageID number The ID of the error message.
----@return number severity The severity level of the error.
+---@return number severity 0 info, 1 master info, 2 error, 3 optional assertion, 4 assertion, 5 panic.
 function GetErrorSeverity(messageID) end
 
 
@@ -2557,13 +3024,52 @@ function GetErrorSeverity(messageID) end
 function GetErrorTimestamp(messageID) end
 
 
---- Returns the installed extensions as a list, each with its own fields. The options menu walks
---- it to build the extensions page and to decide whether to show a warning icon at all.
+---@meta
+---@class ExtensionDependency
+---@field id string The dependency's extension id.
+---@field name string The dependency's name.
+---@field version string The required version.
+
+---@meta
+---@class ExtensionEntry
+---@field id string The extension id.
+---@field index integer The extension index - the key into `GetAllExtensionSettings`.
+---@field name string The extension name.
+---@field version string The extension version.
+---@field date string The extension date.
+---@field enabled boolean Whether it is currently enabled.
+---@field enabledbydefault boolean Its default enabled state, used where the settings table has no entry.
+---@field sync boolean Whether it is synced.
+---@field syncbydefault boolean Its default sync state.
+---@field personal boolean Whether it is a personal extension.
+---@field isworkshop boolean Whether it came from the Workshop.
+---@field egosoftextension boolean Whether Egosoft published it.
+---@field error? any The extension's error id, if any.
+---@field errortext? string The extension's error text, if any.
+---@field warning? any A Workshop update warning, if any.
+---@field warningtext? string The Workshop update warning text, if any.
+---@field desc? string The extension description. Documented; vanilla does not read it.
+---@field author? string The extension author. Documented; vanilla does not read it.
+---@field location? string The extension location. Documented; vanilla does not read it.
+---@field dependencies? ExtensionDependency[] Documented; vanilla does not read it.
+
+--- Returns the installed extensions as a list. The options menu walks it to build the
+--- extensions page and to decide whether to show a warning icon at all: an entry that is both
+--- `error` and `enabled` turns the icon red, any `warning` turns it yellow.
+---
+--- `index`, not `id`, is what keys the table `GetAllExtensionSettings` returns; `id` is what
+--- `SetExtensionSettings` and `OpenWorkshop` take. Where the settings table has no entry for an
+--- extension, vanilla falls back to `enabledbydefault` and `syncbydefault`, so those two are
+--- the authority on an untouched extension rather than `enabled` and `sync`.
+---
+--- `enabledbydefault`, `syncbydefault` and `egosoftextension` are not in the community
+--- reference - the last of the three is how the options menu recognises a third-party mod
+--- before warning that the save will be marked as modified.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 4 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_mapeditor.lua:1012, ui/addons/ego_gameoptions/gameoptions.lua:5899
----@return table extensions A table containing the list of extensions.
+---@return ExtensionEntry[] extensions
 function GetExtensionList() end
 
 
@@ -2814,12 +3320,29 @@ function GetGamepadModeOption() end
 function GetGammaOption() end
 
 
---- Retrieves a list of gates. (No usage found in provided files)
+--- Returns the gates of a space, as a flat array of gate components. Argument 1 is a space - a
+--- sector or a zone - matching the family `GetContainedShips`, `HasShipyard` and `HasWharf` belong
+--- to; a station in that slot gives "is not of class space".
+---
+--- `showOnMap` is a filter that is **off** by default. Passing `true` narrows the result to the
+--- gates already revealed on the player's map; omitting it, or passing `false`, returns every gate
+--- the sector has. `false` is not an inversion - it is identical to omitting the argument. Measured
+--- on 8.00 in a sector holding one unrevealed gate: 5 bare, 4 with `true`, 5 with `false`, the
+--- filtered list a subset of the full one. A genuinely unexplored sector gave 3 bare and 0 with
+--- `true`, so the flag filters rather than failing in unknown space.
+---
+--- **The unfiltered call leaks undiscovered objects** - that unexplored sector handed over its
+--- gates, named, to a player who has never been there. Any mod that shows this result to the
+--- player must pass `true`; this is the one place where the default is the wrong choice for UI
+--- work.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return table gates A table containing gate information.
-function GetGates() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - both arguments and the return shape measured in-game
+---@param space any The sector or zone whose gates to list.
+---@param showOnMap? boolean True to return only gates revealed on the player's map. Defaults to off.
+---@return table gates Array of gate components.
+function GetGates(space, showOnMap) end
 
 
 --- Returns the graphics quality preset on the engine's scale, which starts at zero and where
@@ -2865,12 +3388,34 @@ function GetGlowOption() end
 function GetHeader(tableID) end
 
 
---- Retrieves a list of licences held by the player. (No usage found in provided files)
+---@meta
+---@class LicenceEntry
+---@field id string The licence id.
+---@field type string The licence type - 21 distinct values on the player, from `shiptrade` to `ceremonyfriend`, `tradesubscription`, `innercore_access` and `hyperion_access`.
+---@field name string The licence's displayed name.
+---@field icon string The licence icon.
+---@field price number The licence price. Zero on all but a handful - 21 of the player's 231 - where it runs from 1 to 20,000,000.
+---@field minrelation number The minimum relation required to hold it. Exactly four values measured: 20, 10, -10, -30.
+---@field faction string The faction that **issued** the licence, never the holder passed in.
+---@field precursor? string The licence required before this one. Present on 140 of the player's 231 entries, so it is common rather than rare.
+
+--- Returns the licences a faction **holds**. The argument is the holder and each entry's
+--- `faction` field is the **issuer**; the two are never the same, measured over 238 entries on
+--- one run and corroborated on six factions - the player held 231 from 21 issuers, teladi 7
+--- from ministry, hatikvah and scaleplate, antigone 10 mostly from argon. The player's 231 is a
+--- real subset of vanilla's 360 defined issuer/type pairs, not the whole catalogue.
+---
+--- **The argument is not validated.** A nonexistent faction string returns an empty table with
+--- no engine complaint, and so does a component handed in by mistake - the binding ignores a
+--- wrong type rather than rejecting it. An empty result therefore cannot distinguish "holds
+--- nothing" from "no such faction" from "wrong argument entirely".
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return table licences A table containing the held licences.
-function GetHeldLicences() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - six holders, whole-array field histograms, arity 1
+---@param faction string The faction id that holds the licences, e.g. `"player"`.
+---@return LicenceEntry[] licences Empty when the faction holds none - and equally when the argument is wrong.
+function GetHeldLicences(faction) end
 
 
 --- Returns the x and y of a named hint position, as percentages of the view. The help text menu
@@ -2886,35 +3431,46 @@ function GetHeldLicences() end
 function GetHintPosition(position) end
 
 
+---@meta
+---@class HoloMapColor
+---@field r integer Red, 0-255.
+---@field g integer Green, 0-255.
+---@field b integer Blue, 0-255.
+---@field a integer Alpha, 0-100 - not 0-255.
+
 --- Returns the whole holomap colour set in one call - twenty-two colours, from production and
---- build through the alert levels to gates and highways. `Helper.getHoloMapColors` names them
---- into a table, and that wrapper is what menu code uses.
+--- build through the alert levels to gates and highways, as defined in `parameters.xml`.
+--- `Helper.getHoloMapColors` names them into a table, and that wrapper is what menu code uses.
+---
+--- Each colour is a table of `r`, `g` and `b` in 0-255 with `a` in **0-100**, not 0-255;
+--- `Helper.convertColorToText` scales the alpha by `* 255 / 100` before packing the four into
+--- the escape sequence, which is the arithmetic that proves the range.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13070
----@return any productionColor
----@return any buildColor
----@return any storageColor
----@return any radarColor
----@return any droneDockColor
----@return any efficiencyColor
----@return any defenceColor
----@return any playerColor
----@return any friendColor
----@return any enemyColor
----@return any missionColor
----@return any currentPlayerShipColor
----@return any visitorColor
----@return any lowAlertColor
----@return any mediumAlertColor
----@return any highAlertColor
----@return any gateColor
----@return any highwayGateColor
----@return any missileColor
----@return any superhighwayColor
----@return any highwayColor
----@return any hostileColor
+---@return HoloMapColor productionColor
+---@return HoloMapColor buildColor
+---@return HoloMapColor storageColor
+---@return HoloMapColor radarColor
+---@return HoloMapColor droneDockColor
+---@return HoloMapColor efficiencyColor
+---@return HoloMapColor defenceColor
+---@return HoloMapColor playerColor
+---@return HoloMapColor friendColor
+---@return HoloMapColor enemyColor
+---@return HoloMapColor missionColor
+---@return HoloMapColor currentPlayerShipColor
+---@return HoloMapColor visitorColor
+---@return HoloMapColor lowAlertColor
+---@return HoloMapColor mediumAlertColor
+---@return HoloMapColor highAlertColor
+---@return HoloMapColor gateColor
+---@return HoloMapColor highwayGateColor
+---@return HoloMapColor missileColor
+---@return HoloMapColor superhighwayColor
+---@return HoloMapColor highwayColor
+---@return HoloMapColor hostileColor
 function GetHoloMapColors() end
 
 
@@ -2934,49 +3490,75 @@ function GetHoloMapColors() end
 function GetIconDetails(iconID) end
 
 
---- Returns the action bindings - the inputs that fire on a press. Called with no argument for
---- the player's current map and with true for the default one, next to `GetInputStateMap` and
+---@meta
+---@class InputBinding
+---@field [1] integer The input source.
+---@field [2] integer The input code.
+---@field [3] integer The input signum.
+
+--- Returns the action bindings - the inputs that fire on a press - keyed by integer action id,
+--- each holding a list of the inputs bound to it. Called with no argument for the player's
+--- current map and with true for the default one, next to `GetInputStateMap` and
 --- `GetInputRangeMap`; the options menu keeps both sets to show what has been rebound.
+---
+--- Each binding is a three-element array, not a record: source, code and signum in that order.
+--- `gameoptions.lua` reads `input[1]` to decide whether a binding is keyboard or mouse, and
+--- nudges `input[2]` by one when shifting a mouse axis. An unbound action maps to an empty
+--- table rather than being absent, which is what clearing a binding writes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:4844, ui/addons/ego_gameoptions/gameoptions.lua:4938
 ---@param default? boolean If true, gets the default map.
----@return table actions The input action map.
+---@return table<integer, InputBinding[]> actions
 function GetInputActionMap(default) end
 
 
---- Returns the input profiles - the shipped ones and the player's own - as a table. The
---- controls page splits the user profiles back out of it.
+---@meta
+---@class InputProfile
+---@field id any The profile id.
+---@field name string The profile's displayed name.
+---@field filename string The profile's file name.
+---@field personal boolean Whether the file sits in the personal folder - a user profile rather than a shipped one.
+---@field mouseprofile boolean Whether it is a mouse profile; the load page groups these separately.
+---@field version? any The profile version. Documented; vanilla does not read it.
+---@field customname? string The profile's custom name. Documented; vanilla does not read it.
+
+--- Returns the input profiles - the shipped ones and the player's own - as one list. The
+--- controls page splits them by `personal`: a personal profile is a user profile and is indexed
+--- by `filename`, while the rest are offered for loading and are split again by `mouseprofile`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:12558
----@return table inputProfiles A table of input profiles.
+---@return InputProfile[] inputProfiles
 function GetInputProfiles() end
 
 
---- Returns the range bindings - the axis inputs - as a table. Called with no argument for the
---- player's current map and with true for the default one, which the options menu keeps side by
---- side to show what has been changed.
+--- Returns the range bindings - the axis inputs - keyed by integer range id, each holding a
+--- list of `InputBinding` entries in the same source, code, signum form the action map uses.
+--- Called with no argument for the player's current map and with true for the default one,
+--- which the options menu keeps side by side to show what has been changed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:4844, ui/addons/ego_gameoptions/gameoptions.lua:4938
 ---@param default? boolean If true, gets the default map.
----@return table ranges The input range map.
+---@return table<integer, InputBinding[]> ranges
 function GetInputRangeMap(default) end
 
 
---- Returns the state bindings - the inputs that act while held. Called with no argument for the
---- current map and with true for the default one, alongside `GetInputActionMap` and
---- `GetInputRangeMap`.
+--- Returns the state bindings - the inputs that act while held - keyed by integer state id,
+--- each holding a list of `InputBinding` entries in the same source, code, signum form the
+--- action map uses. Called with no argument for the current map and with true for the default
+--- one, alongside `GetInputActionMap` and `GetInputRangeMap`; `SaveInputSettings` takes all
+--- three back together.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:4844, ui/addons/ego_gameoptions/gameoptions.lua:4938
 ---@param default? boolean If true, gets the default map.
----@return table states The input state map.
+---@return table<integer, InputBinding[]> states
 function GetInputStateMap(default) end
 
 
@@ -2992,13 +3574,22 @@ function GetInputStateMap(default) end
 function GetInteractiveObject(frameID) end
 
 
---- Retrieves the inventory of an entity (e.g., ship, station, NPC).
+---@meta
+---@class InventoryWare
+---@field name string The ware's displayed name.
+---@field amount number The amount held.
+---@field price number The ware's price.
+
+--- Returns the wares an entity holds, keyed by ware id. There is no array part, so vanilla
+--- walks it with `pairs` and tests it for emptiness with `next(...)` - the interact menu decides
+--- whether to offer a trade at all that way. The entity is usually an NPC rather than a ship:
+--- the map passes a pilot, the player info menu the HQ defence NPC.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 10 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:4112, ui/addons/ego_detailmonitor/menu_map.lua:6516
----@param entityID any The ID of the entity.
----@return table inventory A table representing the entity's inventory.
+---@param entityID any The entity whose inventory to read.
+---@return table<string, InventoryWare> inventory
 function GetInventory(entityID) end
 
 
@@ -3013,14 +3604,24 @@ function GetInventory(entityID) end
 function GetInversionSetting(rangeID) end
 
 
---- Returns the joystick slot assignments. The controls page reads it next to
---- `GetMappedJoysticks`, which lists the devices actually mapped, and writes back one slot at a
---- time with `SetJoysticksOption`.
+---@meta
+---@class JoystickSlot
+---@field name string The device name.
+---@field guid string The device guid, empty for an unoccupied slot.
+---@field xinput boolean Whether the device is an XInput controller rather than a plain joystick.
+
+--- Returns the joystick slot assignments, keyed by slot number. The controls page reads it next
+--- to `GetMappedJoysticks`, which lists the devices actually mapped, and writes back one slot at
+--- a time with `SetJoysticksOption`.
+---
+--- Slots can be empty, so vanilla walks the table with `pairs` rather than `ipairs` and skips
+--- any entry whose `guid` is the empty string. `gameoptions.lua:12503` reads `xinput` to
+--- choose between the controller and the joystick icon.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:4926
----@return table joysticks A table containing joystick information.
+---@return table<integer, JoystickSlot> joysticks
 function GetJoysticksOption() end
 
 
@@ -3032,28 +3633,347 @@ function GetJoysticksOption() end
 function GetLegacyShadersOption() end
 
 
---- Returns a whole data library as a table - `factions`, `stationtypes` and the rest of the
---- libraries the encyclopedia is built from. `GetLibrarySize` gives the entry count without
---- reading the entries.
+---@meta
+---@class LibraryItem
+---@field id string The item id - what `GetLibraryEntry` takes as its second argument.
+---@field name string The item's displayed name.
+---@field icon string The item icon.
+---@field parent? string The item's parent, where the library is a tree.
+
+---@meta
+---@class LibraryItemFaction : LibraryItem
+---@field relation number The player's relation to the faction.
+
+--- Returns a whole data library as a list - `factions`, `stationtypes` and the rest of the
+--- libraries the encyclopedia is built from. Each item carries only enough to list it; the
+--- detail behind an item comes from `GetLibraryEntry` with the same library name and the item's
+--- `id`. `GetLibrarySize` gives the entry count without reading the entries.
+---
+--- The item shape barely varies by library: `parent` appears only where the library is a tree,
+--- and `relation` only on `factions`, which is why the diplomacy and player info menus bind the
+--- result to a variable named `relations`. Passing `"factions"` as a literal gets
+--- `LibraryItemFaction` back, which has `relation`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 16 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1188, ui/addons/ego_detailmonitor/menu_docked.lua:627
----@param libraryName string The name of the library to retrieve (e.g., "factions", "stationtypes").
----@return table library A table containing the library data.
+---@overload fun(libraryName: "factions"): LibraryItemFaction[]
+---@param libraryName string The name of the library to retrieve, e.g. `"factions"` or `"stationtypes"`.
+---@return LibraryItem[] library
 function GetLibrary(libraryName) end
 
+
+---@meta
+---@class LibraryEntryBase
+---@field name string The entry name.
+---@field description string The entry description.
+---@field icon string The entry icon.
+---@field video? string The entry video.
+---@field image? string The entry image.
+---@field component? any The component the entry describes, where it has one.
+---@field precursor? any The entry this one is built from.
+
+---@meta
+---@class LibraryEntryFaction : LibraryEntryBase
+---@field factionid? string The faction id.
+---@field primaryfactions? table The factions of a race. `races` only.
+---@field primaryrace? string The faction's primary race.
+---@field influencename? string The faction influence name.
+---@field influencedescription? string The faction influence description.
+---@field canclaim? boolean Whether the player can claim it.
+---@field illegalwares? table Wares illegal to this faction.
+
+---@meta
+---@class LibraryEntryLicence : LibraryEntryBase
+---@field price? number The licence price.
+---@field minrelation? number The minimum relation required.
+---@field issellable? boolean Whether the licence can be bought.
+
+---@meta
+---@class LibraryEntryShip : LibraryEntryBase
+---@field hull? number Hull strength.
+---@field shield? number Shield strength.
+---@field mass? number Mass.
+---@field speed? number Top speed.
+---@field jumpdrive? boolean Whether the ship has a jumpdrive.
+---@field radarrange? number Radar range.
+---@field shiptypename? string The ship type name.
+---@field storagecapacity? number Storage capacity.
+---@field storagetags? any Storage tags.
+---@field storagenames? any Storage names.
+---@field shipstoragecapacity? number Ship storage capacity.
+---@field unitcapacity? number Unit capacity.
+---@field missilecapacity? number Missile capacity.
+---@field docks_m? number M dock count.
+---@field docks_s? number S dock count.
+
+---@meta
+---@class LibraryEntryModule : LibraryEntryBase
+---@field hull? number Hull strength.
+---@field products? table The products of a production module.
+---@field resources? table The resources a production module consumes.
+---@field productions? table Productions.
+---@field storagecapacity? number Storage capacity.
+---@field workforcecapacity? number Workforce capacity.
+---@field maxworkforce? number Maximum workforce.
+---@field radarrange? number Radar range. `moduletypes_radar` only.
+---@field docks_m? number M dock count. Dock modules only.
+---@field docks_s? number S dock count. Dock modules only.
+
+---@meta
+---@class LibraryEntryEngine : LibraryEntryBase
+---@field thrust_forward? number Forward thrust.
+---@field thrust_reverse? number Reverse thrust.
+---@field thrust_vertical? number Vertical thrust.
+---@field thrust_horizontal? number Horizontal thrust.
+---@field thrust_pitch? number Pitch thrust.
+---@field thrust_yaw? number Yaw thrust.
+---@field drag_yaw? number Yaw drag.
+---@field inertia_yaw? number Yaw inertia.
+---@field yawspeed? number Yaw speed.
+---@field pitchspeed? number Pitch speed.
+---@field verticalstrafespeed? number Vertical strafe speed.
+---@field horizontalstrafespeed? number Horizontal strafe speed.
+---@field boost_thrustfactor? number Boost thrust factor.
+---@field boost_chargetime? number Boost charge time.
+---@field boost_rechargetime? number Boost recharge time.
+---@field boost_maxduration? number Boost maximum duration.
+---@field boost_accfactor? number Boost acceleration factor.
+---@field travel_thrustfactor? number Travel drive thrust factor.
+---@field travel_chargetime? number Travel drive charge time.
+---@field travel_attacktime? number Travel drive attack time.
+
+---@meta
+---@class LibraryEntryWeapon : LibraryEntryBase
+---@field range? number Weapon range.
+---@field maxrange? number Maximum range.
+---@field dps? number Damage per second.
+---@field sustaineddps? number Sustained damage per second.
+---@field hullonlydps? number DPS against hull only.
+---@field hullshielddps? number DPS against hull through shields.
+---@field hullnoshielddps? number DPS against unshielded hull.
+---@field hullonlydpshot? number Damage per shot against hull only.
+---@field hullshielddpshot? number Damage per shot against hull through shields.
+---@field hullnoshielddpshot? number Damage per shot against unshielded hull.
+---@field shieldonlydpshot? number Damage per shot against shields only.
+---@field hullonlyareadpshot? number Area damage per shot against hull only.
+---@field hullshieldareadpshot? number Area damage per shot against hull through shields.
+---@field hullnoshieldareadpshot? number Area damage per shot against unshielded hull.
+---@field shieldonlyareadpshot? number Area damage per shot against shields only.
+---@field hullonlyareadamage? number Area damage against hull only.
+---@field hullshieldareadamage? number Area damage against hull through shields.
+---@field hullnoshieldareadamage? number Area damage against unshielded hull.
+---@field explosiondamage? number Explosion damage.
+---@field hullexplosiondamage? number Explosion damage to hull.
+---@field shieldexplosiondamage? number Explosion damage to shields.
+---@field bulletspeed? number Bullet speed.
+---@field reloadrate? number Reload rate.
+---@field chargetime? number Charge time.
+---@field coolingrate? number Cooling rate.
+---@field initialheat? number Heat per shot.
+---@field maxheatrate? number Maximum heat rate.
+---@field isbeamweapon? boolean Whether it is a beam weapon.
+---@field isrepairweapon? boolean Whether it is a repair weapon.
+---@field islongrange? boolean Whether it is long range.
+---@field miningmultiplier? number Mining damage multiplier.
+---@field surfaceelementmultiplier? number Surface element damage multiplier.
+---@field shielddisruption? number Shield disruption.
+
+---@meta
+---@class LibraryEntryTurret : LibraryEntryWeapon
+---@field rotation? number Turret rotation speed.
+---@field maxyawangle? number Maximum yaw angle.
+---@field maxpitchangle? number Maximum pitch angle.
+---@field istracking? boolean Whether it tracks its target.
+---@field isfriendfoe? boolean Whether it uses friend-foe identification.
+
+---@meta
+---@class LibraryEntryMissile : LibraryEntryBase
+---@field speed? number Missile speed.
+---@field acceleration? number Missile acceleration.
+---@field damage? number Missile damage.
+---@field explosiondamage? number Explosion damage.
+---@field hullexplosiondamage? number Explosion damage to hull.
+---@field shieldexplosiondamage? number Explosion damage to shields.
+---@field range? number Missile range.
+---@field maxlockrange? number Maximum lock range.
+---@field locktime? number Missile lock time.
+---@field proximityrange? number Proximity fuse range.
+---@field guided? boolean Whether the missile is guided.
+---@field istracking? boolean Whether it tracks its target.
+---@field countermeasureresilience? number Resilience to countermeasures.
+
+---@meta
+---@class LibraryEntryShield : LibraryEntryBase
+---@field hull? number Shield generator hull.
+---@field shield? number Shield strength.
+---@field recharge? number Shield recharge rate.
+---@field rechargedelay? number Shield recharge delay.
+---@field chargetime? number Charge time.
+
+---@meta
+---@class LibraryEntryWare : LibraryEntryBase
+---@field avgprice? number Ware average price.
+---@field volume? number Ware volume.
+---@field transporttype? string Ware transport type.
+---@field methods? table Ware production methods.
+---@field illegalto? table Factions the ware is illegal to.
+---@field issellable? boolean Whether the ware can be sold.
+---@field isscanner? boolean Whether it is a scanner. Satellites and probes.
+---@field scanlevel? number Scanner level. Satellites and probes.
+---@field resourcedetectionrange? number Resource detection range. Probes.
+
+---@meta
+---@class LibraryEntry
+---@field name string The entry name.
+---@field description string The entry description.
+---@field icon string The entry icon.
+---@field video? string The entry video.
+---@field image? string The entry image. Documented; the encyclopedia does not read it.
+---@field component? any The component the entry describes, where it has one.
+---@field race? string NPC race. Documented; the encyclopedia does not read it.
+---@field faction? string NPC faction. Documented; the encyclopedia does not read it.
+---@field factionid? string The faction id.
+---@field primaryfactions? table The factions of a race.
+---@field primaryrace? string A faction primary race. Documented; the encyclopedia does not read it.
+---@field influencename? string The faction influence name.
+---@field influencedescription? string The faction influence description.
+---@field canclaim? boolean Whether the player can claim it.
+---@field minrelation? number Minimum relation required.
+---@field hull? number Hull strength.
+---@field shield? number Shield strength.
+---@field mass? number Mass.
+---@field speed? number Top speed.
+---@field jumpdrive? boolean Whether the object has a jumpdrive. Documented; the encyclopedia does not read it.
+---@field storagecapacity? number Storage capacity.
+---@field storagetags? any Storage tags. Documented; the encyclopedia does not read it.
+---@field storagenames? any Storage names.
+---@field shipstoragecapacity? number Ship storage capacity.
+---@field unitcapacity? number Unit capacity.
+---@field missilecapacity? number Missile capacity.
+---@field workforcecapacity? number Workforce capacity.
+---@field maxworkforce? number Maximum workforce.
+---@field radarrange? number Radar range.
+---@field docks_m? number M dock count.
+---@field docks_s? number S dock count.
+---@field shiptypename? string The ship type name.
+---@field precursor? any The entry this one is built from.
+---@field products? table The products of a production module.
+---@field resources? table The resources a production module consumes.
+---@field productions? table Productions. Documented; the encyclopedia does not read it.
+---@field weapons? table Weapons. Documented; the encyclopedia does not read it.
+---@field upgrades? table Upgrades. Documented; the encyclopedia does not read it.
+---@field thrust_forward? number Forward thrust.
+---@field thrust_reverse? number Reverse thrust.
+---@field thrust_vertical? number Vertical thrust.
+---@field thrust_horizontal? number Horizontal thrust.
+---@field thrust_pitch? number Pitch thrust.
+---@field thrust_yaw? number Yaw thrust.
+---@field drag_yaw? number Yaw drag.
+---@field inertia_yaw? number Yaw inertia.
+---@field yawspeed? number Yaw speed.
+---@field pitchspeed? number Pitch speed.
+---@field verticalstrafespeed? number Vertical strafe speed.
+---@field horizontalstrafespeed? number Horizontal strafe speed.
+---@field boost_thrustfactor? number Boost thrust factor.
+---@field boost_chargetime? number Boost charge time.
+---@field boost_rechargetime? number Boost recharge time.
+---@field boost_maxduration? number Boost maximum duration.
+---@field boost_accfactor? number Boost acceleration factor.
+---@field travel_thrustfactor? number Travel drive thrust factor.
+---@field travel_chargetime? number Travel drive charge time.
+---@field travel_attacktime? number Travel drive attack time.
+---@field acceleration? number Missile acceleration. Documented; the encyclopedia does not read it.
+---@field range? number Weapon or turret range.
+---@field maxrange? number Maximum range.
+---@field maxlockrange? number Maximum lock range.
+---@field dps? number Damage per second.
+---@field sustaineddps? number Sustained damage per second.
+---@field hullonlydps? number DPS against hull only.
+---@field hullshielddps? number DPS against hull through shields.
+---@field hullnoshielddps? number DPS against unshielded hull.
+---@field hullonlydpshot? number Damage per shot against hull only.
+---@field hullshielddpshot? number Damage per shot against hull through shields.
+---@field hullnoshielddpshot? number Damage per shot against unshielded hull.
+---@field shieldonlydpshot? number Damage per shot against shields only.
+---@field hullonlyareadpshot? number Area damage per shot against hull only.
+---@field hullshieldareadpshot? number Area damage per shot against hull through shields.
+---@field hullnoshieldareadpshot? number Area damage per shot against unshielded hull.
+---@field shieldonlyareadpshot? number Area damage per shot against shields only.
+---@field hullonlyareadamage? number Area damage against hull only.
+---@field hullshieldareadamage? number Area damage against hull through shields.
+---@field hullnoshieldareadamage? number Area damage against unshielded hull.
+---@field damage? number Explosion damage. Documented; the encyclopedia reads the split values instead.
+---@field explosiondamage? number Explosion damage.
+---@field hullexplosiondamage? number Explosion damage to hull.
+---@field shieldexplosiondamage? number Explosion damage to shields.
+---@field bulletspeed? number Bullet speed.
+---@field reloadrate? number Reload rate.
+---@field chargetime? number Charge time.
+---@field coolingrate? number Cooling rate.
+---@field initialheat? number Heat per shot.
+---@field maxheatrate? number Maximum heat rate.
+---@field isbeamweapon? boolean Whether it is a beam weapon.
+---@field isrepairweapon? boolean Whether it is a repair weapon.
+---@field islongrange? boolean Whether it is long range.
+---@field isscanner? boolean Whether it is a scanner.
+---@field scanlevel? number Scanner level.
+---@field miningmultiplier? number Mining damage multiplier.
+---@field surfaceelementmultiplier? number Surface element damage multiplier.
+---@field shielddisruption? number Shield disruption.
+---@field rotation? number Turret rotation speed.
+---@field maxyawangle? number Maximum yaw angle.
+---@field maxpitchangle? number Maximum pitch angle.
+---@field istracking? boolean Whether it tracks its target.
+---@field isfriendfoe? boolean Whether it uses friend-foe identification.
+---@field guided? boolean Whether the missile is guided.
+---@field countermeasureresilience? number Resilience to countermeasures.
+---@field locktime? number Missile lock time.
+---@field proximityrange? number Proximity fuse range.
+---@field recharge? number Shield recharge rate.
+---@field rechargedelay? number Shield recharge delay.
+---@field avgprice? number Ware average price. Documented; the encyclopedia does not read it.
+---@field volume? number Ware volume. Documented; the encyclopedia does not read it.
+---@field transporttype? string Ware transport type. Documented; the encyclopedia does not read it.
+---@field methods? table Ware production methods. Documented; the encyclopedia does not read it.
+---@field illegalto? table Factions the ware is illegal to.
+---@field illegalwares? table Wares illegal to this faction.
+---@field issellable? boolean Whether the ware can be sold.
 
 --- Returns one entry of a data library, by library name and entry ID. The library name is often
 --- not a constant: the map asks `GetMacroData(macro, "infolibrary")` which library a macro
 --- belongs to and passes the answer straight in.
+---
+--- **The field set depends on the library.** Only `name`, `description` and `icon` are common to
+--- all of them, so passing the library name as a string literal gets a narrow class back -
+--- `LibraryEntryShip`, `LibraryEntryEngine`, `LibraryEntryWeapon` and so on - via the overloads
+--- below. Passing a variable, which is what vanilla mostly does, falls back to `LibraryEntry`:
+--- the union of every field, all optional, because nothing at that point says which library it is.
+---
+--- The split follows `menu_encyclopedia.lua`, which branches on `menu.library` before reading
+--- fields - `weapons_lasers` and `weapons_missilelaunchers` at line 3383, `weapons_turrets` at
+--- 3518, `missiletypes` at 3647, `shieldgentypes` at 2231, `enginetypes` at 2207, `licences` and
+--- `factions` at 2196. Library names come from that file's own category config at line 483.
+---
+--- X4 returns considerably more per entry than any published list: the damage figures alone are
+--- nine separate hull-and-shield permutations rather than one `dps`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 34 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1568, ui/addons/ego_detailmonitor/menu_encyclopedia.lua:776
+---@overload fun(libraryName: "factions"|"races", entryID: any): LibraryEntryFaction
+---@overload fun(libraryName: "licences", entryID: any): LibraryEntryLicence
+---@overload fun(libraryName: "ship_xl"|"ship_l"|"ship_m"|"ship_s"|"shiptypes_xl"|"shiptypes_l"|"shiptypes_m"|"shiptypes_s"|"shiptypes_xs", entryID: any): LibraryEntryShip
+---@overload fun(libraryName: "stationtypes"|"moduletypes_production"|"moduletypes_build"|"moduletypes_storage"|"moduletypes_habitation"|"moduletypes_welfare"|"moduletypes_defence"|"moduletypes_dock"|"moduletypes_processing"|"moduletypes_other"|"moduletypes_radar"|"moduletypes_venture", entryID: any): LibraryEntryModule
+---@overload fun(libraryName: "enginetypes"|"thrustertypes", entryID: any): LibraryEntryEngine
+---@overload fun(libraryName: "weapons_turrets"|"weapons_missileturrets", entryID: any): LibraryEntryTurret
+---@overload fun(libraryName: "weapons_lasers"|"weapons_missilelaunchers"|"bombs"|"mines"|"lasertowers", entryID: any): LibraryEntryWeapon
+---@overload fun(libraryName: "missiletypes", entryID: any): LibraryEntryMissile
+---@overload fun(libraryName: "shieldgentypes", entryID: any): LibraryEntryShield
+---@overload fun(libraryName: "wares"|"inventory_wares"|"software"|"paintmods"|"satellites"|"navbeacons"|"resourceprobes"|"countermeasures", entryID: any): LibraryEntryWare
 ---@param libraryName string The name of the library.
 ---@param entryID any The ID of the entry to retrieve.
----@return table entry The requested library entry.
+---@return LibraryEntry entry The union of every library's fields; pass a literal library name for a narrow type.
 function GetLibraryEntry(libraryName, entryID) end
 
 
@@ -3168,9 +4088,29 @@ function GetLocalMousePosition() end
 function GetLODOption() end
 
 
+---@meta
+---@class LogbookEntry
+---@field title string The entry's headline, drawn in bold.
+---@field text string The entry body; may be the empty string, which vanilla skips rather than drawing.
+---@field time number The entry timestamp, in game time.
+---@field category any The entry's category.
+---@field money number Credits gained or lost, 0 where the entry is not financial.
+---@field bonus number Bonus credits, 0 where there are none.
+---@field entityname string The entity the entry concerns; may be the empty string.
+---@field factionname string The faction the entry concerns; may be the empty string.
+---@field highlighted boolean Whether the entry is drawn in the highlight colour.
+---@field interaction? string The interaction type, if the entry can be jumped to.
+---@field interactiontext? string A format string for the jump button's mouse-over text, taking the component name.
+---@field interactioncomponent? any The component the interaction targets; test it with `IsValidComponent` first.
+
 --- Returns a page of logbook entries: `numQuery` of them starting at `startIndex`, limited to
---- one category. It can return nothing, so both callers fall back with `or {}`, and both page
---- the log rather than asking for all of it - the query limit is a config value.
+--- one category. It can return nothing, so all three call sites fall back with `or {}`, and all
+--- three page the log rather than asking for all of it - the query limit is a config value.
+---
+--- `menu_playerinfo.lua:2946` reads `title`, `text`, `time`, `money`, `bonus`, `entityname`,
+--- `factionname`, `highlighted`, `interaction`, `interactiontext` and `interactioncomponent`.
+--- An entry is only jumpable when `interaction` is set **and** `IsValidComponent` accepts its
+--- `interactioncomponent`; vanilla checks both before drawing the button.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 3 vanilla call sites, 3 arguments
@@ -3178,18 +4118,37 @@ function GetLODOption() end
 ---@param startIndex number The starting index for retrieval.
 ---@param numQuery number The number of entries to query.
 ---@param category any The category of logbook entries to retrieve.
----@return table logbook A table containing the logbook entries.
+---@return LogbookEntry[] logbook
 function GetLogbook(startIndex, numQuery, category) end
 
 
---- Retrieves specific data from a macro definition. This is a variadic function.
+--- Reads named properties off a macro, in the same variadic form as `GetComponentData`: every
+--- argument after the macro is a property name, and one value comes back per name, in order.
+--- Unlike `GetComponentData` it takes a macro name rather than a component, so it works without
+--- an instance of the thing existing anywhere in the game.
+---
+--- `infolibrary` is the key worth knowing: it names the library the macro belongs to, which is
+--- what the map feeds straight into `GetLibraryEntry`. The 55 keys 9.00 vanilla passes, most
+--- used first:
+---
+--- `name`, `infolibrary`, `ware`, `makerraceid`, `shortname`, `islasertower`, `primarypurpose`,
+--- `entityfemale`, `makerrace`, `makerracename`, `shiptype`, `icon`, `sectors`, `compatibility`,
+--- `entityrace`, `image`, `macro`, `ammoicon`, `basemacro`, `compatibilityinfo`,
+--- `entityracename`, `hasinfoalias`, `isventuremodule`, `mk`, `size`, `isminingweapon`, `isunit`,
+--- `isvirtual`, `prestigename`, `sectorcomponent`, `shieldcapacitymodifier`,
+--- `shieldrechargedelaymodifier`, `shieldrechargeratemodifier`, `shiptypename`, `spacesuitmacro`,
+--- `storagetags`, `tier`, `waregroup`, `weaponheatmodifier`, `canclaimownership`,
+--- `defaultmaxtraveldrivestabilityvalue`, `haswaveprotection`, `isdeployable`, `isfixedstation`,
+--- `isintegrated`, `isshowroomdock`, `isshowroommodule`, `makericon`, `maxradarrange`,
+--- `maxtraveldrivestabilityvalue`, `maxworkforce`, `primarypurposeicon`,
+--- `resourcedetectionrange`, `waregroupicon`, `workforcecapacity`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 251 vanilla call sites, 2-9 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_docked.lua:509, ui/addons/ego_detailmonitor/menu_encyclopedia.lua:574
 ---@param macro string The name of the macro.
----@param ... string One or more string keys for the data to retrieve (e.g., "name", "icon", "infolibrary").
----@return any ... The requested macro data. The number and types of return values depend on the keys provided.
+---@param ... string One or more property names.
+---@return ... any One value per name, in the order asked.
 function GetMacroData(macro, ...) end
 
 
@@ -3272,12 +4231,24 @@ function GetMessageCutsceneParameter(messageID, category) end
 function GetMessageScreenPosition(messageID) end
 
 
---- Retrieves macros for mining units. (No usage found in provided files)
+--- Returns the mining unit macros a ship macro can carry - the drones it launches to mine.
+--- The argument is a **macro name string**, not a component; this row declared no parameter
+--- at all until it was measured. A bare call still returns an **empty array**, so the return
+--- value never announces the missing argument - but the engine does, in the log:
+--- `Invalid number of arguments (0, expected 1)`. Reading returns alone is what hid this.
+---
+--- Measured on 8.00: `ship_arg_m_miner_liquid_01_a_macro` ->
+--- `ship_gen_s_miningdrone_liquid_01_a_macro`. Every other macro measured returns an empty
+--- array, solid miners included, so the answer is whether the macro carries mining **drones**
+--- and not whether it mines at all. `GetStandardUnitMacros` on the same macro returns this
+--- set plus the cargo drone, so this is the mining subset of that one.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return table macros A table of mining unit macros.
-function GetMiningUnitMacros() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - 54 calls over nine ship macros and a station macro, one non-empty
+---@param macro string The macro name of the ship to ask about.
+---@return string[] macros The mining unit macros, empty when the macro carries none.
+function GetMiningUnitMacros(macro) end
 
 
 --- Returns everything about a mission in one call - twenty-four values, of which vanilla names
@@ -3491,13 +4462,32 @@ function GetNPCBlackboard(entity, key) end
 function GetNPCs(containerID) end
 
 
---- Retrieves NPCs located on stations within a specific sector. (No usage found in provided files)
+--- Returns the people on stations in `sector` that are within `distance` of **the player** -
+--- not of the sector being asked about. The sector argument selects the population, the radius
+--- is measured across the universe from wherever the player is, in metres, so a remote sector
+--- needs a radius on the order of 1e8 before it answers at all.
+---
+--- `distance` is a literal radius and not a flag: `0` returns nothing, in every sector, every
+--- time. The count saturates at the sector's own total once the radius covers it - Ore Belt
+--- reached 31 at 500000 and stayed there through 1e9 - so a huge value is an honest radius
+--- rather than a sentinel for "no limit".
+---
+--- The container has to be a `station` or a `buildstorage`. People on ships are not included,
+--- whatever the radius.
+---
+--- Both arguments are 64-bit component IDs. A `UniverseID` cdata straight out of
+--- `C.GetContextByClass` is refused with
+--- `Invalid argument #1 <sector> (got cdata, expected component ID)` - convert it first.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param sectorID any The ID of the sector.
----@return table npcs A table of NPCs on stations in the sector.
-function GetNPCsInSectorOnStations(sectorID) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - the reference point measured against three candidates over seven sectors and
+-- then proved by moving the player: the gradient followed them, so no sector-local point can be
+-- what the radius is measured from
+---@param sectorID any The sector whose stations are searched, as a 64-bit component ID.
+---@param distance number The radius in metres, measured from the player. 0 returns nothing.
+---@return table npcs The people found, empty when none are in range.
+function GetNPCsInSectorOnStations(sectorID, distance) end
 
 
 --- Calculates the number of items that can be afforded with a given amount of money.
@@ -3588,24 +4578,62 @@ function GetOrderParams(object, orderIndex) end
 function GetOrigin() end
 
 
---- Returns the licences a faction holds, as a list. Called per faction rather than for all of
+---@meta
+---@class OwnLicence
+---@field id string The licence id.
+---@field type string The licence type.
+---@field name string The licence's displayed name.
+---@field price number The licence price.
+---@field minrelation number The minimum relation required to buy it.
+---@field issellable boolean Whether the licence can be bought from this faction.
+---@field icon? string The licence icon.
+---@field desc? string The licence description.
+---@field isbasic? boolean Whether it is a basic licence.
+---@field precursor? string The licence that must be held first.
+---@field parent? string The licence this one sits under.
+
+--- Returns the licences a faction offers, as a list. Called per faction rather than for all of
 --- them - the diplomacy and player information menus loop over the relations and ask for each
---- one, then sort the result themselves.
+--- one, then sort the result themselves; the trader menu asks only about the faction being
+--- traded with.
+---
+--- `precursor` and `parent` are what make the list a tree: a licence with a `precursor`
+--- cannot be bought until that one is held.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1200, ui/addons/ego_detailmonitor/menu_encyclopedia.lua:564
 ---@param factionID string The ID of the faction.
----@return table licences A table of licences owned by the faction.
+---@return OwnLicence[] licences
 function GetOwnLicences(factionID) end
 
 
---- Retrieves role data for people. (No usage found in provided files)
+--- Returns the people aboard a controllable, broken down by role. The result is a mixed table: an
+--- array of one entry per role actually present - { amount, name, role }, where name is the display
+--- name ("Crewman", "Marine") and role the libraries/roles.xml id - plus the hash keys capacity and
+--- stored holding the object's totals.
+---
+--- Passing a role in argument 2 filters the array to that role alone and adds a rolestored key with
+--- its headcount; a role nobody holds gives an empty array and rolestored 0. Measured on 8.00, a
+--- crewed XL ship: 181 service + 179 marine, capacity 361, stored 361.
+---
+--- The roles do not sum to stored. In that measurement they came to 360 against a stored of 361:
+--- a person filling a control post, such as the captain or a station manager, is counted in the
+--- total but belongs to no role. An object whose people all hold posts returns an empty array, so
+--- the array part is invisible unless role-holding crew are actually aboard.
+---
+--- Argument 1 is a controllable, not a role: a role string in slot 1 gives "Invalid argument #1
+--- <controllable> (got string, expected component ID)", and an npc gives "is not of class
+--- controllable". Both rejections still return a table rather than failing, so an empty result is
+--- not by itself evidence that the call was accepted.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return table roleData The role data.
-function GetPeopleRoleData() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - both arguments and the return shape measured in-game
+---@param controllable any The ship or station whose people to report.
+---@param role? string A role id from libraries/roles.xml, e.g. "marine", "service", "worker".
+---@return table roleData Array of { amount: integer, name: string, role: string }, plus capacity, stored and (when role is given) rolestored.
+function GetPeopleRoleData(controllable, role) end
 
 
 --- Returns whether crash reports carry the player's user ID, and pairs with
@@ -3619,12 +4647,18 @@ function GetPeopleRoleData() end
 function GetPersonalizedCrashReportsOption() end
 
 
---- Retrieves a list of platforms. (No usage found in provided files)
+--- Returns the **docking bays** of a container, whatever this name suggests - every one of 358
+--- elements measured across five targets resolved to class `dockingbay`, with bay names like
+--- "S Standard Docking Bay" and "M Luxury Docking Bay". It accepts ships as readily as
+--- stations: a player HQ gave 172, a shipyard 166, a Tokyo carrier 19, a Syn destroyer 1 and a
+--- Katana corvette 0 - the empty being the correct answer for a ship with no bay.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return table platforms A table of platforms.
-function GetPlatforms() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - arity 1, every element's class resolved over the whole array
+---@param container any The ship or station whose docking bays to list.
+---@return table dockingBays Array of `dockingbay` components; empty when the container has none.
+function GetPlatforms(container) end
 
 
 --- Returns what the player is currently doing as three values: the activity name, its colour
@@ -3654,13 +4688,15 @@ function GetPlayerActivity() end
 function GetPlayerContextByClass(className) end
 
 
---- Returns the player's inventory as a table. Every menu that shows or spends inventory wares -
---- crafting, the mod shop, the player information page - reads it fresh rather than caching it.
+--- Returns the player's inventory, keyed by ware id, in the same shape `GetInventory` returns
+--- for any other entity: each value carries `name`, `amount` and `price`. Every menu that shows
+--- or spends inventory wares - crafting, the mod shop, the player information page - reads it
+--- fresh rather than caching it, because crafting and trading both change it underneath.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 11 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:227, ui/addons/ego_detailmonitor/menu_diplomacy.lua:4110
----@return table inventory A table representing the player's inventory.
+---@return table<string, InventoryWare> inventory
 function GetPlayerInventory() end
 
 
@@ -3738,32 +4774,67 @@ function GetPlayerSteeringStrength() end
 function GetPlayerTarget() end
 
 
+---@meta
+---@class DisplayAdapter
+---@field name string The adapter name.
+---@field ordinal integer The adapter ordinal - the value `SetAdapterOption` takes.
+
 --- Returns the graphics adapters that can be selected, as a list. The options menu pairs it
---- with `GetAdapterOption` to build the dropdown and mark the current one.
+--- with `GetAdapterOption` to build the dropdown and mark the current one; `GetAdapterOption`
+--- reports the adapter by **name**, so vanilla matches on `name` and then uses `ordinal` as the
+--- dropdown's value.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:6936
----@return table adapters A table of available adapters.
+---@return DisplayAdapter[] adapters
 function GetPossibleAdapters() end
 
 
---- Retrieves a list of possible products for a module. (No usage found in provided files)
+---@meta
+---@class ProductResource
+---@field ware string The resource ware id.
+---@field name string The resource's displayed name.
+---@field cycle number The amount consumed per cycle.
+
+---@meta
+---@class PossibleProduct
+---@field ware string The product ware id.
+---@field name string The product's displayed name.
+---@field cycletime number The cycle duration in seconds - the `time` of the matching method in `libraries/wares.xml`.
+---@field component string Empty string on every target measured, both player and NPC owned. Unexplained.
+---@field resources ProductResource[] What each cycle consumes; each element's `cycle` is that input's `amount`.
+
+--- Returns what a production module produces - despite the plural, **one entry per module, not
+--- one per production method of the ware**. A hull parts module returned only the `default`
+--- method, 900s for graphene 40 / energycells 80 / refinedmetals 280, though `hullparts` defines
+--- three methods; `libraries/modulegroups.xml` explains it, giving `prod_gen_hullparts` and
+--- `prod_tel_hullparts` **separate module macros**. So the module's own macro decides the
+--- method, and the ware's method list is not what this reads.
+---
+--- The module is class `module, destructible, production` and **not** `container` or `object`,
+--- which is the class shape a container-guard silently skips.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param moduleID any The ID of the module.
----@return table products A table of possible products.
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - two wares, two owners, entries dumped in full, arity 1
+---@param moduleID any The production module to ask about.
+---@return PossibleProduct[] products
 function GetPossibleProducts(moduleID) end
 
 
---- Returns the resolutions the display can take, as a list of tables with `width` and `height`.
---- The options menu sorts them itself and marks the one `GetResolutionOption` reports.
+---@meta
+---@class ScreenResolution
+---@field width number Resolution width in pixels.
+---@field height number Resolution height in pixels.
+
+--- Returns the resolutions the display can take, as a list. The options menu sorts them itself
+--- and marks the one `GetResolutionOption` reports.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7386
----@return table resolutions A table of available resolutions.
+---@return ScreenResolution[] resolutions
 function GetPossibleResolutions() end
 
 
@@ -3791,15 +4862,45 @@ function GetPrioritizedPlatformNPCs(component) end
 function GetProcessingModuleData(module) end
 
 
---- Returns the live production state of a module - its `state` (`producing`,
---- `waitingforresources`, `empty`) and its `cycleprogress`. It can come back empty for a module
---- that is not producing at all, and the map menu tests for that.
+---@meta
+---@class ProductionWare
+---@field ware string The ware id.
+---@field name string The ware's displayed name.
+---@field amount number The amount in storage.
+---@field cycle number The amount per cycle.
+---@field component string The component name.
+
+---@meta
+---@class ProductionWareList
+---@field [integer] ProductionWare The wares themselves.
+---@field efficiency number Efficiency percentage; 100 by default.
+
+---@meta
+---@class ProductionModuleData
+---@field state string `"producing"`, `"waitingforresources"`, `"empty"` and the other production states.
+---@field cycletime number Cycle duration; 0 unless the state is `producing`.
+---@field remainingcycletime number Time left in this cycle; 0 unless the state is `producing`.
+---@field cycleprogress number Percentage through the current cycle; 0 unless the state is `producing`.
+---@field cycleefficiency number Cycle efficiency percentage; 100 by default.
+---@field remainingtime number Time until the module runs out of resources. Ignores limited storage space.
+---@field products ProductionWareList What the module makes.
+---@field presources ProductionWareList Primary resources, in the same shape as `products`.
+---@field sresources ProductionWareList Secondary resources, in the same shape as `products`.
+---@field estimated? boolean Non-nil when the figures are filtered rather than exact.
+
+--- Returns the live production state of a module. It can come back holding nothing but
+--- `state = "empty"` for a module that is not producing at all, and the map menu tests for
+--- that; `menu_research.lua` relies on the same thing, guarding `cycleprogress` with `or 0`.
+---
+--- `cycletime`, `remainingcycletime` and `cycleprogress` are 0 outside the `producing` state
+--- rather than absent. The three ware lists carry their wares in the array part and an
+--- `efficiency` percentage as a named field alongside them, so walk them with `ipairs`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 21 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:17814, ui/addons/ego_detailmonitor/menu_research.lua:271
----@param module any The module identifier.
----@return table data The data for the production module, including `cycleprogress` and `state`.
+---@param module any The production module to inspect.
+---@return ProductionModuleData data
 function GetProductionModuleData(module) end
 
 
@@ -3811,16 +4912,27 @@ function GetProductionModuleData(module) end
 -- Usage: confirmed - 9 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2761, ui/addons/ego_detailmonitor/menu_map.lua:14498
 ---@param objectID any The ID of the object (e.g., station).
----@return table modules A table of production modules.
+---@return table modules A table of production modules, as Lua-side component ids. Every vanilla
+--- site feeds them straight back to a Lua global such as `GetComponentData`; an `ffi` call needs
+--- `ConvertIDTo64Bit` first, and handed one raw it reads nothing.
 function GetProductionModules(objectID) end
 
 
---- Gets the name of the radar module. (No usage found in provided files)
+--- Returns "" on every call, on both versions, so nothing has ever read a radar module name
+--- out of it. 9.00 deprecates it outright: the engine answers every call with `has been
+--- deprecated and has no effect` and no longer checks the argument count, where 8.00 refuses a
+--- bare call with `Invalid number of arguments (0, expected 1)`.
 -- Environment: addons only
--- Versions: 8.00, 9.00
+-- Versions: 8.00 - deprecated in 9.00
 -- Usage: unverified - no vanilla call site
----@return string name The name of the radar module.
-function GetRadarModuleName() end
+-- Deprecated: 9.00 - the engine answers every call with `has been deprecated and has no
+-- effect`, and stops checking the argument count; 8.00 still refuses a bare call
+-- Probed: 8.00, 9.00 - the one behaviour difference the 9.00 pass found: "" and a live arity
+-- check on 8.00, the deprecation notice and no arity check on 9.00, over two call keys in two
+-- separate runs
+---@param object any The object to ask about. Never read; 9.00 does not check that it is there.
+---@return string name Always "", on both versions.
+function GetRadarModuleName(object) end
 
 
 --- Returns the radar quality level on the engine's scale, which starts at zero; the options
@@ -3849,30 +4961,60 @@ function GetRadarOption() end
 function GetReferenceProfit(shipID, ware, price, amount) end
 
 
+---@meta
+---@class RegisteredModule
+---@field id string The module id.
+---@field name string The module's displayed name.
+---@field description? string The gamestart description, if any.
+---@field image? string The gamestart image, if any.
+---@field tutorial? boolean Whether the module is a tutorial.
+---@field group? any The group the tutorial belongs to; the help menu groups by it.
+---@field unlocked? boolean Whether the module is unlocked.
+---@field unlockhidden? boolean Whether it is hidden until unlocked.
+---@field hasunlockconditions? boolean Whether it has unlock conditions at all.
+---@field unlockprogress? number Progress towards unlocking.
+---@field unlocktotal? number The total needed to unlock.
+---@field unmetuserdata? any The unmet unlock condition.
+---@field custom? boolean Whether it is a custom module.
+---@field timelinesscenario? boolean Whether it is a Timelines scenario.
+---@field scenariodata? table Scenario details; carries `chapter`.
+---@field scenariochapterfinale? boolean Whether it ends its chapter.
+---@field usetimelinesplayercharacter? boolean Whether it uses the Timelines player character.
+
 --- Returns the registered game modules - tutorials and scenarios - as a list. Called with no
 --- argument it leaves scenarios out; the scenario selection passes true to get them.
+---
+--- The help menu filters on `unlockhidden` and `unlocked` and groups tutorials by
+--- `group`, and the scenario selection uses `timelinesscenario`, `scenariodata.chapter`,
+--- `hasunlockconditions` and `unlocked` to decide what to show. Note that `stats` and `ladder`,
+--- which also appear on these entries in `menu_scenario_selection.lua`, are added by the menu
+--- afterwards and do not come from here.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 8 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_help.lua:215, ui/addons/ego_detailmonitor/menu_scenario_debriefing.lua:90
 ---@param includeScenarios? boolean If true, includes scenarios in the list.
----@return table modules A table of registered modules.
+---@return RegisteredModule[] modules
 function GetRegisteredModules(includeScenarios) end
 
 
---- Returns the mouse position relative to one element, as fractions rather than pixels:
---- `widget_fullscreen.lua` maps the result to -1..1 with `posX * 2 - 1`. `useElementSize`
---- decides whether the element's size is taken into account, and the x comes back nil when the
---- pointer is not over it.
+--- Returns the mouse cursor position in an element's own coordinate space, as x, y and z.
+--- 0/0/0 is the element's upper left front edge. Without `useElementSize`, or with it false, the
+--- range is 0 to 1; with it true the range runs to the element's own `boxWidth`, `boxHeight`
+--- and `boxDepth`.
+---
+--- The result is undefined if the element is not pickable at all, or was not hit by the cursor
+--- in the current frame - vanilla only ever calls it on an element it has just established the
+--- mouse is over. Two of the three call sites take x and y alone and ignore z.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 3 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/dialogmenu.lua:892, ui/core/lua/monitors.lua:3633
 ---@param elementID any The ID of the UI element.
----@param useElementSize boolean Whether to consider the element's size.
+---@param useElementSize? boolean Scale to the element's own size instead of 0 to 1.
 ---@return number x The relative x-coordinate.
 ---@return number y The relative y-coordinate.
----@return number z The relative z-coordinate (if applicable).
+---@return number z The relative z-coordinate.
 function GetRelativeMousePosition(elementID, useElementSize) end
 
 
@@ -3944,15 +5086,53 @@ function getRow(table, row) end
 function GetRumbleOption() end
 
 
---- Returns the savegames as a table. The argument is a filter function the engine calls per
+---@meta
+---@class SaveInvalidPatch
+---@field id string The patch id.
+---@field name string The patch name.
+---@field state any The patch state.
+---@field requiredversion any The version the savegame requires.
+---@field installedversion any The version currently installed.
+
+---@meta
+---@class SaveGameEntry
+---@field filename string The save file name.
+---@field name string The savegame name. Where `error` is set, this holds the non-localised error message instead.
+---@field displayedname string The name as the menu shows it.
+---@field description string The savegame description.
+---@field location string The save location.
+---@field time string The formatted save date.
+---@field rawtime number The save date as a number.
+---@field version any The savegame version.
+---@field rawversion any The savegame version as a number.
+---@field empty boolean Whether the slot is empty.
+---@field error boolean The savegame could not be read; `name` then holds the error message.
+---@field modified? boolean Whether the save was made on a modified game.
+---@field isonline? boolean Whether it is an online save.
+---@field isonlinesavefilename? boolean Whether the file name is an online save name.
+---@field invalidgameid? boolean The save is from a different game.
+---@field invalidversion? boolean The save version is newer than the running game.
+---@field invalidpatches? SaveInvalidPatch[] Extensions whose versions do not match.
+---@field playtime? number Played time. Documented; vanilla does not read it.
+---@field playername? string Player name. Documented; vanilla does not read it.
+---@field money? number Player money. Documented; vanilla does not read it.
+---@field difficulty? any Save difficulty. Documented; vanilla does not read it.
+---@field mindifficulty? any The lowest difficulty the save was ever set to. Documented; vanilla does not read it.
+
+--- Returns the savegames as a list. The argument is a filter function the engine calls per
 --- file - vanilla passes `Helper.validSaveFilenames`, which keeps the game's own naming scheme
 --- and drops anything else in the folder.
+---
+--- It is performance critical: do not call it unnecessarily. The three `invalid*` fields are
+--- what the load menu checks before letting a save be opened, and `error` marks a save that
+--- could not be read at all - its `name` then carries the raw error message rather than a
+--- savegame name.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:24909, ui/addons/ego_gameoptions/gameoptions.lua:11608
 ---@param filter? function An optional function to filter the save game list.
----@return table savegames A table of save game information.
+---@return SaveGameEntry[] savegames
 function GetSaveList(filter) end
 
 
@@ -4077,25 +5257,53 @@ function GetSSAOOption() end
 function GetStandardButtons(frame) end
 
 
---- Returns the macros of the standard (non-mining, non-transport) unit types.
---- No vanilla code calls this; the return shape is unverified.
+--- Returns the unit macros a ship macro carries as standard. The argument is a **macro name
+--- string**, not a component; this row declared no parameter until it was measured. A bare call
+--- still returns an **empty array**, so nothing in the return value says an argument is
+--- missing - the engine says it in the log instead, as
+--- `Invalid number of arguments (0, expected 1)`.
+---
+--- Measured on 8.00, and the set is small: every ship macro tried - bomber, corvette,
+--- destroyer, battleship, both miners - returns `ship_gen_xs_cargodrone_empty_01_a_macro`;
+--- `ship_ter_xl_carrier_01_a_macro` adds `ship_gen_xs_buildingdrone_01_a_macro`; and
+--- `ship_arg_m_miner_liquid_01_a_macro` adds `ship_gen_s_miningdrone_liquid_01_a_macro`,
+--- which is exactly what `GetMiningUnitMacros` returns on its own for that macro. A station
+--- macro returns an empty array.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return any macros
-function GetStandardUnitMacros() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - 54 calls over nine ship macros and a station macro; no target has yet
+-- returned more than two entries
+---@param macro string The macro name of the ship to ask about.
+---@return string[] macros The standard unit macros, empty when the macro carries none.
+function GetStandardUnitMacros(macro) end
 
 
---- Reads named properties of one statistic and returns one value per name, in order -
---- `"hidden"`, `"displayname"`, `"displayvalue"`. Same shape as `GetComponentData`: ask for
---- everything you need in one call. The statistic IDs come from `GetAllStatIDs`.
+--- Reads named properties of one statistic and returns one value per name, in order. Same
+--- shape as `GetComponentData`: ask for everything you need in one call. The statistic IDs
+--- come from `GetAllStatIDs`.
+---
+--- **Five property names are measured**, where vanilla uses only the last three:
+--- `"exists"` (boolean), `"value"` (the raw number), `"hidden"` (boolean, the `secret`
+--- attribute of `libraries/stats.xml` resolved against the current value), `"displayname"`
+--- and `"displayvalue"`. **`"displayvalue"` is formatted, not numeric** - the same statistic
+--- reads back as `"480"` and, once set to 4242, as `"4,242"` - so anything doing arithmetic
+--- wants `"value"`.
+---
+--- **A bad property name and a bad statistic ID fail differently.** A bad name is reported as
+--- `Invalid argument N, got unknown key 'X'`, puts `nil` in that slot and still returns every
+--- good property beside it. A bad ID returns **no values at all**, silently, with nothing in
+--- the log - so `nret == 0` means argument 1 was wrong, and `"exists"` can never answer
+--- `false`. Use `GetAllStatIDs` to test for a statistic, not this.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_playerinfo.lua:2527, ui/addons/ego_detailmonitor/menu_playerinfo.lua:2531
----@param stat any The statistic ID.
----@param ... string Property names, e.g. hidden, displayname, displayvalue.
----@return ... any One value per requested property, in order.
+-- Probed: 8.00, 9.00 - five keys measured on one statistic, plus a bad-key and an absent-id
+-- control; the same answers on both versions, the good key still returned beside the bad one
+---@param stat string The statistic ID, one of those `GetAllStatIDs` returns.
+---@param ... string Property names: exists, value, hidden, displayname, displayvalue.
+---@return ... any One value per requested property, in order; nothing at all if the ID is unknown.
 function GetStatData(stat, ...) end
 
 
@@ -4118,13 +5326,44 @@ function GetSteeringNoteOption() end
 function GetStopShipInMenuOption() end
 
 
---- Returns the storage modules of a station or build storage, with their capacities.
+---@meta
+---@class StorageWare
+---@field ware string The ware id.
+---@field name string The ware's displayed name.
+---@field amount number Units currently stored.
+---@field volume number Volume per unit.
+---@field consumption number Consumption and production of this ware.
+
+---@meta
+---@class StorageModule
+---@field [integer] StorageWare The wares held in this cargo bay.
+---@field name string The cargo bay's name.
+---@field capacity number The bay's capacity.
+---@field stored number The amount stored in the bay.
+---@field consumption number The bay's total consumption.
+
+---@meta
+---@class StorageData
+---@field [integer] StorageModule One entry per storage module.
+---@field capacity number Total capacity across all modules.
+---@field stored number Total amount stored across all modules.
+---@field estimated? boolean Non-nil when the figures are filtered rather than exact.
+---@field modules? StorageModule[] Documented, but no vanilla code reads it.
+
+--- Returns the storage of a container as an array of storage modules, plus the totals.
+--- Iterate the array part for the modules and each module's own array part for its wares -
+--- all five vanilla call sites do exactly that, and `menu_map.lua:14529` spells the fields out
+--- in its own comments. The totals `capacity` and `stored` sit on the returned table itself;
+--- `estimated` is non-nil only where the player cannot see exact figures, which is what
+--- `targetmonitor.lua` tests before prefixing the value with an approximation mark. For a
+--- container with no storage information the table is empty, so vanilla guards every read
+--- with `next(storagearray)`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 5 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:14043, ui/addons/ego_targetmonitor/targetmonitor.lua:878
 ---@param object any The container to inspect.
----@return table storagemodules
+---@return StorageData
 function GetStorageData(object) end
 
 
@@ -4397,22 +5636,70 @@ function GetTopTargetPriorityMessages(category, maxMessages) end
 function GetTotalValue(ship, unknown, shipyard) end
 
 
+---@meta
+---@class TradePriceModifier
+---@field name string The modifier name.
+---@field level any The modifier level.
+---@field amount number The modifier amount.
+---@field expire number When the modifier expires.
+
+---@meta
+---@class TradeData
+---@field id any The trade id - what `CanTradeWith` and `IsValidTrade` take.
+---@field ware string The ware traded.
+---@field name string The ware's displayed name.
+---@field amount number The trade amount.
+---@field desiredamount number The desired amount.
+---@field minamount number The minimum amount; vanilla passes this to `CanTradeWith`.
+---@field price number The trade price.
+---@field marketprice number The price before discounts and commissions.
+---@field quantityfactor number Market price divided by average price.
+---@field totalprice number Price times amount.
+---@field totalmarketprice number Market price times amount.
+---@field isbuyoffer boolean Whether the offer is a buy offer.
+---@field isselloffer boolean Whether the offer is a sell offer.
+---@field rebundle boolean Whether units are rebundled.
+---@field unbundle boolean Whether units are unbundled.
+---@field expire number When the trade expires.
+---@field isshady? boolean Whether the offer is a shady one; the map can filter on it.
+---@field ismissionoffer? boolean Whether the offer belongs to a mission.
+---@field issupply? boolean Whether the offer is a supply offer.
+---@field station? any The trade container.
+---@field stationname? string The trade container's name.
+---@field stationzone? string The trade container's zone name.
+---@field stationzoneid? any The trade container's zone.
+---@field stationsectorid? any The trade container's sector.
+---@field isplayer? boolean Whether the trade container is player owned.
+---@field faction? string The trade container's faction.
+---@field pricemodifiers? TradePriceModifier[] The modifiers applied to the price.
+
 --- Returns everything about one trade - the ware, the amounts, the price. The second argument
 --- is the container it is being looked at from, which decides whether the trade reads as a buy
 --- or a sell; without it the trade is described from its own side. Guard it with
 --- `IsValidTrade`, because a trade can be gone by the time the row showing it is redrawn.
+---
+--- The station fields and `pricemodifiers` are only present where the trade has a container
+--- behind it. The map reads `isshady`, `ismissionoffer` and `issupply` when it sorts offers
+--- into its buy, sell and mission lists. Fields
+--- like `active`, `stale` and `ammotypename` also appear on these tables in `menu_map.lua`, but
+--- the menu writes those itself - they do not come from here.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 3 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:1063, ui/addons/ego_detailmonitor/menu_map.lua:27498
 ---@param tradeID any The trade to read.
 ---@param component? any Container the trade is viewed from, which decides the buy/sell direction.
----@return table tradedata
+---@return TradeData tradedata
 function GetTradeData(tradeID, component) end
 
 
---- Returns the trade offers of a container, as seen from a given ship.
---- Vanilla passes nothing for the tradeable offers and false for the non-trade entries.
+--- Returns the trade offers of a container, as seen from a given ship, each entry in the same
+--- shape `GetTradeData` returns for a single trade.
+---
+--- The third argument selects which half of the list comes back. Vanilla calls it twice on the
+--- same container and ship - once with the argument omitted for the offers the ship can act on,
+--- and once with false for the rest, which it then marks `stale` and inactive after
+--- deduplicating them against the first set by trade id.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 6 vanilla call sites, 1-3 arguments
@@ -4420,36 +5707,81 @@ function GetTradeData(tradeID, component) end
 ---@param tradeOfferContainer any The station or ship offering the trades.
 ---@param currentShip? any The ship the offers are evaluated for.
 ---@param unknown? boolean Selects which half of the list is returned.
----@return table tradeoffers
+---@return TradeData[] tradeoffers
 function GetTradeList(tradeOfferContainer, currentShip, unknown) end
 
 
---- Returns the trade orders currently queued.
---- No vanilla code calls this; the parameters and return shape are unverified.
+--- Returns the trade orders a container currently has queued, as an array of order entries. Each
+--- entry names the ware and the station it is placed at, the agreed amount and price, and flags for
+--- what kind of order it is:
+---   amount, minamount   integer   units ordered, and the smallest acceptable fill
+---   name                string    ware name, e.g. "Advanced Composites"
+---   price               number    this order's price; averageprice is the ware's market average
+---   id                  userdata  the order's own component id
+---   station, stationname          the counterparty station and its name
+---   isbuyoffer, isselloffer, ispassive, isshiptoship, iswareexchange   boolean
+---
+--- The array is a flat list of whatever orders the container currently holds, one entry each, in no
+--- documented order. Measured on 8.00: a mining ship held a single buy order (6250 Ice at one
+--- station), a trade ship held two for the same ware, one marked isselloffer and one isbuyoffer at
+--- different stations. Do not read a pairing into that - the two entries are independent orders that
+--- happened to share a ware, not the legs of one run. A container with nothing queued returns an
+--- empty table, so an empty result means no orders, not a bad call.
+-- Environment: addons only
+-- Versions: 8.00, 9.00
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - signature and return shape measured in-game
+---@param container any The ship or station whose orders to report.
+---@return table orders Array of { amount, minamount, name, price, averageprice, id, station, stationname, isbuyoffer, isselloffer, ispassive, isshiptoship, iswareexchange }.
+function GetTradeOrders(container) end
+
+
+---@meta
+---@class TradeRestrictions
+---@field faction boolean The global restriction on trading with other factions.
+---@field overrides table<string, boolean> Per-ware overrides of that global restriction.
+
+--- Returns the trade restrictions on a container: one global faction restriction plus the
+--- per-ware overrides of it. `ToggleFactionTradeRestriction` and `ToggleFactionTradeWareOverride`
+--- are the setters for the two halves.
+---
+--- No vanilla code calls it, so the signature is unverified: the container parameter and the
+--- shape are what the community reference describes, and the entry here previously declared no
+--- parameter at all. Note that the documentation spells the second field `overrrides`, with
+--- three r's; that is a typo in the documentation rather than the field name, but nothing here
+--- can confirm which spelling the engine actually returns.
+--
+-- The engine answers every call with `Obsolete since version 3.20, returns empty data!` and an
+-- empty table. So the shape below is the documentation's, not a measurement: nothing this
+-- build returns can confirm it.
+-- Environment: addons only
+-- Versions: none - present in both, but deprecated in 3.20
+-- Usage: unverified - no vanilla call site
+-- Deprecated: 3.20 - the engine answers every call with `Obsolete since version 3.20,
+-- returns empty data!` and an empty table, on both versions
+-- Probed: 8.00 - empty data, with the engine's obsolescence notice beside it
+---@param containerID any The container to ask about.
+---@return TradeRestrictions restrictions
+function GetTradeRestrictions(containerID) end
+
+
+--- Returns the trades offered at one connection of a container. Arity is 2, stated by the engine
+--- itself (`Invalid number of arguments (0, expected 2)`), and argument 2 is a template
+--- connection name by the shape of its only sibling, `GetMissionOfferAtConnection`, which vanilla
+--- calls twice and gates on `HasTag(component, connection, "mission")`.
+---
+--- **The return is still unmeasured.** The connection an interact menu carries on the map is
+--- `"connectionui"`, the generic UI connection rather than a tagged interaction point, and the
+--- sibling answered nothing on it either. A tagged connection belongs to a trade console or dock
+--- point, which can only be clicked in first person, where the interact menu does not open.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
----@return any orders
-function GetTradeOrders() end
-
-
---- Returns the trade restrictions in effect.
---- No vanilla code calls this; the parameters and return shape are unverified.
---- ToggleFactionTradeRestriction and ToggleFactionTradeWareOverride are the setters.
--- Environment: addons only
--- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return any restrictions
-function GetTradeRestrictions() end
-
-
---- Returns the trades offered at a specific container connection.
---- No vanilla code calls this; the parameters and return shape are unverified.
--- Environment: addons only
--- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return any trades
-function GetTradesAtConnection() end
+-- Probed: 8.00 - arity from the engine; no tagged connection has been reached to ask on
+---@param component any The container the connection belongs to.
+---@param templateConnectionName string The name of the template connection.
+---@return table trades
+function GetTradesAtConnection(component, templateConnectionName) end
 
 
 --- Returns a container's trade offers for one ware. The interact menu treats an empty result as
@@ -4466,30 +5798,93 @@ function GetTradesAtConnection() end
 function GetTradesForWare(component, ware, unknown) end
 
 
---- Returns the trade-related data of a single ship.
---- No vanilla code calls this; the parameters and return shape are unverified.
+---@meta
+---@class TradeShipCargo
+---@field ware string The ware id, as in `wares.xml`.
+---@field name string The ware's displayed name.
+---@field amount number Units of the ware carried.
+---@field volume number Volume of THIS stack - the amount times the ware's unit volume, not the unit volume.
+
+---@meta
+---@class TradeShipQueueEntry
+---@field id any The trade partner's cargo bay: a `cargobay` component, not an abstract trade id.
+---@field name string The ware's displayed name.
+---@field amount number The trade amount.
+---@field minamount number The trade's minimum amount.
+---@field price number The trade price.
+---@field averageprice number The ware's universe average price from `wares.xml` - a constant, not this ship's average.
+---@field isbuyoffer boolean Whether the ship is selling.
+---@field isselloffer boolean Whether the ship is buying.
+---@field stationname? string The trade partner's name.
+---@field stationsectorid? any The trade partner's sector.
+
+---@meta
+---@class TradeShipData
+---@field shipid any The ship id.
+---@field name string The ship's displayed name.
+---@field cargo TradeShipCargo[] One entry per ware stack in the hold; empty when the hold is empty.
+---@field queue TradeShipQueueEntry[] The ship's trade queue.
+---@field cargocurrent number Cargo space used, in volume - not in units of ware.
+---@field cargomax number Cargo capacity, in volume.
+---@field cargofree number Free cargo capacity, in volume.
+---@field numtrips number The number of planned trips. Matched the queue length in both ships measured.
+
+--- Returns the trade-related state of one ship: what it is carrying, its cargo figures and its
+--- trade queue. Note that `isbuyoffer` and `isselloffer` read from the offer's side, not the
+--- ship's - a buy offer is one the ship sells into.
+---
+--- **The argument must be a ship.** A station is refused with `Component '<name>' is not of class
+--- ship` and nothing comes back. `GetTradeShipList` returns a list of these.
+---
+--- `cargo` and `queue` are both plain arrays, countable with `#`. `cargo` is **one entry per ware
+--- stack** rather than a single record, which is what this row declared until a loaded miner was
+--- measured, and it is empty on a ship with an empty hold.
+---
+--- **The cargo figures are volumes, not units.** A miner holding 5,000 silicon reports
+--- `amount = 5000` and `volume = 50000` - the ware's unit volume of 10 times the amount - and
+--- `cargocurrent` is that same 50,000 against a `cargomax` of 50,000 with `cargofree` at 0.
+---
+--- The offer-side reading of the two flags is measured too: a trader's queued pair came back as
+--- `isselloffer = true` at 481 where it buys and `isbuyoffer = true` at 485 where it sells.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return any shipdata
-function GetTradeShipData() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - the whole structure, on a loaded miner and a trader with two trades queued
+---@param shipID any The ship to ask about.
+---@return TradeShipData shipdata
+function GetTradeShipData(shipID) end
 
 
---- Returns the player ships currently available for trade orders.
+--- Returns the player ships available for trade orders, each entry in the same shape
+--- `GetTradeShipData` returns for a single ship. The map takes the list and filters it down
+--- itself: it drops any ship with a commander other than the player-occupied ship, anything
+--- deployable, anything with no transport unit macros, and optionally the player's own ship and
+--- ships already running an order loop.
+---
+--- Only `shipid` is confirmed - it is the one field the single vanilla call site reads, and it
+--- feeds `GetCommander`, `GetComponentData` and `ConvertIDTo64Bit`. The rest of the entry is
+--- what the community reference describes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:30308
----@return table ships
+---@return TradeShipData[] ships
 function GetTradeShipList() end
 
 
---- Gets the current traffic density setting.
---- No vanilla code calls the getter; SetTrafficDensityOption is its setter.
+--- Returns the current traffic density - the value `SetTrafficDensityOption` writes. No vanilla
+--- code calls either half, and unlike the character-density pair this setting has no MD property
+--- and no script reader at all.
+---
+--- Reads the persisted setting, not save state: it matches `<trafficdensity>` in `config.xml` and
+--- survives a reload. Returns the stored 32-bit float widened to a Lua number, so a value that is
+--- not exactly representable comes back approximate - `0.8` reads as `0.80000001192093`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@return any density
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - the read-back witness for SetTrafficDensityOption across four values, on
+-- both versions
+---@return number density Traffic density. 0 to 1 by convention; the setter does not clamp.
 function GetTrafficDensityOption() end
 
 
@@ -4558,28 +5953,52 @@ function GetVolumeOption(sfxType) end
 function GetWareCapacity(componentID, wareID, arg3) end
 
 
---- Retrieves data for a specific ware. This is a variadic function.
+--- Reads named properties off a ware, in the same variadic form as `GetComponentData`: every
+--- argument after the ware id is a property name, and one value comes back per name, in order.
+--- Vanilla calls it more often than almost anything else in the file, usually for `name` alone
+--- but frequently for a handful at once.
+---
+--- The 67 keys 9.00 vanilla passes, most used first:
+---
+--- `name`, `component`, `avgprice`, `islimited`, `transport`, `volume`, `ismissiononly`,
+--- `resources`, `ispaintmod`, `maxprice`, `ispersonalupgrade`, `isprimarymodpart`, `minprice`,
+--- `researchprecursors`, `tradelicence`, `volatile`, `buyprice`, `description`, `isunbundleammo`,
+--- `sortorder`, `allowdrop`, `hasblueprint`, `iscraftingresource`, `isequipment`,
+--- `ishiddenwithoutlicence`, `ismodpart`, `isbraneitem`, `video`, `blueprintsowners`,
+--- `iscrafting`, `isdeprecated`, `isoperationvolatile`, `isplayerblueprintallowed`,
+--- `isseasonvolatile`, `nocustomgamestart`, `productionresearchprecursors`, `products`,
+--- `researchtime`, `tradeonly`, `hasproductionmethod`, `icon`, `inventory`, `iscraftable`,
+--- `isprocessed`, `issinglecraft`, `isunreadinventory`, `isventureuploadallowed`, `modclass`,
+--- `modquality`, `playerillegal`, `productionmethod`, `shortname`, `factoryname`, `image`,
+--- `isblueprintsaleonly`, `iscargo`, `isexplorationchart`, `isminable`, `ismodule`, `isship`,
+--- `istransmutable`, `miningmapcolor`, `productionamount`, `productionmethods`, `productiontime`,
+--- `storagename`, `tags`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 338 vanilla call sites, 2-8 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:102, ui/addons/ego_detailmonitor/menu_crafting.lua:238
 ---@param wareID string The ID of the ware.
----@param ... string One or more string keys for the data to retrieve (e.g., "name", "description", "price").
----@return any ... The requested ware data.
+---@param ... string One or more property names.
+---@return ... any One value per name, in the order asked.
 function GetWareData(wareID, ...) end
 
 
 --- Returns the trades available for a ware exchange between two containers, as a list of trade
---- offers. Despite the parameter names here, the map menu passes the **ship** and the **other
---- container**, not a station and a ware.
+--- offers in the same shape `GetTradeData` returns for a single trade. It takes the **ship**
+--- and the **other container** - `menu_map.lua:21362` passes exactly that pair.
+---
+--- `SetVirtualCargoMode` has to have been called on both containers first, or the result comes
+--- back empty, which is the reason a correct-looking call can return nothing. No vanilla call
+--- site passes a third argument.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21362
----@param stationID any The ID of the station.
----@param wareID string The ID of the ware.
----@return table tradeList A table containing the ware exchange trade list.
-function GetWareExchangeTradeList(stationID, wareID) end
+---@param tradingShipID any The ship doing the exchange.
+---@param tradedContainerID any The container it is exchanging with.
+---@param sortby? any Sort order. Documented; no vanilla call site passes one.
+---@return TradeData[] tradeList
+function GetWareExchangeTradeList(tradingShipID, tradedContainerID, sortby) end
 
 
 --- Returns the production limit set for a ware at a container - the amount the station is meant
@@ -4731,14 +6150,25 @@ function HasFlightControl(componentID) end
 function HasLicence(factionID, licenceID, otherFactionID) end
 
 
---- Reports whether a component has a shipyard. No vanilla code calls it - the menus ask
---- `GetComponentData(id, "isshipyard")`, which answers several such questions at once.
+--- Reports whether a **space** - a cluster, sector or zone - contains a shipyard. No vanilla
+--- code calls it; the menus ask `GetComponentData(id, "isshipyard")` of an object instead,
+--- which answers several such questions at once.
+---
+--- **It never returns `false`.** A space with a shipyard returns `true`; one without returns
+--- *nothing at all*, which reaches the caller as `nil`. `if HasShipyard(s) then` is therefore
+--- correct, while anything that counts return values or compares against `false` is not.
+---
+--- A bare `HasShipyard()` returns `true`, because the missing argument resolves to the whole
+--- universe, which does contain shipyards. That is not an error and not an answer about
+--- anything the caller has in hand.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param componentID any The ID of the component.
----@return boolean isShipyard True if the component is a shipyard.
-function HasShipyard(componentID) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - 51 calls, the true and the silent case each matched against the map across
+-- thirteen sectors
+---@param spaceID any The cluster, sector or zone to ask about.
+---@return boolean? isShipyard `true`, or no value at all when there is none.
+function HasShipyard(spaceID) end
 
 
 --- Reports whether a connection of a component carries a tag. The connection matters as much as
@@ -4756,14 +6186,24 @@ function HasShipyard(componentID) end
 function HasTag(componentID, connectionName, tag) end
 
 
---- Reports whether a component has a wharf. No vanilla code calls it - the menus ask
---- `GetComponentData(id, "iswharf")` instead, which answers several such questions in one call.
+--- Reports whether a **space** - a cluster, sector or zone - contains a wharf. No vanilla code
+--- calls it; the menus ask `GetComponentData(id, "iswharf")` of an object instead, which
+--- answers several such questions in one call.
+---
+--- **It never returns `false`**, exactly as `HasShipyard` does not: a wharf gives `true`, no
+--- wharf gives *nothing*, reaching the caller as `nil`. A bare `HasWharf()` returns `true`,
+--- the missing argument resolving to the whole universe.
+---
+--- Unlike its twin, this name is absent from the community LuaLS library altogether, so the
+--- space-class argument here is the engine's own, taken from its rejection of everything else.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param componentID any The ID of the component.
----@return boolean hasWharf True if the component has a wharf.
-function HasWharf(componentID) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - 51 calls, the true and the silent case each matched against the map across
+-- thirteen sectors
+---@param spaceID any The cluster, sector or zone to ask about.
+---@return boolean? hasWharf `true`, or no value at all when there is none.
+function HasWharf(spaceID) end
 
 
 --- Reports whether any extension setting has been changed since the game started - what the
@@ -4871,15 +6311,26 @@ function HideTriangle(triangleID) end
 function HideView(viewID) end
 
 
---- Adds to a statistic. No vanilla code calls it - the shipped menus only read statistics, with
---- `GetAllStatIDs` and `GetStatValue` - so it is there for code that has its own counters to
---- keep.
+--- Adds to a statistic. **`addvalue` is optional and defaults to 1**: measured, the
+--- two-argument call moved the statistic by exactly the value given, and the one-argument
+--- call moved it by 1 with no engine complaint. The engine reports this one as
+--- `expected >= 1`, unlike `SetStatValue`'s hard `expected 2`.
+---
+--- No vanilla Lua calls it - the shipped menus only read statistics, with `GetAllStatIDs` and
+--- `GetStatData` - so it is there for code that has its own counters to keep. Uncalled is not
+--- unused: the game writes statistics constantly from MD, where a statistic is a plain lvalue
+--- and the equivalent of this call is a `set_value` on `stat.<id>` with `operation="add"`.
+---
+--- See `SetStatValue` for which statistics are safe to write: some persist to the Steam/GOG
+--- account rather than to the savegame.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - +7 and the bare +1 default, both read back and witnessed from MD, on both
+-- versions
 ---@param statID string The ID of the statistic to increment.
----@param value number The value to add to the statistic.
-function IncStatValue(statID, value) end
+---@param addvalue? number The value to add. Defaults to 1.
+function IncStatValue(statID, addvalue) end
 
 
 --- Runs a module's one-off setup.
@@ -4993,14 +6444,24 @@ function IsComponentConstruction(componentID) end
 function IsComponentOperational(componentID) end
 
 
---- Reports whether a container's operational range covers what it is meant to reach. No vanilla
---- code calls it.
+--- Reports whether a container's operational range covers the given space. No vanilla code
+--- calls it.
+---
+--- **Both arguments are required.** The one-argument call this row used to declare is answered
+--- with `Invalid number of arguments (1, expected 2)` - there is no default space.
+---
+--- Argument 2 is a space of any granularity: **cluster, sector and zone are all accepted**, each
+--- returning a plain `false` on a player headquarters. What makes a range "sufficient" is not
+--- measured - no call has yet returned `true` - so the condition behind the answer is still the
+--- name's own claim and nothing more.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param containerID any The ID of the container.
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - four call shapes on a player HQ: bare, and against its zone, sector and cluster
+---@param containerID any The container to ask about.
+---@param spaceID any The space to test the range against: a cluster, sector or zone.
 ---@return boolean isSufficient True if the range is sufficient.
-function IsContainerOperationalRangeSufficient(containerID) end
+function IsContainerOperationalRangeSufficient(containerID, spaceID) end
 
 
 --- Reports whether a conversation dialog is running. The core dialog menu checks it while
@@ -5133,18 +6594,23 @@ function IsLuaDebugInputEnabled() end
 function IsMacroClass(macroName, className) end
 
 
---- Reports whether something blocks the line of sight to a position - a real ray-cast, which is
---- why the core target system stores the answer and reuses it for the rest of the frame.
---- `useScreenPosition` says the position is a screen position rather than world space.
+--- Reports whether something blocks the line of sight to a target element, identified by its
+--- position id - a real ray-cast, which is why the core target system stores the answer and
+--- reuses it for the rest of the frame.
+---
+--- With `obstructedByOwnComponent` true, the element can also be obstructed by geometry on its
+--- own component - a target point on a capital ship blocked by that ship's own hull, say. The
+--- third argument governs the player's cockpit geometry: when it is true the cockpit never
+--- counts as an obstruction, which is the pre-4.20 behaviour and remains the default.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 3 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:3946
----@param position any The position to check.
----@param obstructedByOwnComponent? boolean Whether the player's own component counts as an obstruction.
----@param useScreenPosition? boolean Whether the position is a screen position rather than world space.
+---@param position any The position id of the target element to check.
+---@param obstructedByOwnComponent? boolean Let the element's own component obstruct it.
+---@param ignoreCockpitObstruction? boolean Do not treat the player cockpit as an obstruction. Defaults to true.
 ---@return boolean isObstructed True if the position is obstructed.
-function IsObstructed(position, obstructedByOwnComponent, useScreenPosition) end
+function IsObstructed(position, obstructedByOwnComponent, ignoreCockpitObstruction) end
 
 
 --- Reports whether the game can be saved as an online save right now. The map menu makes the
@@ -5231,6 +6697,7 @@ function IsSofttargetLocked() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 10 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13242, ui/addons/ego_gameoptions/gameoptions.lua:3437
+-- Probed: 8.00, 9.00 - false on the GOG build and true on the Steam build, the same rung on both stores
 ---@return boolean isEnabled True if Steamworks is enabled.
 function IsSteamworksEnabled() end
 
@@ -5410,14 +6877,25 @@ function LockPresentation() end
 function MakeGlobalAvailable(objectname) end
 
 
---- Sets the repair priority of a destructible component. No vanilla code calls it, and neither
---- is `RepairDestructibles`.
+--- Moves a component to the top of an entity's repair queue. **Both arguments are components**:
+--- argument 1 is the entity holding the queue - the engine answers anything else with
+--- `is not of class entity` - and argument 2 is the component to promote.
+---
+--- There is no priority number. This row declared one, and nothing had ever passed one: the
+--- call `MakeRepairPriority(entity, 5)` is answered with `Component 5 does not exist any more`,
+--- the engine reading 5 as a component ID. So the name sets a position in a queue by naming a
+--- component, not a rank.
+---
+--- The effect has never been witnessed. The call returns nothing, raises nothing on a valid
+--- pair, and Lua has no reader for a repair queue, so whether it did anything is not something
+--- a mod can check from here.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param componentID any The ID of the component.
----@param priority number The repair priority.
-function MakeRepairPriority(componentID, priority) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - argument 2 typed by the engine's own rejection of a number
+---@param entityID any The entity whose repair queue is reordered.
+---@param componentID any The component to move to the top of that queue.
+function MakeRepairPriority(entityID, componentID) end
 
 
 --- Anark 4x4 transform matrix class.
@@ -6558,16 +8036,39 @@ function OpenMenu(menuName, param1, param2, force) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 6 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3438, ui/addons/ego_gameoptions/gameoptions.lua:10557
+-- Probed: 8.00, 9.00 - bare on both stores: the game's own store page in the overlay on Steam, nothing at all on GOG
 ---@param appID? number The Steam AppID of the page to open.
 function OpenSteamOverlayStorePage(appID) end
 
 
 --- Opens a web page in the Steam overlay. No vanilla code calls it; `OpenSteamOverlayStorePage`
 --- is the one the UI uses, and both are only safe behind `IsSteamworksEnabled`.
+---
+--- **It works, and only on a Steam build.** The same eleven rungs ran on the GOG 8.00 build and
+--- the Steam 9.00 one. On Steam (`IsSteamworksEnabled()` true, `C.IsGOGVersion()` false) the real
+--- call opened the overlay browser on the URL over the running game; on GOG (`IsSteamworksEnabled()`
+--- false, `C.IsGOGVersion()` true) the identical call did nothing, silently, and returned normally -
+--- and `C.CanOpenWebBrowser()` was true there, so the GOG fallback is vanilla's own
+--- `C.OpenWebBrowser` branch and not something this name falls back to. Nothing distinguishes the
+--- two runs in the log: the guard is the caller's job.
+---
+--- **Argument checking runs before the Steam gate**, word for word the same on both builds. Arity is
+--- exactly 1 - `Invalid number of arguments (0, expected 1)` bare and `(2, expected 1)` with a second
+--- argument - and slot 1 is strictly a string: a table and a boolean are refused with
+--- `Invalid argument #1 <url> (got table, expected string)`, the engine's own parameter name, while a
+--- number is taken by the usual Lua coercion with no complaint. No return, on every rung.
+---
+--- **The URL itself is never validated.** `""` and `"not a url at all"` passed the argument check in
+--- silence on both builds and opened no page on Steam, so a bad string is indistinguishable from a
+--- refused one except by what appears on screen.
+---
+--- The overlay is one window: the control `OpenSteamOverlayStorePage()` and this call, fired seconds
+--- apart, landed as two tabs in call order rather than two windows.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param url string The URL to open.
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - eleven rungs on each store, three environment readings first and the real URL last, with OpenSteamOverlayStorePage as the control
+---@param url string The URL to open. Not validated: a number is coerced, an empty or non-URL string is accepted and opens nothing.
 function OpenSteamOverlayWebPage(url) end
 
 
@@ -6675,14 +8176,17 @@ function PrepareIcon(iconName) end
 function PrepareMesh(meshName) end
 
 
---- Loads a render target texture so it is ready before anything draws into it. The monitor code
---- prepares both radar targets up front, so switching radar integration mode mid-flight cannot
---- stall.
+--- Loads a render target texture so it is ready before anything draws into it, and returns
+--- whether that succeeded. The monitor code prepares both radar targets up front, so switching
+--- radar integration mode mid-flight cannot stall.
+---
+--- Documented as **unsupported** and not designed to be used by mods.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 5 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:796, ui/widget/lua/widget_fullscreen.lua:8777
 ---@param renderTargetName string The name of the render target texture.
+---@return boolean success
 function PrepareRenderTarget(renderTargetName) end
 
 
@@ -6732,15 +8236,28 @@ function QuitGame() end
 function QuitModule() end
 
 
---- Global access to widget_fullscreen.widgetSystem.raisePlayerInteractionEvent
+--- Fires the MD event `event_player_interaction` for a live interaction id from
+--- `CreateInteractionDescriptor2`. The cue receives the **interaction name in `param`**, the
+--- descriptor's payload in **`param2`** and a **null `event.object`** - so an MD handler matches
+--- it the way `md/conversations.xml:1789-1830` does, `<event_player_interaction param="'my
+--- interaction'"/>`. (Interactions raised from MD's own `show_notification` fill the two slots
+--- the other way round, the name in `param2`; both shapes exist in vanilla.)
+---
+--- **Synchronous**, measured: the cue has run before this call returns, unlike
+--- `AddUITriggeredEvent`, whose cue runs after the Lua handler ends.
+---
+--- It needs nothing but a live id. Vanilla only raises one that is currently on the target
+--- monitor, but `TargetMonitorInteractionShown2` is **not** a precondition - a descriptor that was
+--- never shown raises exactly the same event. A **freed** id does not: the engine answers `Error
+--- raising the interaction event. Errormessage: Cannot find notification with ID 'N'` and no cue
+--- runs. A legacy `CreateInteractionDescriptor` userdata is refused outright.
 -- Mapped from: widgetSystem.raisePlayerInteractionEvent
 -- Source: ui\widget\lua\widget_fullscreen.lua
--- Raises a player interaction event by ID, triggering associated scripts or actions.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:1221
----@param interactionID any -- The ID of the interaction to raise.
+---@param interactionID integer An id from CreateInteractionDescriptor2, not yet released.
 function RaisePlayerInteractionEvent(interactionID) end
 
 
@@ -6764,6 +8281,11 @@ function ReadLuaDebugInput() end
 --- `t/*.xml` text files. `ego_detailmonitorhelper/helper.lua` replaces the engine's own version
 --- at load with a wrapper that memoises the result under `page .. "-" .. line`, which makes it
 --- the one vanilla override of an engine global.
+---
+--- **It never fails and never complains.** Missing text returns the placeholder
+--- `"=ReadText<page>-<line>="` with no log line, so a mod cannot detect a missing entry from this
+--- call except by matching that string. `ExistsText` is the correct pre-check, and `ReadTextTest`
+--- is the same read with the engine's `TextDB lookup failed` line added.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 7474 vanilla call sites, 2 arguments
@@ -6774,12 +8296,38 @@ function ReadLuaDebugInput() end
 function ReadText(pageID, textID) end
 
 
---- A test function for reading text.
---- No usage found in the workspace.
+--- **`ReadText` that complains.** It returns exactly what `ReadText(pageID, textID)` returns -
+--- the same text on a hit, and the same `"=ReadText<page>-<line>="` placeholder when the page or
+--- the entry is missing - but on a miss it also writes `TextDB lookup failed for (page, line)` to
+--- the game log, which `ReadText` never does. That log line is the whole difference between the
+--- two, and it makes this the read to use while developing a mod: a missing `t/` entry shows up
+--- in the Debug Log instead of as a placeholder in the UI.
+---
+--- **`fallbacktext` is required and never reaches the return.** Measured over five values on both
+--- the hit and the miss path - a sentinel string, the entry's own text, a number and an empty
+--- string - and the result was the text on a hit and the placeholder on a miss every time. The
+--- parameter is named for a behaviour the 8.00 return path does not have. Omitting it is refused
+--- outright: `Invalid number of arguments (2, expected 3)`, a hard requirement rather than an
+--- open minimum.
+---
+--- **Slot 3 is strictly a string.** A number is accepted by the usual Lua coercion and the call
+--- proceeds normally; a table and a boolean - both `true` and `false` - are refused with
+--- `Invalid argument #3 <fallbacktext> (got table, expected string)`, the engine's own parameter
+--- name, and the call then returns nothing at all. So it is not a flag: there is no boolean to
+--- pass, and an empty fallback does not force the placeholder on a hit either.
+---
+--- Not to be confused with `C.GetLocalizedText(pageid, textid, defaultvalue)`, the three-argument
+--- C-side read whose third argument **is** returned when the lookup fails, and which every
+--- vanilla caller hands a plain fallback literal (`widget_fullscreen.lua:907-918`).
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function ReadTextTest() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - thirteen calls over two runs: a known-good pair, both kinds of miss, five fallback values and four type refusals, with ReadText on the same pairs as the contrast
+---@param pageID integer The ID of the text page.
+---@param textID integer The ID of the text entry within that page.
+---@param fallbacktext string Required, and never returned in 8.00. A number is coerced; a table or a boolean is refused.
+---@return string # The text, or `"=ReadText<page>-<line>="` when it is missing. Nothing at all if the call is refused.
+function ReadTextTest(pageID, textID, fallbacktext) end
 
 
 --- Registers an init function to run when the game is loaded or the UI is reloaded.
@@ -6871,13 +8419,25 @@ function ReleaseCutsceneDescriptor(cutsceneDesc) end
 function ReleaseDescriptor(descriptor) end
 
 
---- Frees an interaction descriptor by id - the counterpart of `CreateInteractionDescriptor`.
---- Neither is called anywhere in vanilla, so the signature is unverified.
+--- Frees a **legacy** interaction descriptor - the counterpart of `CreateInteractionDescriptor`,
+--- and it takes that function's **userdata**, measured. It is not the release for the current
+--- API: handed the integer id from `CreateInteractionDescriptor2` it answers `invalid parameters`
+--- and frees nothing, which the raise afterwards proves by still working.
+---
+--- **The current id is freed through the C function of the same name**, `void
+--- ReleaseInteractionDescriptor(int32_t id)`, which `ui/core/lua/monitors.lua:103` cdefs and
+--- `monitors.lua:1766` calls. That cdef is **core's, and is not visible in the addon Lua state** -
+--- `C.ReleaseInteractionDescriptor` there answers `missing declaration for symbol`. An addon that
+--- creates descriptors must declare the symbol itself; `ffi.cdef` accepts it, and the release then
+--- works, after which a raise on that id reports `Cannot find notification with ID 'N'`.
+--- Without that declaration an addon can create and raise interactions but **cannot free one**.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param id integer
-function ReleaseInteractionDescriptor(id) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - accepts a legacy userdata descriptor, refuses an integer id with
+-- `invalid parameters`, on both versions
+---@param descriptor userdata A descriptor from CreateInteractionDescriptor.
+function ReleaseInteractionDescriptor(descriptor) end
 
 
 --- No vanilla code calls this, so nothing here confirms what it releases or what it takes. Its
@@ -7003,34 +8563,73 @@ function RemoveScript(widget, handleType, scriptFunction) end
 function RemoveSofttarget() end
 
 
---- Releases a softtarget lock taken with `RequestSofttargetLock`, and returns whether the
---- request was found. `requester` has to be the same name that took the lock.
+--- Releases a softtarget lock taken with `RequestSofttargetLock`. `requester` has to be the
+--- same name that took the lock.
+---
+--- The return value says only whether that requester's own request was found and removed. It
+--- does **not** mean the target lock has been lifted: other requesters may still hold locks of
+--- their own, and the softtarget stays fixed until the last of them is gone.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/targetsystem.lua:2377
----@param requester string
----@return boolean
+---@param requester string The name that took the lock.
+---@return boolean requesterRemoved Whether this requester's request was found, not whether the lock was lifted.
 function RemoveSofttargetLockRequest(requester) end
 
 
---- No vanilla code calls this, so nothing here confirms what it repairs or that it takes no
---- arguments.
+--- Repairs each destructible named as an argument, **to full hull, synchronously, in one call**.
+--- Variadic: three arguments are accepted without complaint, so the engine's `expected >= 1` is a
+--- real tail here and not a trailing parameter with a default. Returns nothing.
+---
+--- A "destructible" is `scriptproperties.xml`'s parent class, so the vocabulary spans whole
+--- objects and their surface elements alike. Both are measured: a ship, an engine and a shield
+--- generator were each repaired by being named.
+---
+--- **It repairs exactly what is named and nothing else.** Passing a ship repairs the ship's hull
+--- and leaves every one of its surface elements untouched, so the plural in the name is about the
+--- argument list, not about what one object contains. Proved with a negative control: of three
+--- identically damaged engines, the two named went to full and the third did not move, then moved
+--- when it was named in the next call.
+---
+--- **A wreck is refused silently.** A destroyed element is still present - its slot answers its id
+--- and its name is unchanged - but `GetComponentClass` degrades it from `turret` /
+--- `shieldgenerator` / `engine` to plain `destructible`, with `hull` 0 of 0 and `isfunctional`
+--- false, and MD reports `isrepairable` false. Naming one changes nothing and raises nothing.
+--- Restoring a wreck is `<restore_object>`'s job in MD, a different operation.
+---
+--- Each repair raises MD's `event_object_hull_repaired` **twice: once on the component and once on
+--- its parent object**, with `event.param` naming the repaired component in both, so a listener
+--- attached to a ship hears about its own surface elements. The event's undocumented payload,
+--- measured here and read by no vanilla script: `param2` is the repaired component's full hull
+--- (6027 for an engine, 500 for a shield, 35000 for the ship) and **`param3` is the hull delta**.
+--- `<set_object_hull>` raising a hull from MD does **not** raise this event - it is specific to a
+--- repair.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function RepairDestructibles() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - hull and class read back per component, with an MD group listener; that
+-- arguments 2 onwards are acted on is a 9.00 reading, taken against the one-argument call as its
+-- own control in the same run
+---@param destructible any A destructible: an object, or one of its surface elements.
+---@param ... any Further destructibles. Each is repaired independently.
+function RepairDestructibles(destructible, ...) end
 
 
---- Asks for the softtarget to be held fixed, and returns whether the lock was granted.
---- `requester` names the holder - the core target system passes `"softtargetManager"` - and the
---- same name has to be handed to `RemoveSofttargetLockRequest` to let it go again.
+--- Asks for the softtarget to be held fixed, preventing the current target from changing, and
+--- returns whether the lock was granted. `requester` names the holder - the core target system
+--- passes `"softtargetManager"` - and the same name has to be handed to
+--- `RemoveSofttargetLockRequest` to let it go again.
+---
+--- Calling it with no current softtarget **fails** and reports so in its return value. Before
+--- 4.20 that same call was the way to prevent anything being targeted at all; that no longer
+--- works, so the return value has to be checked rather than assumed.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/targetsystem.lua:2367
----@param requester string
----@return boolean
+---@param requester string The name holding the lock.
+---@return boolean success
 function RequestSofttargetLock(requester) end
 
 
@@ -7159,14 +8758,18 @@ function SaveInputProfile(filename, id, customName, isNew) end
 
 
 --- Persists the input mapping. The three tables are the three kinds of binding the options menu
---- keeps apart: actions (a press), states (held down) and ranges (an axis).
+--- keeps apart: actions (a press), states (held down) and ranges (an axis), each in the shape its
+--- own getter returns - keyed by integer id, holding a list of source, code and signum triples.
+---
+--- It takes all three every time; vanilla never saves one map alone, and calls it after every
+--- individual rebind rather than batching changes up.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 8 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3143
----@param actions table
----@param states table
----@param ranges table
+---@param actions table<integer, InputBinding[]> As returned by `GetInputActionMap`.
+---@param states table<integer, InputBinding[]> As returned by `GetInputStateMap`.
+---@param ranges table<integer, InputBinding[]> As returned by `GetInputRangeMap`.
 function SaveInputSettings(actions, states, ranges) end
 
 
@@ -7365,13 +8968,29 @@ function SetCaptureHQOption() end
 function SetCellContent(tableID, descriptor, row, column) end
 
 
---- Sets the character density graphics option. No vanilla code calls it, so nothing here
---- confirms whether it toggles the value like the other argument-less `Set*Option` globals or
---- takes one.
+--- Sets the density of characters on station platforms, and returns nothing. Vanilla MD reads
+--- the same setting as `player.chardensity`, which `scriptproperties.xml` documents as a float
+--- *"between 0 and 1"* - but **that range is the game's own, not a constraint the setter
+--- enforces**: `1.5` is taken and stored unchanged. Values above 1 push vanilla past its own
+--- ceiling, since `md/npc_instantiation.xml:1695` computes `30 * player.chardensity`.
+---
+--- The value is **not save state**. It persists to `config.xml` as `<chardensity>`, written
+--- through as soon as the setter is called, so it outlives the save and the session.
+---
+--- Uncalled is not unused: no Lua code calls this setter in any version from 7.10 to 9.00, but
+--- `scriptproperties.xml` and `md/npc_instantiation.xml` have read the setting in all five. The
+--- game has no UI for it either, which makes this the only programmatic way to change it.
+---
+--- Stored as a 32-bit float: `0.8` reads back as `0.80000001192093`, while an exactly
+--- representable `1.5` or `0.5` reads back unchanged. Never compare a read-back for equality.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function SetCharacterDensityOption() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - 0.5 -> 0.8 -> 1.5 -> 0.5, each value read back through
+-- GetCharacterDensityOption, confirmed in config.xml between steps, and read back a third
+-- time from MD as player.chardensity - which reported 1.5 unclamped on the script side
+---@param density number Characters on platforms. 0 to 1 by convention; not clamped.
+function SetCharacterDensityOption(density) end
 
 
 --- Toggles the collision avoidance assist. Argument-less, like the other flight assist toggles.
@@ -7667,12 +9286,23 @@ function SetLODOption(value) end
 function SetLuaDebugOutput(message) end
 
 
---- Sets the main mission target message. No vanilla code calls it, and the declaration carries
---- no parameters.
+--- Sets a mission target message on a position marker. **This name is an alias and the engine
+--- answers under its own**: called bare it replies
+--- `SetPriorityMissionTargetMessage(): invalid argument. Proper syntax:
+--- SetPriorityMissionTargetMessage(posid, messageid)`, naming the real internal function and
+--- its full signature in one line. The two parameters below are the engine's own words; no
+--- call has ever been made with arguments, so neither type has been measured.
+---
+--- **Egosoft marks it UNSUPPORTED.** Both names carry `UNSUPPORTED. Not designed to be used by
+--- mods.` in Egosoft's X Rebirth Lua function overview, which is why this row is documented
+--- rather than measured - parked on Egosoft's own word, not for want of a way to call it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
-function SetMainMissiontargetMessage() end
+-- Probed: 8.00 - one bare call, which printed the real name and signature; parked there
+---@param posid any Position id. Named by the engine, type unmeasured.
+---@param messageid any Message id. Named by the engine, type unmeasured.
+function SetMainMissiontargetMessage(posid, messageid) end
 
 
 --- Sets a station's maximum budget. It is always set together with `SetMinBudget`, and vanilla
@@ -7748,22 +9378,51 @@ function SetMouseSleeping() end
 --- Writes one value onto an NPC's blackboard, where Mission Director code can read it. The key
 --- is the MD variable name including its `$` - the trader inventory menu sets `$TradeDone` to
 --- true when a trade completes.
+---
+--- **A Lua `true` crosses as MD integer `1`**, measured: written here, it reads back through
+--- `GetNPCBlackboard` as `number 1` and MD's own `typeof` calls it `integer`, not `bool`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_trader_inventory.lua:538
+-- Probed: 8.00, 9.00 - a station and a ship defence entity, read back in Lua and in MD, on both
+-- versions
 ---@param entity userdata The NPC entity to set the blackboard for.
----@param key string The key of the value to set.
----@param value any The value to set.
+---@param key string The key of the value to set. The MD variable name, `$` included.
+---@param value any The value to set. A `true` arrives in MD as integer 1; `false` was not measured.
 function SetNPCBlackboard(entity, key, value) end
 
 
---- Sets NPC skill levels. No vanilla code calls it, and the declaration carries no parameters,
---- so nothing here says what it would take.
+--- Sets one skill of one NPC. Arity 3, returns nothing. MD's `<set_skill entity= type= exact= />`
+--- (`common.xsd:35803`) is the same operation from the script side, and no vanilla Lua calls this.
+---
+--- Argument 1 is an **entity** - an NPC component id such as a ship's `assignedpilot`, not the
+--- ship and not a seed-based crew member. The engine names the type itself, answering
+--- `Component '<name>' is not of class entity` to a controllable and
+--- `Invalid argument #1 <entity> (got cdata, expected component ID)` to the player person.
+--- Both complaints print while the call still returns normally.
+---
+--- **Argument 2 is the bare skill id**, one of `boarding`, `engineering`, `management`, `morale`
+--- or `piloting` - `C.GetSkills` enumerates them and they match MD's `skilltype` enum exactly.
+--- MD's own `skilltype.` prefix is **not** accepted. Unlike most of this family, a wrong skill -
+--- a name that does not exist, the prefixed spelling, or an integer - **fails silently**: nothing
+--- moves and the engine prints nothing, so this call cannot be probed by feeding it nonsense.
+---
+--- **Argument 3 is on the 0-15 skill scale, not the 0-100 combined one**, and is **clamped at
+--- both ends rather than refused**: 75 and 100 each wrote 15, a negative wrote 0, and a fraction
+--- truncates. An out-of-range call leaves the skill usable - the next in-range value takes.
+---
+--- The write reaches the real store: `C.GetEntitySkillsForAssignment`, `C.GetEntityCombinedSkill`
+--- and MD's `skill.{$skilltype}` all track it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function SetNPCSkill() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - a ship's pilot, every skill read back either side of every call, MD as a
+-- second witness; the 0-15 scale, the truncated fraction and the clamp reproduced on both versions
+---@param entityID any The NPC entity whose skill is written. Not a controllable, not a seed person.
+---@param skill string One of boarding, engineering, management, morale, piloting. A wrong id is silently ignored.
+---@param value number The new value on the 0-15 scale. Clamped to 0-15; a fraction is truncated.
+function SetNPCSkill(entityID, skill, value) end
 
 
 --- Sets one parameter of a queued order. `orderIndex` is the position in the queue, or the
@@ -7997,13 +9656,30 @@ function SetSoundOption() end
 function SetSSAOOption(option) end
 
 
---- Sets a statistics value. No vanilla code calls it, and the declaration carries no
---- parameters, so nothing here says which stat or which value it would take. `IncStatValue` is
---- the one the UI does use.
+--- Sets a statistic to an exact value. Arity 2: a statistic ID from `GetAllStatIDs` and a
+--- number. Returns nothing, and the write is immediate - `GetStatData(id, "value")` reads the
+--- new value back in the same frame. It is a true assignment, not a maximum: a measured call
+--- took a statistic from 4250 back down to 480. Note that the statistics marked
+--- `highest="true"` in `libraries/stats.xml` keep only their highest value, so a set on one
+--- of those is expected to be one-way.
+---
+--- No vanilla Lua calls it, nor `IncStatValue`, but uncalled is not unused: the shipped game
+--- writes statistics constantly from MD, where a statistic is a plain lvalue and the
+--- equivalent is `set_value` on `stat.<id>`. Measured from both sides - after a Lua
+--- `SetStatValue`, MD reads the new value in `stat.<id>`, so the two are one store.
+---
+--- **Some statistics are not save state.** `libraries/stats.xml` marks 21 of them
+--- `account="true"`, meaning they persist to the Steam/GOG account across savegames, every
+--- achievement in the game hangs off one of those, and `copyto`/`addto`/`mapto` propagate a
+--- write from a plain statistic into them. Reloading a save does not undo such a write.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function SetStatValue() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - set and read back exactly, and witnessed from MD as stat.<id>, on both
+-- versions
+---@param statID string The ID of the statistic to set.
+---@param value number The value to set it to.
+function SetStatValue(statID, value) end
 
 
 --- Toggles the steering control mode messages. Argument-less, like the other game option
@@ -8117,12 +9793,25 @@ function SetTextureColorMode(element, useColor) end
 function SetTopRow(tableID, row) end
 
 
---- Sets the traffic density. No vanilla code calls it, and the declaration carries no
---- parameters, so whether it toggles or takes a value is unverified.
+--- Sets the traffic density, and returns nothing. Measured to behave identically to
+--- `SetCharacterDensityOption` in every respect - same arity, same float storage, same
+--- write-through to `config.xml` as `<trafficdensity>`, and the same absence of clamping,
+--- `1.5` being taken unchanged.
+---
+--- Unlike its twin it has **no MD property and no script reader anywhere**, so a set is
+--- unobservable from MD: it is absent from `scriptproperties.xml`, and `md/`, `aiscripts/`
+--- and `libraries/` never mention `trafficdensity`. So the traffic it governs is spawned
+--- engine-side, nothing in the game's own scripts consumes the value, and the 0-to-1
+--- convention is inherited from the twin rather than documented for this name.
+---
+--- The value is **not save state**; it persists to `config.xml` and outlives the session.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function SetTrafficDensityOption() end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - 0.5 -> 0.8 -> 1.5 -> 0.5 alongside SetCharacterDensityOption, read back
+-- through GetTrafficDensityOption and confirmed in config.xml between steps
+---@param density number Traffic density. 0 to 1 by convention; not clamped.
+function SetTrafficDensityOption(density) end
 
 
 --- Turns UI safe mode on or off - the mode that loads the UI without extensions. The options
@@ -8189,12 +9878,23 @@ function ShowHighlightOverlay(id, style) end
 function SignalObject(objectID, param, param2, param3) end
 
 
---- Starts the autopilot towards a target. No vanilla code calls it, and neither is
---- `StopAutoPilot`; the menus drive the autopilot through the player activity instead.
+--- Flies **the player's own ship** to the given object under autopilot. The argument is the
+--- **destination**, not the ship: `GetAutoPilotTarget` reads the component straight back out
+--- after the call, and the game writes `Autopilot engaged` with a `Fly to <object>` command
+--- for the ship the player is piloting. A route through gates is planned as needed - the target
+--- measured was 34,627km away in another sector. Returns nothing.
+---
+--- **The player has to be piloting a ship.** Called from the bridge with no ship under the
+--- player, it is accepted silently and nothing happens: no autopilot, no error, and
+--- `GetAutoPilotTarget` still reads `nil`.
+---
+--- `StopAutoPilot` cancels it, after which `GetAutoPilotTarget` reads `nil` again. No vanilla
+--- code calls either one; the menus drive the autopilot through the player activity instead.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param targetID any The ID of the autopilot target.
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - read back through GetAutoPilotTarget, before, after and after StopAutoPilot
+---@param targetID any The object to fly to.
 function StartAutoPilot(targetID) end
 
 
@@ -8251,11 +9951,15 @@ function StartPlayingSound(soundName) end
 function StartSubConversationFromMenu(conversationName, actorID, conversationParam, baseParam) end
 
 
---- Stops the autopilot. No vanilla code calls it, and neither is `StartAutoPilot` called; the
---- menus stop it through the player activity instead, with `C.StopPlayerActivity`.
+--- Stops the autopilot started by `StartAutoPilot`, after which `GetAutoPilotTarget` reads
+--- `nil` and the game writes `Autopilot disengaged`. Takes nothing, returns nothing, and is
+--- harmless when the autopilot is already off. No vanilla code calls it, and neither is
+--- `StartAutoPilot` called; the menus stop it through the player activity instead, with
+--- `C.StopPlayerActivity`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - read back through GetAutoPilotTarget
 function StopAutoPilot() end
 
 
@@ -8299,13 +10003,16 @@ function SwitchInteractiveObject() end
 function TargetMonitorInteractionHidden() end
 
 
---- Hide the interaction for the target monitor by interaction ID.
----
+--- Takes the interaction off the target monitor. Argument 1 is the **integer id** from
+--- `CreateInteractionDescriptor2`; a legacy `CreateInteractionDescriptor` userdata is refused with
+--- `invalid parameters`. Vanilla pairs it with `TargetMonitorInteractionShown2` and then releases
+--- the descriptor (`monitors.lua:1770-1772`). Hiding is **not** a precondition for anything: an
+--- interaction that was never shown still raises its event.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:1770
----@param interactionID any The ID of the interaction to hide.
+---@param interactionID integer The id of the interaction to hide.
 function TargetMonitorInteractionHidden2(interactionID) end
 
 
@@ -8319,12 +10026,15 @@ function TargetMonitorInteractionShown() end
 
 --- Tells the game that a target monitor interaction is on screen, with its ID, its text and
 --- whether it is a notification - the version the monitor code actually calls, unlike the
---- argument-less `TargetMonitorInteractionShown`.
+--- argument-less `TargetMonitorInteractionShown`. Argument 1 is the **integer id** from
+--- `CreateInteractionDescriptor2`; a legacy userdata descriptor is refused with `invalid
+--- parameters`. Calling it is **not** what makes an interaction raisable -
+--- `RaisePlayerInteractionEvent` works on a descriptor that was never shown.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 3 arguments
 -- Seen at: ui/core/lua/monitors.lua:2770
----@param interactionID any The ID of the interaction to show.
+---@param interactionID integer The id from CreateInteractionDescriptor2.
 ---@param interactionText string The text of the interaction.
 ---@param isNotification boolean Whether the interaction is a notification.
 function TargetMonitorInteractionShown2(interactionID, interactionText, isNotification) end
@@ -8868,15 +10578,37 @@ function SetWidth(widgetID, width) end
 function CreateOrder(controllable, orderDefinition, params, default, plannedDefault, priority, arg7, arg8, arg9, arg10) end
 
 
---- Returns unit storage data for an object, optionally filtered by unit type.
+---@meta
+---@class UnitStorageEntry
+---@field macro string The unit macro name.
+---@field name string The unit's displayed name.
+---@field amount number How many are stored.
+---@field unavailable number How many of those are unavailable.
+
+---@meta
+---@class UnitStorageData
+---@field [integer] UnitStorageEntry One entry per unit macro.
+---@field capacity number Total unit capacity.
+---@field stored number Total units stored.
+---@field categorystored? number Units stored of the requested category, where one was given.
+
+--- Returns the units stored on a defensible, optionally filtered to one unit category. The
+--- units themselves sit in the array part, with the totals as named fields alongside them, so
+--- walk it with `ipairs` and read `capacity` and `stored` off the table itself.
+---
+--- `virtualammo` only means anything after `SetVirtualCargoMode` has been called. Neither it
+--- nor `excluderestricted` is passed by any vanilla call site, which never uses more than two
+--- arguments, so neither is confirmed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 13 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:16180, ui/addons/ego_detailmonitor/menu_map.lua:22295
----@param objectID any The object to query.
----@param unitType? string Unit type filter, e.g. "transport".
----@return table data Includes a capacity field.
-function GetUnitStorageData(objectID, unitType) end
+---@param objectID any The defensible to query.
+---@param unitType? string Unit category filter, e.g. `"transport"`.
+---@param virtualammo? boolean Include virtual ammo; requires `SetVirtualCargoMode` first.
+---@param excluderestricted? boolean Leave restricted units out.
+---@return UnitStorageData data
+function GetUnitStorageData(objectID, unitType, virtualammo, excluderestricted) end
 
 
 --- Returns the transport unit macros a ship macro can carry. The map uses only the length - a
@@ -8913,16 +10645,22 @@ function SetVolumeOption(sfxType, value) end
 
 
 --- Projects a UI element position onto the screen and returns its x, y, z and whether it is on
---- screen. The two sizes are the space to reserve around it, which is what makes the on-screen
---- test account for the element's extent rather than a bare point.
---- `GetUIElementRectangleScreenPosition` is the version that returns a rectangle.
+--- screen. Only applicable outside worldspace mode. The two sizes are the space to reserve
+--- around the element, which is what makes the on-screen test account for its extent rather
+--- than a bare point. `GetUIElementRectangleScreenPosition` is the version that returns a
+--- rectangle.
+---
+--- x and y run from `-viewWidth/2` to `+viewWidth/2` and `-viewHeight/2` to `+viewHeight/2`,
+--- with 0/0 at the centre of the screen and the negative corner at the lower left - not the
+--- top-left origin the rest of the widget system uses. z is the position between the clipping
+--- planes, from 0 to 1.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 3 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:3643
 ---@param posID any The element position ID.
----@param sizeX number Reservation width.
----@param sizeY number Reservation height.
+---@param sizeX number Reservation width, used for the on-screen test.
+---@param sizeY number Reservation height, used for the on-screen test.
 ---@return number x
 ---@return number y
 ---@return number z
@@ -8931,9 +10669,14 @@ function GetUIElementScreenPosition(posID, sizeX, sizeY) end
 
 
 --- Projects a UI element position onto the screen as a **rectangle**: x, y, z, whether it is on
---- screen, and the rectangle's width and height. The minimum size and maximum scale bound how
---- large it may be drawn, and the core target system asks for the rectangle first, because
---- whether a target is off screen depends on the extent rather than the centre point.
+--- screen, and the rectangle's width and height. Only applicable outside worldspace mode. The
+--- minimum size and maximum scale bound how large it may be drawn, and the core target system
+--- asks for the rectangle first, because whether a target is off screen depends on the extent
+--- rather than the centre point.
+---
+--- The width and height are always a multiple of 2. x, y and z carry the same meaning as in
+--- `GetUIElementScreenPosition`: x and y measured from the centre of the screen, negative
+--- towards the lower left, and z between the clipping planes from 0 to 1.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 3 arguments

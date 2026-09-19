@@ -71,16 +71,42 @@ const scopeBadge = (n, short) => {
 const kindBadge = (n) => badge(DATA[n].kind === 'function' ? 'no' : 'warn', DATA[n].kind);
 const savedOf = (n) => (docs[n] && docs[n].saved) || null;
 
+// The version the "Deprecated:" tag names, as a number to compare against the covered
+// versions. "3.00 Beta 6" is 3.00.
+function deprecatedAt(n) {
+  const d = docs[n] && docs[n].deprecated;
+  const m = d && d.match(/^(\d+(?:\.\d+)?)/);
+  return m ? parseFloat(m[1]) : null;
+}
+
+// A version badge says the global is there to be used. The engine still exports a
+// deprecated name, and calling it does nothing, so that version is not a tick - and
+// nothing else on the page counts it either: the range, the filter and their counts
+// all read this, so a deprecated version never lists the name.
 function verState(n, v) {
   const e = DATA[n], s = e.versions[v];
   if (!s || !s.present) return { tone: 'no', tick: '✗', text: 'absent' };
+  const dep = deprecatedAt(n);
+  if (dep !== null && parseFloat(v) >= dep) return { tone: 'gone', tick: 'DEP', text: 'deprecated' };
   if (e.delta === 'new in ' + v) return { tone: 'new', tick: 'NEW', text: 'NEW in ' + v };
   return { tone: 'ok', tick: '✓', text: 'present' };
 }
 
-// Presence as a range: one column per version stops fitting once the game has a few
-// more of them. The card still lists every version, because the areas differ per version.
-const rangeOf = (n) => versionRange(VERSIONS, VERSIONS.filter((v) => (DATA[n].versions[v] || {}).present));
+// Usable presence as a range: one column per version stops fitting once the game has a
+// few more of them. The card still lists every version, because the areas differ per
+// version - and because a deprecated version is worth naming, which a range cannot do.
+const usableIn = (n) => VERSIONS.filter((v) => verState(n, v).tone === 'ok' || verState(n, v).tone === 'new');
+function rangeOf(n) {
+  const on = usableIn(n), dep = deprecatedAt(n) !== null;
+  if (!on.length && dep) {
+    return { short: 'dep', tone: 'gone', long: 'deprecated in every covered version (' + VERSIONS.join(', ') + ')' };
+  }
+  const r = versionRange(VERSIONS, on);
+  // versionRange knows one reason for a name to stop being listed: it was removed.
+  // Deprecated is the other one, and the range is the only place that would say so
+  // in the wrong word.
+  return dep && r.tone === 'gone' ? { ...r, long: r.long.replace('gone in ', 'deprecated in ') } : r;
+}
 const versShort = (n) => {
   const r = rangeOf(n);
   return `<b class="t-${r.tone}" title="${esc(r.long)}">${esc(r.short)}</b>`;
@@ -92,7 +118,7 @@ function versCell(n, tick) {
     if (tick) return `<b>${v}</b> ${badge(s.tone, s.tick)}`;
     const areas = DATA[n].versions[v].areas || [];
     return `<b>${v}</b> ${badge(s.tone, s.text)}` +
-      (s.tone === 'no' || !areas.length ? '' : ' - ' + esc(areas.join(' + ')));
+      (s.tone === 'no' || s.tone === 'gone' || !areas.length ? '' : ' - ' + esc(areas.join(' + ')));
   }).join('<br>');
 }
 
@@ -145,6 +171,29 @@ function availCell(n) {
     : '<i>no vanilla call site in either version</i>');
 }
 
+// Measured by calling the global in the running game. Blue, because the evidence
+// came from the engine itself rather than from reading vanilla's call sites.
+// The tag reads "<versions> - <what was measured>"; the version list becomes the badge.
+function probedOf(n) {
+  const p = docs[n] && docs[n].probed;
+  if (!p) return null;
+  // The version field is a list once a reading has been taken on more than one version:
+  // "8.00, 9.00 - ...". \S+ swallowed only the first and then failed the dash, which put
+  // the whole sentence in the badge.
+  const m = p.match(/^(\d+\.\d+(?:\s*,\s*\d+\.\d+)*)\s+-\s+([\s\S]+)$/);
+  return m ? { version: m[1], detail: m[2] } : { version: p, detail: '' };
+}
+
+// Hand-written, like "Probed:", and read the same way: "<version> - <what the engine
+// says>". Red, because it is the one badge that says do not build on this. It is
+// independent of the signature verdict - a deprecated name can still be measured.
+function deprecatedOf(n) {
+  const p = docs[n] && docs[n].deprecated;
+  if (!p) return null;
+  const m = p.match(/^(.+?)\s+-\s+([\s\S]+)$/);
+  return m ? { version: m[1], detail: m[2] } : { version: p, detail: '' };
+}
+
 function usageCell(n) {
   const u = verdicts[n], [tone, label] = USAGE[u.verdict];
   const seen = [...new Set(u.sites.map((s) => s.rel + ':' + s.line))];
@@ -176,12 +225,16 @@ function facets(n) {
 }
 
 // Version is the one multi-valued facet, so it is a token list rather than one value:
-// a global is in 8.00, in 9.00, new in 9.00, or in neither.
+// a global is in 8.00, in 9.00, new in 9.00, deprecated, or in neither. A version that
+// deprecated it is not in the list, so the two names deprecated before 8.00 would be
+// unreachable under every option - "dep" is what keeps them findable without putting
+// them in "in neither", which means absent.
 const vtok = (v) => 'v' + v.replace(/\W/g, '');
 function vtokens(n) {
   const e = DATA[n];
-  const t = VERSIONS.filter((v) => (e.versions[v] || {}).present).map(vtok);
+  const t = usableIn(n).map(vtok);
   if (VERSIONS.some((v) => e.delta === 'new in ' + v)) t.push('new');
+  if (deprecatedAt(n) !== null) t.push('dep');
   return t.length ? t : ['none'];
 }
 
@@ -198,6 +251,10 @@ function card(n) {
     const [tone, label] = USAGE[u.verdict];
     head.push(badge(tone, (e.group === 'function' ? 'signature: ' : 'usage: ') + label));
   }
+  const dep = deprecatedOf(n);
+  if (dep) head.push(badge('gone', 'deprecated: ' + dep.version));
+  const pr = probedOf(n);
+  if (pr) head.push(badge('engine', 'probed: ' + pr.version));
 
   const rows = [['Kind', kindBadge(n)]];
   if (d && d.classes.length) {
@@ -219,7 +276,9 @@ function card(n) {
   rows.push(['Origin', originCell(n)]);
   rows.push(['Availability', availCell(n)]);
   rows.push(['Game versions', `${badge(vr.tone, vr.long)}<br>` + versCell(n, false)]);
+  if (dep) rows.push(['Deprecated', badge('gone', dep.version) + (dep.detail ? ' - ' + x(dep.detail) : '')]);
   if (e.origin === 'engine' && u) rows.push(['Vanilla usage', usageCell(n)]);
+  if (pr) rows.push(['Probed in-game', badge('engine', pr.version) + (pr.detail ? ' - ' + x(pr.detail) : '')]);
 
   const overloads = d && d.overloads.length
     ? d.overloads.map((o) => '\n-- overload: ' + o).join('') : '';
@@ -328,6 +387,7 @@ const vcount = (t) => names.filter((n) => vtokens(n).includes(t)).length;
 const VERSION_OPTS = [
   ...VERSIONS.map((v) => [vtok(v), `in ${v} (${vcount(vtok(v))})`]),
   ['new', `new in ${VERSIONS[VERSIONS.length - 1]} (${vcount('new')})`],
+  ['dep', `deprecated (${vcount('dep')})`],
   ['none', `in neither (${vcount('none')})`],
 ];
 const DEFAULT_VERSION = vtok(VERSIONS[VERSIONS.length - 1]);
@@ -362,13 +422,17 @@ ${badge('addon', 'addons')} only where <code>ui/addons/*</code> menus run.<br>
 ${badge('new', 'core')} only in the HUD environment - addon code cannot reach these.<br>
 ${badge('gone', 'absent')} declared, but present in neither version.<br>
 The column is headed <b>Seen in</b>; a row carries the short word, and hovering it or opening the card gives the full wording.</td></tr>
-<tr><th>Signature</th><td>${badge('ok', 'confirmed')} vanilla calls it, and every argument count fits the declaration.<br>
+<tr><th>Signature</th><td>${badge('ok', 'confirmed')} vanilla calls it, and every argument count fits the declaration - or, where vanilla never calls it, the global was called in the running game instead and the card's <b>Probed in-game</b> row says what that call measured.<br>
 ${badge('gone', 'disputed')} vanilla passes a count the declaration cannot take - believe the call site.<br>
-${badge('warn', 'unverified')} no vanilla code calls it at all.</td></tr>
-<tr><th>Game versions</th><td>${badge('ok', 'all')} in every version covered here (${VERSIONS.join(', ')}).<br>
+${badge('warn', 'unverified')} neither: no vanilla code calls it, and no probe reading either.</td></tr>
+<tr><th>Game versions</th><td>Which versions have the global <i>to be used</i>: a version that deprecated it is not counted here, in the filter, or in its count, even though the executable still exports the name.<br>
+${badge('ok', 'all')} in every version covered here (${VERSIONS.join(', ')}).<br>
 ${badge('new', '≥ ' + VERSIONS[VERSIONS.length - 1])} from that version onwards, so new since the one before it.<br>
 ${badge('gone', '≤ ' + VERSIONS[0])} up to that version, and gone in the next.<br>
 The card still names every version, because which Lua environment holds it can differ between them.</td></tr>
+<tr><th>Deprecated</th><td>${badge('gone', 'deprecated: 9.00')} - the game version that deprecated the name; the card says what the engine answers when it is called anyway. Independent of the signature badge: a deprecated name can still have a measured signature, and a live one can have none. A deprecated version does not list the name: the card's <b>Game versions</b> row says <i>deprecated</i> there, and the <b>Version</b> filter has a <b>deprecated</b> option for the names no covered version can still use.</td></tr>
+<tr><th>Probed</th><td>${badge('engine', 'probed: 8.00')} / ${badge('engine', 'probed: 8.00, 9.00')} - the card's reading was taken by <i>calling</i> the global in the running game, on the versions listed; every other card was read from vanilla's own call sites.<br>
+Every global was re-called on 9.00 in a confirmation pass, and presence, argument counts, return shapes and the engine's own complaints all reproduce 8.00 with <b>one exception</b>, <code>GetRadarModuleName</code>, which 9.00 deprecates. A card lists <code>9.00</code> only where a run on that version produced the reading it states, so a card badged <code>8.00</code> alone is still one 9.00 agrees with.</td></tr>
 <tr><th>Copying</th><td>An open card carries <b>Copy name</b>, <b>Copy signature</b> and <b>Copy link</b>; the last gives a URL that reopens that card.</td></tr>
 <tr><th>Saved</th><td>${badge('warn', 'saved')} - a <code>&lt;savedvariable&gt;</code> in the addon’s <code>ui.xml</code>. The engine restores the previous value <i>before</i> that file runs, which is why vanilla creates every one of them with <code>X = X or { }</code>. The card names the store: ${badge('warn', 'saved: userdata')} is per player profile, ${badge('warn', 'saved: savegame')} travels with the save.</td></tr>
 </table></details>
