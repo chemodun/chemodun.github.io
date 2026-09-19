@@ -306,14 +306,30 @@ function AddLicence(factionID, licenceID, otherFactionID) end
 function AddLogbookEntry(category, title, text, ...) end
 
 
---- Adds money to the player's account, and a negative amount takes it away. No vanilla code
---- calls it - the menus move money with `TransferPlayerMoneyTo` and `TransferMoneyToPlayer`,
---- which name a counterparty.
+--- Credits or debits a **container's** account by `amount`, and returns the amount moved. A
+--- negative amount takes it back. No vanilla code calls it - the menus move money with
+--- `TransferPlayerMoneyTo` and `TransferMoneyToPlayer`, which name a counterparty.
+---
+--- **It creates money rather than transferring it.** Across a +1000 / -1000 pair on the player
+--- HQ the station account went 330795062 -> 330796062 -> 330795062 while the player purse stayed
+--- at 23844772840 at all three readings. Nothing is debited on the other side, which makes this
+--- a cheat-grade call, not a trade primitive.
+---
+--- **The player is not a container.** `C.GetPlayerID()` resolves to class `player`,
+--- `IsComponentClass(player, "container")` is `false`, and both `AddMoney(player, ...)` and
+--- `GetAccountData(player, "money")` answer `Component '...' is not of class container`. The
+--- player's own money is a separate mechanism, reached through `GetPlayerMoney` and
+--- `TransferMoneyToPlayer`. An entity is refused the same way, so a pilot or a station manager
+--- is not the argument either.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param amount number -- The amount of money to add. Can be negative.
-function AddMoney(amount) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - nine rungs over a station, a ship, a derived entity and the player, each a
+-- +1000 / -1000 pair with the account read back either side; arity stated by the engine in words
+---@param containerID any The container whose account to change, as a 64-bit component ID.
+---@param amount number The amount to add. Negative takes it away.
+---@return number transferred The amount actually moved. Nothing is returned when the call is refused.
+function AddMoney(containerID, amount) end
 
 
 --- Queues a trade offer on a ship. `amount` is always positive - the map menu negates its own
@@ -592,9 +608,18 @@ function CanBeSubordinateOf(subordinateID, commanderID) end
 --- Cancels the running player conversation. No vanilla code calls it; the menus end a
 --- conversation by closing themselves, and `UnsuspendConversation` is what they do call around
 --- one.
+---
+--- **It reports whether there was anything to cancel.** Every call measured was made with no
+--- conversation running and returned `false`, with the engine writing
+--- `[ConversationManager::CancelConversation] There is no conversation` beside it. The positive
+--- case has not been measured, so that `true` means "cancelled" is the reading the engine's own
+--- line implies rather than one taken.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions with no conversation running: `false` and
+-- the same engine line either side. No argument is required; the positive case is unmeasured.
+---@return boolean cancelled `false` when there was no conversation to cancel.
 function CancelConversation() end
 
 
@@ -796,7 +821,8 @@ function CloseMenusUponMouseClick() end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - a ten-case truth table over literal numbers, both orders of every pair
+-- Probed: 8.00, 9.00 - a ten-case truth table over literal numbers, both orders of every pair,
+-- every case answering the same either side
 ---@param numgates number Gate transitions of the first route.
 ---@param numjumps number Jumps of the first route.
 ---@param othernumgates number Gate transitions of the second route.
@@ -1606,7 +1632,9 @@ function DumpAllMessageSources() end
 --- no parameters.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function EnableCameraEffectSync() end
 
 
@@ -1640,7 +1668,8 @@ function ExecuteDebugCommand(command, parameter) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - seven calls, arity stated by the engine in words
+-- Probed: 8.00, 9.00 - seven calls, arity stated by the engine in words; every shared rung
+-- answered the same either side
 ---@param page integer|string The text page id. Strings are coerced - `("1001", "2954")` works.
 ---@param line integer|string The text line id within that page.
 ---@return string? text The text when it exists, `nil` when it does not.
@@ -1666,8 +1695,10 @@ function ExistsText(page, line) end
 --- `IsValidComponent` before calling, which the Distance Tool does not.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site; signature and return confirmed against kuertee_ui_extensions
+-- Usage: confirmed - in-game probe, no vanilla call site; also read against kuertee_ui_extensions
 -- Seen at: kuertee_ui_extensions ui/addons/ego_detailmonitor/menu_map.xpl:34321
+-- Probed: 8.00 - a hop ladder of sector pairs in both directions plus a sector against itself,
+-- arity and the parameter name `fromsector` both stated by the engine in words
 ---@param startSector any The sector to start from, as a 64-bit component ID.
 ---@param endSector any The sector to reach, as a 64-bit component ID.
 ---@return number numgates The gate transitions between the two sectors.
@@ -2599,13 +2630,21 @@ function GetContainedShips(space, showOnMap) end
 function GetContainedShipsByOwner(owner, space) end
 
 
---- Returns the spaces belonging to one owner. No vanilla code calls it, so the shape of the
---- result is unverified.
+--- Returns the spaces belonging to one owner, as an array of component handles. No vanilla code
+--- calls it.
+---
+--- The count is per savegame, not a constant: `GetContainedSpacesByOwner("player")` answered 0,
+--- 323 and 334 entries on three different saves. **The engine reports a minimum, not a fixed
+--- count** - a bare call answers `Invalid number of arguments (0, expected >= 1)` - so there is
+--- at least one further parameter, presumably the `space` its sibling `GetContainedShipsByOwner`
+--- takes to limit the search. Only the one-argument form has been called.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param owner string
----@return table
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00 - the one-argument form on three savegames, arity minimum stated by the engine
+-- in words; any further parameter is unmeasured
+---@param owner string The faction id, e.g. `"player"`.
+---@return table spaces Array of space components.
 function GetContainedSpacesByOwner(owner) end
 
 
@@ -3992,13 +4031,26 @@ function GetLibrarySize(libraryName) end
 --- defines it at file scope, so it lands in the addons Lua environment where anything can reach
 --- it. Nothing in vanilla calls it - the engine does, to fill in a target monitor placeholder -
 --- which makes it the usual place a mod hooks to put its own text on the monitor.
+---
+--- **It is the other half of `GetTargetMonitorDetails`.** That call returns the display template
+--- with `$token$` placeholders in its `text` rows; `placeholder` is one of those tokens without
+--- the dollars, and this resolves it against a component into the string to substitute.
+--- `targetmonitor.lua:1052` dispatches on the name - `"targetmonitorstate"`, `"unitsstored"`,
+--- `"containerheader"`, `"unlockheader"` and the rest.
+---
+--- `GetLiveData("hullpercent", ship, "")` -> `"100"`. **The return is a string**, whatever the
+--- token measures. Passing `nil` for `placeholder` returns nothing at all and logs
+--- `targetmonitor.lua(1243): GetComponentData(): Invalid argument #2 (got nil, expected string)`
+--- from inside the function.
 -- Source: ui\addons\ego_targetmonitor\targetmonitor.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
----@param placeholder any A placeholder parameter (purpose unclear).
----@param component any The component requesting the data.
----@param templateConnectionName string The name of the template connection.
----@return any data The live data.
+-- Probed: 8.00 - resolved against a ship, paired with the GetTargetMonitorDetails template that
+-- carries the token, and the nil-placeholder failure reproduced
+---@param placeholder string The template token to resolve, without the `$` delimiters, e.g. `"hullpercent"`.
+---@param component any The component to read it from.
+---@param templateConnectionName string The name of the template connection. Must be a string; `""` is accepted.
+---@return string data The resolved text to substitute for the token.
 function GetLiveData(placeholder, component, templateConnectionName) end
 
 
@@ -4173,13 +4225,24 @@ function GetMacroUnitStorageCapacity(macro) end
 function GetMappedJoysticks() end
 
 
---- Gets the maximum text length for an element. (No usage found in provided files)
+--- How many characters of `text` fit into `width` pixels when drawn in the named font at the
+--- named size. It measures a string against a box; it has nothing to do with a widget, and the
+--- element ID this was once declared to take does not exist.
+---
+--- `GetMaxTextLength("Probe text", "Zekton", 22, 200)` -> `10`. All four parameters are
+--- required: a bare call answers `Invalid number of arguments (0, expected 4)`. It needs no game
+--- object and changes nothing, so it can be called from anywhere at any time.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param elementID any The ID of the element.
----@return number maxLength The maximum text length.
-function GetMaxTextLength(elementID) end
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - one working call with synthesised arguments, arity stated by the engine
+-- in words; both rungs answered the same either side
+---@param text string The string to measure.
+---@param fontname string The font to measure it in, e.g. `"Zekton"`.
+---@param fontsize number The font size.
+---@param width number The available width in pixels.
+---@return number maxLength How many characters of `text` fit into `width`.
+function GetMaxTextLength(text, fontname, fontsize, width) end
 
 
 --- Gets the parameters of the current menu. (No usage found in provided files)
@@ -5522,17 +5585,31 @@ function GetTableRowHeight(tableID, row) end
 function GetTargetElementInfo(targetElementQuery) end
 
 
---- Builds the full target-monitor description for a component.
+--- Builds the full target-monitor description for a component: the display template, with
+--- `$token$` placeholders in its `text` rows that `GetLiveData` resolves one at a time.
+---
+--- The returned table carries `duration`, `header` (itself `color{r,g,b,a,glow}`, `font`,
+--- `fontsize`, `text`), `notorietyComponent`, `notorietyEffect`, `notorietyFaction`,
+--- `notorietyIcon` and `text`. **The shape varies with the target**: a sector returned those 7
+--- keys with an empty `text`, a player station 8 - adding `interactionID` - with `text` a
+--- 3-element array of `{left, right}` rows.
+---
+--- **`templateConnectionName` must be a string.** `""` is accepted and produces no error at all;
+--- `nil` still returns a partial table but logs `GetCompSlotPlayerActionTriggeredConnection():
+--- Given connection name is nullptr` plus three `targetmonitor.lua: HasTag(): Invalid argument
+--- #2 <templateConnectionName> (got nil, expected string)` from inside the function.
 -- Source: ui\addons\ego_targetmonitor\targetmonitor.lua
 -- Defined by an addon file, not by the engine, and explicitly not part of the public
 -- UI API - the vanilla source says so at targetmonitor.lua:1044. Returns an empty table
 -- for an invalid component.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
+-- Probed: 8.00 - a sector, a player station and a player ship, keys enumerated on each, with the
+-- nil and empty-string connection names measured against one another
 ---@param component any The component to describe.
----@param templateConnectionName string The connection the template is bound to.
+---@param templateConnectionName string The connection the template is bound to. Must be a string; `""` is accepted.
 ---@param isSofttarget boolean Whether the component is the current soft target.
----@return table details
+---@return table details The display template, empty for an invalid component.
 function GetTargetMonitorDetails(component, templateConnectionName, isSofttarget) end
 
 
@@ -6232,6 +6309,8 @@ Helper = {}
 -- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function HideAllCircles() end
 
 
@@ -6240,6 +6319,8 @@ function HideAllCircles() end
 -- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function HideAllRects() end
 
 
@@ -6256,6 +6337,8 @@ function HideAllShapes() end
 -- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function HideAllTriangles() end
 
 
@@ -6368,7 +6451,9 @@ function InstallSteamDLC(appid) end
 -- Interrupts the player's computer control, likely to regain control for the UI.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function InterruptPlayerComputer() end
 
 
@@ -8008,6 +8093,8 @@ function onTickerOnlyMode(_, enabled, showpermanently) end
 -- to SetScript instead of relying on the name.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function onUpdate() end
 
 
@@ -8322,7 +8409,9 @@ function ReadText(pageID, textID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - thirteen calls over two runs: a known-good pair, both kinds of miss, five fallback values and four type refusals, with ReadText on the same pairs as the contrast
+-- Probed: 8.00, 9.00 - thirteen calls over two runs: a known-good pair, both kinds of miss, five
+-- fallback values and four type refusals, with ReadText on the same pairs as the contrast; all
+-- fourteen rungs answered the same either side
 ---@param pageID integer The ID of the text page.
 ---@param textID integer The ID of the text entry within that page.
 ---@param fallbacktext string Required, and never returned in 8.00. A number is coerced; a table or a boolean is refused.
@@ -8445,7 +8534,9 @@ function ReleaseInteractionDescriptor(descriptor) end
 --- declaration carries no parameters.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function ReleaseListener() end
 
 
@@ -8801,12 +8892,18 @@ function SaveResolutionOption() end
 function ScheduleReloadUI() end
 
 
---- No vanilla code calls this, so nothing here confirms what it does or that it takes no
---- arguments. By its name it picks the back option of the dialog `SelectDialogOption` selects a
---- button in.
+--- No vanilla code calls this, so nothing here confirms what it does. By its name it picks the
+--- back option of the dialog `SelectDialogOption` selects a button in.
+---
+--- A bare call is accepted and **returns `false`**, with no engine line to say why - so unlike
+--- its neighbours it answers rather than acting silently, but whether `false` means "no dialog
+--- is open" or something else is unmeasured. No argument is required.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions with no dialog open: `false` and no engine
+-- line either side. No argument is required; what the boolean reports is unmeasured.
+---@return boolean selected `false` in every call measured, with no dialog open.
 function SelectBackOption() end
 
 
@@ -9212,7 +9309,9 @@ function SetGlowOption(option) end
 --- a pixel width.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function SetHeight() end
 
 
@@ -9262,7 +9361,9 @@ function SetJoysticksOption(slot, guid) end
 --- read - so the option is shown but set somewhere else.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function SetLegacyShadersOption() end
 
 
@@ -9317,11 +9418,19 @@ function SetMainMissiontargetMessage(posid, messageid) end
 function SetMaxBudget(station, budget) end
 
 
---- Sets the menu position. No vanilla code calls it, and the declaration carries no parameters,
---- so nothing here says what it would take.
+--- Sets the menu position. No vanilla code calls it.
+---
+--- **It does take arguments, and the declaration does not name them.** A bare call is not
+--- refused on arity - there is no `expected N` line - but it returns `false` and the engine
+--- writes `(from presentation '...') SetMenuPosition(): invalid parameters`, so the check is the
+--- presentation's rather than the engine's argument counter. What it wants is unmeasured; the
+--- `false` is the refusal, not a position.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions: `false` and the same `invalid parameters`
+-- line either side. The parameters it wants are unmeasured.
+---@return boolean positioned `false` when the parameters are rejected.
 function SetMenuPosition() end
 
 
@@ -9371,7 +9480,9 @@ function SetMouseOverOverride(widgetID, override, forceHide) end
 --- carries no parameters.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function SetMouseSleeping() end
 
 
@@ -9999,7 +10110,9 @@ function SwitchInteractiveObject() end
 --- its counterpart `TargetMonitorInteractionShown`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function TargetMonitorInteractionHidden() end
 
 
@@ -10020,7 +10133,9 @@ function TargetMonitorInteractionHidden2(interactionID) end
 --- its counterpart `TargetMonitorInteractionHidden`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - in-game probe, no vanilla call site
+-- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
+-- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function TargetMonitorInteractionShown() end
 
 

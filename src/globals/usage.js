@@ -51,12 +51,15 @@ const probed = (name) => !!(docs[name] && docs[name].probed) && !PARKED.has(name
 
 // Evidence from outside vanilla, for a name vanilla never calls. Another mod's call
 // site is weaker than a probe - it is a reading of someone else's code, not of the
-// engine - so the verdict stays unverified and the detail says where it came from.
+// engine - so on its own it leaves the verdict unverified and the detail says where it
+// came from. Where a probe has since answered, the probe sets the verdict and this only
+// keeps the site: the reading is still worth linking, it is just no longer the evidence.
 // It lives here because write-meta.js owns the "Usage:" and "Seen at:" lines and
 // drops anything hand-written into them on its next run.
 const EXTERNAL = {
   FindJumpRoute: {
     detail: 'no vanilla call site; signature and return confirmed against kuertee_ui_extensions',
+    probedDetail: 'in-game probe, no vanilla call site; also read against kuertee_ui_extensions',
     sites: [{ rel: 'kuertee_ui_extensions ui/addons/ego_detailmonitor/menu_map.xpl', line: 34321 }],
   },
 };
@@ -102,9 +105,13 @@ function usageOf(name) {
   const a = e.args[v] || { counts: {}, open: 0, unreadable: 0 };
   const n = total(v);
   if (!n) {
-    if (probed(name))
-      return { verdict: 'confirmed', detail: 'in-game probe, no vanilla call site', sites: [], kind: 'function' };
     const ex = EXTERNAL[name];
+    if (probed(name))
+      return {
+        verdict: 'confirmed', kind: 'function',
+        detail: ex ? ex.probedDetail : 'in-game probe, no vanilla call site',
+        sites: ex ? ex.sites : [],
+      };
     if (ex) return { verdict: 'unverified', detail: ex.detail, sites: ex.sites, kind: 'function' };
     return { verdict: 'unverified', detail: 'no vanilla call site', sites: [], kind: 'function' };
   }
