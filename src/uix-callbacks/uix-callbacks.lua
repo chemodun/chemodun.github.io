@@ -3903,10 +3903,14 @@ local menu_research = {}
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_research.xpl:556 (8.0.4.10), menu_research.xpl:560 (9.0.0.12)
 -- Added by: kuertee
----
----@param ftable any
----@param resources any
----@param data any
+--- Adds rows to a research node's detail panel, directly above its Start
+--- Research button. Only the not-yet-started branch reaches it, so a
+--- completed or already running technology never fires it, and by then the
+--- menu has written the time required, the mission precursors and the
+--- resource list.
+---@param ftable any # the node's detail table, filled down to the resource rows
+---@param resources any # the technology's resource requirements, each `{ ware, amount }`
+---@param data any # the node's row data - `techdata` is the technology, plus `mainIdx` and `col`
 function menu_research.expandNode_before_start_button(ftable, resources, data) end
 
 ---@class uix.menu_ship_configuration
@@ -4248,7 +4252,10 @@ local menu_station_configuration = {}
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_station_configuration.xpl:507 (8.0.4.10), menu_station_configuration.xpl:644 (9.0.0.12)
 -- Added by: kuertee
----
+--- Fires as the Station Configuration menu closes, after it has dropped its
+--- own state and released the undo binding. Every way out of the menu
+--- reaches it, so it is the one reliable place to clear what a mod set up
+--- here.
 function menu_station_configuration.cleanup() end
 
 -- Menu: menu_station_configuration (ego_detailmonitor)
@@ -4264,11 +4271,17 @@ function menu_station_configuration.cleanup() end
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_station_configuration.xpl:2844 (8.0.4.10), menu_station_configuration.xpl:3164 (9.0.0.12)
 -- Added by: mycu
----
----@param macro any
----@param macro2 any
----@param untruncatedExtraText any
----@return any
+--- Rewrites the mouse-over text of one macro button in the equipment
+--- chooser, just before the button is created. It is handed the text the
+--- menu built - the untruncated macro name plus its maker races - and what
+--- it returns is used for both the button and the caption box beneath it.
+--- Callbacks chain through that third argument: each is handed what the one
+--- before it returned, so order matters and only the first sees the menu's
+--- own text.
+---@param macro any # the macro this button offers
+---@param macro2 any # the macro the plan currently has in the slot
+---@param untruncatedExtraText any # the mouse-over text so far, already carrying any earlier callback's edit
+---@return any # a table; only its `mouseovertext` field is read. Return nothing to pass the text on unchanged
 function menu_station_configuration.displayModules_on_before_create_button_mouseovertext(macro, macro2, untruncatedExtraText) end
 
 -- Menu: menu_station_configuration (ego_detailmonitor)
@@ -4283,10 +4296,14 @@ function menu_station_configuration.displayModules_on_before_create_button_mouse
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_station_configuration.xpl:3653 (8.0.4.10), menu_station_configuration.xpl:4321 (9.0.0.12)
 -- Added by: kuertee
----
----@param ware any
----@param name any
----@return any
+--- Supplies the label for one ware in the plan's Configure Individual Buy
+--- Offers list. Callbacks chain, and the first is handed nil rather than the
+--- vanilla name, so a callback that only wants to decorate has to read the
+--- ware's name itself. If the last one returns nothing the menu falls back
+--- to the plain ware name.
+---@param ware any # the ware id
+---@param name any # what the previous callback returned; nil for the first one
+---@return any # the label to draw, or nothing to leave it to the next callback and then to the menu
 function menu_station_configuration.displayPlan_getWareName(ware, name) end
 
 -- Menu: menu_station_configuration (ego_detailmonitor)
@@ -4301,12 +4318,16 @@ function menu_station_configuration.displayPlan_getWareName(ware, name) end
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_station_configuration.xpl:3559 (8.0.4.10), menu_station_configuration.xpl:4227 (9.0.0.12)
 -- Added by: kuertee
----
----@param row any
----@param colorprefix any
----@param name any
----@param reservation any
----@return any
+--- Takes over drawing one incoming reservation under the plan's Ware
+--- Reservations section. This one replaces the menu outright: registering
+--- any callback at all suppresses its ETA text, so a callback that draws
+--- nothing leaves the row's name blank. The first to return a truthy value
+--- claims the row and the rest are skipped.
+---@param row any # the reservation's row - cells 2 to 4 are the callback's, while the menu still fills 5 and 6 with the amount and the cancel button
+---@param colorprefix any # the player colour escape when the reserver is player-owned, otherwise an empty string
+---@param name any # the reserver, as "<name> (<idcode>)"
+---@param reservation any # the reservation entry - `reserver`, `amount`, `eta` and `tradedeal`
+---@return any # truthy to claim the row and stop the remaining callbacks
 function menu_station_configuration.displayPlan_render_incoming_ware(row, colorprefix, name, reservation) end
 
 ---@class uix.menu_station_overview
@@ -4588,11 +4609,16 @@ local menu_trader_blueprintsorlicences = {}
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_trader_blueprintsorlicences.xpl:422 (8.0.4.10), menu_trader_blueprintsorlicences.xpl:422 (9.0.0.12)
 -- Added by: mycu
----
----@param macro any
----@param macro2 any
----@param name any
----@return any
+--- Replaces the mouse-over text on an equipment blueprint's name cell, once
+--- per ware listed while the Equipment category is expanded. What it
+--- overwrites is the Equipment Compatibility list the menu just built, and
+--- the callback is not handed that text, so it can only replace it, never
+--- extend it. Every callback is handed the same arguments and writes
+--- straight to the cell, so the last one to return a table wins.
+---@param macro any # the equipment's component macro
+---@param macro2 any # the same macro a second time - the slot carries the installed macro in the Station Configuration sibling of this hook, and there is none to pass here
+---@param name any # the ware's display name
+---@return any # a table; only its `mouseovertext` field is read. Return nothing to leave the cell as the menu built it
 function menu_trader_blueprintsorlicences.display_on_after_create_equipment_text(macro, macro2, name) end
 
 ---@class uix.menu_transactionlog
@@ -4609,7 +4635,9 @@ local menu_transactionlog = {}
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_transactionlog.xpl:51 (8.0.4.10), menu_transactionlog.xpl:67 (9.0.0.12)
 -- Added by: kuertee
----
+--- Fires as the Transaction Log closes, after the menu has dropped its own
+--- state. Every exit reaches it, the right-bar buttons and a jump to another
+--- station's log included, so a mod can rely on it to clear what it set up.
 function menu_transactionlog.cleanup() end
 
 -- Menu: menu_transactionlog (ego_detailmonitor)
@@ -4623,7 +4651,10 @@ function menu_transactionlog.cleanup() end
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_transactionlog.xpl:128 (8.0.4.10), menu_transactionlog.xpl:279 (9.0.0.12)
 -- Added by: kuertee
----
+--- Fires once the log itself has been built into the info frame and before
+--- the frame is displayed - the last point at which a mod can add to it. The
+--- frame is menu.infoFrame, and menu.container is the object whose log is
+--- being shown.
 function menu_transactionlog.createFrame_on_create_transaction_log() end
 
 ---@class uix.menu_transporter
@@ -4714,7 +4745,9 @@ local menu_userquestion = {}
 -- Since: 8.0.4.10
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_userquestion.xpl:92 (8.0.4.10), menu_userquestion.xpl:92 (9.0.0.12)
----
+--- Fires as a user question closes, after the menu has cleared its mode and
+--- the parameters it was opened with. Every close path reaches it, so it is
+--- where a mod drops the state it set up for a dialog of its own.
 function menu_userquestion.cleanup_end() end
 
 -- Menu: menu_userquestion (ego_detailmonitor)
@@ -4729,9 +4762,17 @@ function menu_userquestion.cleanup_end() end
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_userquestion.xpl:210 (8.0.4.10), menu_userquestion.xpl:210 (9.0.0.12)
 -- Added by: kuertee
----
----@param config any
----@return any
+--- Replaces the entire property table of the user question's frame, before
+--- the frame handle is made. The first callback to return a table wins and
+--- the rest are skipped; if none does, the menu builds its own centred,
+--- button-less frame. The table stands in for the menu's completely, so it
+--- has to carry everything the frame needs: standardButtons, width, x, y,
+--- layer, startAnimation and playerControls. A second return value decides
+--- the height - leave it out and the frame is fitted to whatever table gets
+--- built, return true and it keeps the height from the properties table.
+--- Either way the menu re-centres the frame vertically afterwards.
+---@param config any # the menu's own config table, carrying `width`, `layer` and `infoLayer`
+---@return any # the frame properties table, plus a second value that is true to keep its `height` instead of fitting the frame to its table
 function menu_userquestion.createInfoFrame_custom_frame_properties(config) end
 
 -- Menu: menu_userquestion (ego_detailmonitor)
@@ -4745,9 +4786,14 @@ function menu_userquestion.createInfoFrame_custom_frame_properties(config) end
 -- Since: 8.0.4.10
 -- Versions: 8.0.4.10, 9.0.0.12
 -- Seen at: menu_userquestion.xpl:503 (8.0.4.10), menu_userquestion.xpl:503 (9.0.0.12)
----
----@param frame any
----@param tableProperties any
----@param config any
----@return any
+--- Builds the whole table of a mod-defined user question. Only a menu mode
+--- whose name contains custom_ reaches it - the mode is the third element of
+--- the open_menu param - and nothing else draws in that case, so the
+--- callback owns the dialog's entire body. The first to return a table wins.
+--- Returning nothing leaves the frame empty and sends the frame height back
+--- to whatever the properties table carried.
+---@param frame any # the info frame handle to add the table to
+---@param tableProperties any # the `width`, `x` and `y` the menu has already worked out
+---@param config any # the menu's own config table
+---@return any # the table that was added; the first non-nil claims the dialog
 function menu_userquestion.createTable_new_custom_table(frame, tableProperties, config) end
