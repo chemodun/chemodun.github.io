@@ -6467,6 +6467,9 @@ function C.GetAllSignals(result, resultlen) end
 ---@return integer # `uint32_t`
 function C.GetAllTradeRules(result, resultlen) end
 
+--- Fills `result` with one `UnitData` per stored macro - macro name, unit category, amount - and returns how many it wrote. `resultlen` comes from `GetNumAllUnits` with the same `onlydrones` flag, which returns the **entry count**, not a unit count.
+---
+--- Same two limits as that function: `onlydrones=true` omits the `defence` category, and only **untagged** unit macros are enumerated at all. A macro carrying `tags=` in `libraries/loadoutrules.xml` can be added, is counted against `units.maxcount` and is returned by MD's `units.{$macro}.count`, yet never appears in this array - measured by adding 2 of one and watching every Lua reader stay still while MD reported them.
 -- State: declared
 -- Environment: addons
 -- Versions: 8.00, 9.00
@@ -12110,6 +12113,11 @@ function C.GetNumAllSignals() end
 ---@return integer # `uint32_t`
 function C.GetNumAllTradeRules() end
 
+--- Number of distinct unit macros stored on the defensible, **not the number of units**. Measured: a ship whose storage went from 20 units to 100 read `3` throughout, and the number moved only when a third macro first appeared. It is the buffer size `GetAllUnits` is to be called with, which is exactly how vanilla uses it.
+---
+--- `onlydrones=true` excludes the **`defence`** category: a transport cargo drone and a repair drone are counted, a fighting drone is not. Measured on three ships, where the true call was one entry below the false call in every reading and the entry list named the dropped macro every time.
+---
+--- It enumerates the **untagged loadout set only**. `libraries/loadoutrules.xml` declares 18 `<unit>` macros, 5 of them carrying `tags=`, and a tagged macro is storable, is counted by MD's `units.count` and appears here never - so a count from this function is not a storage total in either sense.
 -- State: declared
 -- Environment: addons
 -- Versions: 8.00, 9.00
@@ -13545,6 +13553,9 @@ function C.GetNumStationModules(stationid, includeconstructions, includewrecks) 
 ---@return integer # `uint32_t`
 function C.GetNumStationOverviewGraphWares(stationid, initialized) end
 
+--- Units stored in one `<unit>` category - a real amount, unlike `GetNumAllUnits`, which counts macro entries. Measured tracking MD's `units.{$macro}.count` exactly for an untagged macro across adds, a clamp and two removals.
+---
+--- Categories are `libraries/loadoutrules.xml`'s own: `transport`, `orecollector`, `gascollector`, `build`, `repair`, `defence`, `police`. Carries the same blindness as the rest of the family - a unit macro carrying `tags=` is stored and counted by MD but contributes nothing here.
 -- State: declared
 -- Environment: addons
 -- Versions: 8.00, 9.00
@@ -13765,6 +13776,9 @@ function C.GetNumTurrets() end
 ---@return UISystemInfoCounts # `UISystemInfoCounts`
 function C.GetNumUISystemInfo(clusterid) end
 
+--- Units in one category flagged unavailable, the dedicated reader for `AddUnits`' fourth argument. Measured: adding 2 with `unavailable=true` moved this from 0 to 2 while an otherwise identical add with `false` moved it not at all, and a negative amount with the flag set took them back out of that pool alone. MD states the same number as `units.count - availableunits.count`.
+---
+--- Same categories and the same tagged-macro blindness as `GetNumStoredUnits`.
 -- State: declared
 -- Environment: addons
 -- Versions: 8.00, 9.00
@@ -20030,6 +20044,9 @@ function C.IsUICoverOverridden() end
 ---@return boolean # `bool`
 function C.IsUnit(controllableid) end
 
+--- Whether a unit macro may be stored by `macroname`'s unit storage. **It predicts neither what the storage will list nor what `AddUnits` will accept**, measured in both directions: it answers `true` for a tagged macro that no enumerator in this family will ever show, and `false` for missile, torpedo and mine macros that `AddUnits` went on to accept and route into ammo storage.
+---
+--- Vanilla uses it to filter a UI list (`menu_ship_configuration.lua:10538`), which is what it is good for. It is not a pre-flight for a write.
 -- State: declared
 -- Environment: addons
 -- Versions: 8.00, 9.00
