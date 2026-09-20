@@ -1,6 +1,19 @@
 {
-  "through": "781dabcb5679e19471165132e48ff063f21fd893",
+  "through": "4c871b2aeeb364e2bd040a424b54952aa038aa71",
   "days": [
+    {
+      "date": "2026-09-21",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/uix-callbacks/",
+          "title": "UIX callbacks",
+          "kind": "",
+          "lines": [
+            "build the version axis from every UIX release"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-09-20",
       "pages": [
@@ -35,7 +48,16 @@
           "title": "Changes",
           "kind": "new",
           "lines": [
-            "add generated Changes page to build"
+            "add generated Changes page to build",
+            "split changes page into game and site logs"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/game-changes/",
+          "title": "Game Changes",
+          "kind": "new",
+          "lines": [
+            "split changes page into game and site logs"
           ]
         }
       ]
