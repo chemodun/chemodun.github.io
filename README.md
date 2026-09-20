@@ -35,6 +35,7 @@ src/globals/         the Lua Globals Reference pipeline (see below)
 src/commands/        the Script Commands reference (see below)
 src/c-functions-and-structures/  the C functions and structures reference (see below)
 src/uix-callbacks/    the UIX callbacks reference (see below)
+src/changes/         the Changes page, built from all four of the above (see below)
 ```
 
 `src/build.js` also writes the root-level files: `favicon.ico` (built from the two PNGs in `src/assets/`, so nothing derived is committed), `404.html`, `sitemap.xml` and `robots.txt`.
@@ -189,3 +190,21 @@ The version axis is the **mod's** release tags, not the game's, because a callba
 The layout follows the C functions page - a filter bar over a flat list, with each card assembled in the browser when its row is opened. Facets are menu, kind, aggregation, holder, whether a description has been written, and release. 366 KB.
 
 The extraction half lives outside this repo, in a working copy of the UIX sources; it writes `uix-callbacks.lua`, `meta.js` and `data/meta.json` here and nothing else.
+
+### The Changes page
+
+`src/changes/build-html.js` builds `/x4/changes/` from the four references above and nothing else.
+
+```text
+sources.js      reads each reference through its own parser, returns the delta
+build-html.js   renders it, and checks every link against the built reference pages
+```
+
+Two clocks could fill a page like this: the game's, and the site's own edits. This is the first of them. Every reference already records, per row, which of the versions it covers has that row, and nothing aggregated it, so the question a reader actually arrives with after a game update had no page. The delta is always between the last two versions a reference covers, so nothing here names 8.00 or 9.00 except the data.
+
+It is generated for the same reason the references are: a hand-written changelog is one edit away from disagreeing with the page it summarises. Reading the same committed data through the same parsers means it cannot, and rebuilding it on every build means it cannot go stale.
+
+The page is ordered removals, then names that stayed and changed shape, then additions, because that is the order a reader wants them in after an update. What "changed shape" means is per reference and is whatever the data actually records: for globals, an availability change or a `Deprecated:` tag naming the newer version; for script commands, an attribute or child element the command gained or lost.
+
+It runs **last** in `npm run build`, because it verifies itself against the other pages' output. Every name on it is a deep link into the reference that owns it, and an anchor that does not exist over there is a dead link nothing else on the site would notice; `checkAnchors()` reads the built pages and fails the build on one. It caught a real case on the first run: child elements are rendered inside their parent command's card and have no anchor at all, which is why they are counted inside the command that accepts them rather than listed on their own.
+
