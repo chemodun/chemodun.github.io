@@ -13,6 +13,12 @@ name: UIX releases
 # The backfill is NOT this job. data/history.json is committed and already covers
 # every release from 8.0.0.1, so a run here extracts only what is new - one
 # release, plus the two old ones whose full extraction out/ does not carry.
+#
+# Merging the pull request is what puts a line on the Changes page: the commit
+# changes a reference's data, and site-log.js logs that whoever made it, so the
+# subject below is written to be read there rather than to be read in git log.
+# Squash it and the line is dated the day it was accepted; a merge commit keeps
+# the bot's own date, which is the day this ran.
 
 on:
   schedule:
@@ -82,11 +88,20 @@ jobs:
             exit 0
           fi
 
+          # The subject is what the Changes page prints once this is merged, so it names
+          # the releases rather than counting them, and carries the conventional prefix
+          # site-log.js strips off. The pull request takes the same line, so a squash
+          # merge lands it unchanged.
+          # paste -d cycles through the delimiter characters, so ', ' would join three
+          # tags as "a,b c". One delimiter, then space it out.
+          tags=$(sed -n 's/^  new: \([^ ]*\).*/\1/p' check.txt | paste -sd, - | sed 's/,/, /g')
+          subject="docs(uix-callbacks): cover UIX $tags"
+
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -C "$BRANCH"
           git add src/uix-callbacks
-          git commit -m "uix-callbacks: take $(grep -c '^  new: ' check.txt) new UIX release(s)"
+          git commit -m "$subject"
           # Rebuilt from main every run, never added to, so the force is the point: an
           # unmerged branch from last week is stale, and this run already covers every
           # release it did. --force-with-lease cannot help here anyway - the checkout is
@@ -116,11 +131,13 @@ jobs:
           } > body.md
 
           # One pull request for the subject, updated rather than duplicated, so a
-          # quiet month is one branch instead of four.
+          # quiet month is one branch instead of four. The title is rewritten with the
+          # body: the branch is rebuilt from main every run and covers every release,
+          # so a title naming last week's would be wrong the moment it is squashed.
           n=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
           if [ -n "$n" ]; then
-            gh pr edit "$n" --body-file body.md
+            gh pr edit "$n" --title "$subject" --body-file body.md
             echo "updated PR #$n"
           else
-            gh pr create --head "$BRANCH" --title 'uix-callbacks: new UIX releases' --body-file body.md
+            gh pr create --head "$BRANCH" --title "$subject" --body-file body.md
           fi

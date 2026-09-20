@@ -8,13 +8,14 @@
 //   node site-log.js --rebuild    regenerates the whole log from git history
 //   require('./site-log')         returns { load } for the build
 //
-// Why a committed file rather than git at build time: Pages checks the repo out at
-// fetch-depth 1, so the build has no history to read, and reading it would tie a
-// published page to a history that can be rewritten. So history is read here, where it
-// exists, and the result is committed for the build to render.
+// Why a committed file rather than git read by the build: it would tie a published page
+// to a history that can be rewritten, and to messages that can only ever be commit
+// subjects. Read once, written down, and editable afterwards in the words a reader
+// needs.
 //
-// It reports; it does not commit. And it is append-only: everything down to `through`
-// is left exactly as written, so a line corrected by hand stays corrected. --rebuild is
+// It reports; it does not commit. The Pages workflow runs it before the build and
+// commits what it wrote after. And it is append-only: everything down to `through` is
+// left exactly as written, so a line corrected by hand stays corrected. --rebuild is
 // the backfill and throws hand edits away.
 //
 // Scope is usable content under /x4/ only. A file that maps to no page is invisible to
@@ -129,15 +130,22 @@ function commits(since) {
 }
 
 // `docs(globals): finish the 9.00 probe pass` is a line about the reference once the
-// bookkeeping in front of it is gone.
+// bookkeeping in front of it is gone. A squash merge appends the pull request number,
+// which is bookkeeping at the other end.
 const CONVENTIONAL = /^(\w+)(?:\(([^)]*)\))?!?:\s*/;
 const typeOf = (subject) => (CONVENTIONAL.exec(subject) || [])[1] || '';
-const textOf = (subject) => subject.replace(CONVENTIONAL, '').trim();
+const textOf = (subject) => subject.replace(CONVENTIONAL, '').replace(/\s*\(#\d+\)$/, '').trim();
 
 // The log's own commits. Its files map to no page already, so this matters only when
-// one of them touches the log and a real page together - but the workflow that writes
-// this file pushes exactly that kind of commit, and a log reporting its own updates
-// says nothing. Skipped for content too: the day belongs to the work, not the logging.
+// one of them touches the log and a real page together, and a log reporting its own
+// updates says nothing. Two independent reasons is what makes the loop safe rather than
+// lucky, and this one also covers a correction made by hand.
+//
+// Nothing tests the author, deliberately. CI landing a commit is not the question: what
+// a reader sees is, and pageOf() already answers it. A job that refreshes the wiki
+// snapshot or bumps a dependency touches no page and is invisible without being named,
+// while uix-releases.yml regenerates a reference and belongs on the log exactly as a
+// hand edit to the same file would.
 const scopeOf = (subject) => (CONVENTIONAL.exec(subject) || [])[2] || '';
 const isOwn = (subject) => typeOf(subject) === 'docs' && scopeOf(subject) === 'changes';
 

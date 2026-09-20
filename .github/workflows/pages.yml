@@ -5,9 +5,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# deploy-pages serves an uploaded artifact, so nothing generated is ever committed.
+# deploy-pages serves an uploaded artifact, so nothing built is ever committed. The one
+# exception is src/changes/site-log.json, which is an input to the build and not output:
+# see the log steps below.
 permissions:
-  contents: read
+  contents: write # only to append src/changes/site-log.json
   pages: write
   id-token: write
 
@@ -20,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the log drafter reads git log; depth 1 carries no history
       - uses: actions/setup-node@v7
         with:
           node-version: 22
@@ -31,10 +35,79 @@ jobs:
       # this site, so the build carries on with what is in the repository.
       - run: npm run wiki:fetch ||
           echo "::warning::the Egosoft wiki is unreachable; building from the committed tree.json"
+
+      # The Changes page renders src/changes/site-log.json, a committed file rather than
+      # git read at build time, because a published page should not depend on a history
+      # that can be rewritten. So the log is drafted here, in the same run that deploys:
+      # drafted and written before the build, committed after it. Drafting in a workflow
+      # of its own meant the deploy that followed a push had been built before the line
+      # existed, and needed a second deploy to carry it.
+      #
+      # Preview first and write only when there is a line to add. A push that logs
+      # nothing - tooling, CI, a refactor, the log itself - should leave no commit saying
+      # so, and re-reading those commits next run costs nothing: the drafter is
+      # idempotent, and append-only, so a line corrected by hand stays corrected.
+      - id: log
+        run: |
+          set +e
+          node src/changes/site-log.js > draft.txt 2>&1
+          code=$?
+          cat draft.txt
+          if [ $code -ne 0 ]; then
+            echo "::error::the drafter failed; the log is unchanged"
+            exit 1
+          fi
+          if grep -q 'nothing to add' draft.txt; then
+            echo "state=clean" >> "$GITHUB_OUTPUT"
+          else
+            echo "state=new" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.log.outputs.state == 'new'
+        run: node src/changes/site-log.js --write
+
       - run: npm run build
       # A page can build byte-perfect and still be inert, so nothing is uploaded
       # until a real browser has loaded every page without a console error.
       - run: node src/check-pages.js
+
+      # After the build, so a broken build commits nothing, and before the upload, so a
+      # log that cannot be pushed stops the deploy rather than publishing a line the
+      # repository does not have. Pushing with GITHUB_TOKEN triggers no workflow, which
+      # is what keeps this from deploying itself in a circle.
+      - if: steps.log.outputs.state == 'new'
+        run: |
+          if git diff --quiet -- src/changes/site-log.json; then
+            echo "::warning::the drafter listed lines but wrote no change"
+            exit 0
+          fi
+
+          summary=$(sed -n 's/^\([0-9][0-9]*\) line(s) over \([0-9][0-9]*\) day(s).*/\1 line(s) over \2 day(s)/p' draft.txt)
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/changes/site-log.json
+          # The wiki refresh rewrote the tracked src/wiki/tree.json, and an unstaged
+          # change aborts the rebase below. That refresh is deliberately not committed -
+          # wiki-drift.yml reports the drift and a human takes it - and the build that
+          # used the fresh copy has already run, so putting the tree back is exactly
+          # right. Staged, the log itself survives this.
+          git checkout -- .
+          git commit -m "docs(changes): log ${summary:-new entries}"
+
+          # main can have moved while this ran. Rebasing a one-file append is safe: the
+          # worst case is that the next run re-reads a commit already logged, and adds
+          # nothing for it.
+          pushed=
+          for i in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then pushed=1; break; fi
+            echo "push attempt $i failed; retrying"
+            sleep 5
+          done
+          if [ -z "$pushed" ]; then
+            echo "::error::could not push the log; nothing is deployed this run"
+            exit 1
+          fi
+
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
