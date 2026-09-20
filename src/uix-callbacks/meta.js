@@ -14,8 +14,11 @@
 //   authored    the `---` prose and the text trailing a ---@param / ---@return,
 //               carried across untouched
 //
-// One key is neither: `Since:` is generated once, when a callback is first seen,
-// and then left alone. A later tag that adds a callback stamps only that one.
+// `Since:`, `Versions:` and `Removed:` are generated like the rest. They used to
+// be stamped once and owned by the file, because only two releases had ever been
+// extracted and nothing could prove a first appearance; data/history.json covers
+// every release from 8.0.0.1 onwards, so they are computed now (see extract/lib/
+// axis.js) and a hand-edit to them would be overwritten.
 //
 // Callback names collide across menus - `cleanup` is in ten files - so the file
 // is one table per menu and the key is always (menu, name).
@@ -70,7 +73,7 @@ function emitEntry(e, authored) {
   if (e.targets && e.targets.length) gen('Returns', e.targets.join(', '));
   if (e.returnFields && e.returnFields.length) gen('Return fields', e.returnFields.join(', '));
   gen('Since', e.since);
-  gen('Versions', e.versions.join(', '));
+  gen('Versions', e.versions); // already collapsed to per-line ranges by axis.js
   gen('Removed', e.removed);
   gen('Seen at', e.seenAt);
   gen('Added by', e.attribution);
@@ -145,11 +148,6 @@ function authoredFrom(src) {
     for (const e of entries) {
       if (e.prose.length || Object.keys(e.params).length || e.ret) {
         m.set(menu + '::' + e.name, { prose: e.prose, params: e.params, ret: e.ret });
-      }
-      // Since is written once and then owned by the file, not by the extraction.
-      if (e.keys.Since) {
-        const k = menu + '::' + e.name;
-        m.set(k, Object.assign(m.get(k) || { prose: [], params: {}, ret: '' }, { since: e.keys.Since }));
       }
     }
   }

@@ -18,7 +18,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { shell, esc, versionRange, legend } = require('../layout.js');
+const { shell, esc, legend } = require('../layout.js');
 const { parse } = require('./meta.js');
 
 const DATA = path.join(__dirname, 'data');
@@ -32,14 +32,45 @@ const VERSIONS = meta.versions.map((v) => v.version);
 const NEWEST = VERSIONS[VERSIONS.length - 1];
 const tokenOf = (v) => 'v' + v.replace(/\./g, '_');
 
+// The axis is two PARALLEL lines, not one sequence: 8.0.4.10 and 9.0.0.7 were
+// published the same day. A reader is on one line or the other, so presence is
+// read per line and "current" means that line's head release.
+const LINES = meta.lines;
+const LINE_NAMES = Object.keys(LINES).sort();
+const lineOf = (v) => String(v).split('.')[0] + '.x';
+const releasesIn = (l) => LINES[l].releases;
+
 const entries = [];
 for (const list of byMenu.values()) entries.push(...list);
 entries.sort((a, b) => a.menu.localeCompare(b.menu) || a.name.localeCompare(b.name));
 
 const list = (s) => (s ? String(s).split(',').map((x) => x.trim()).filter(Boolean) : []);
-const versionsOf = (e) => list(e.keys.Versions).map(tokenOf);
-const isNew = (e) => VERSIONS.length > 1 && versionsOf(e).join(' ') === tokenOf(NEWEST);
+
+// `Versions:` is stored collapsed - "8.0.4.9..8.0.4.10, 9.0.0.3..9.0.0.14" -
+// because 33 release names is not a line anyone reads. Expanding it back needs
+// each line's release order, which meta.json carries. The separator is `..` and
+// not `-` because 8.0.0.7-rc1 has a hyphen of its own.
+const expand = (s) => list(s).flatMap((r) => {
+  const [a, b] = r.split('..');
+  if (!b) return [a];
+  const order = releasesIn(lineOf(a));
+  return order.slice(order.indexOf(a), order.indexOf(b) + 1);
+});
+const inLine = (e, l) => expand(e.keys.Versions).filter((v) => lineOf(v) === l);
+const firstIn = (e, l) => inLine(e, l)[0] || null;
+const versionsOf = (e) => expand(e.keys.Versions).map(tokenOf);
 const described = (e) => e.prose.length > 0;
+
+// NEW marks the most recent additions, which is not the same as "in the head
+// release": 9.0.0.14 added nothing, and a badge that matched it would mark none of
+// the 17 hooks 9.0.0.13 brought. So it is the latest release on each line that
+// introduced anything, its own floor excepted - everything is "new" there.
+const NEWEST_ADDING = {};
+for (const l of LINE_NAMES) {
+  const rs = releasesIn(l);
+  NEWEST_ADDING[l] = rs.slice(1).reverse().find((t) => entries.some((e) => firstIn(e, l) === t)) || null;
+}
+const isNew = (e) => LINE_NAMES.some((l) => NEWEST_ADDING[l] && firstIn(e, l) === NEWEST_ADDING[l]);
 
 // What the meta file parses to has to be what the extraction measured. Anything else
 // means an edit reshaped an entry, and the page would publish the damage silently.
@@ -53,8 +84,13 @@ for (const e of entries) {
   for (const k of ['Function', 'Holder', 'Kind', 'Aggregation', 'Versions', 'Since']) {
     if (!e.keys[k]) problems.push(`${e.menu}::${e.name} has no ${k}`);
   }
-  const unknown = versionsOf(e).filter((t) => !VERSIONS.map(tokenOf).includes(t));
+  const known = VERSIONS.map(tokenOf);
+  const got = versionsOf(e);
+  const unknown = got.filter((t) => !known.includes(t));
   if (unknown.length) problems.push(`${e.menu}::${e.name} is in ${unknown.join(', ')}, which meta.json does not cover`);
+  // An unexpandable range reads as zero releases, which would otherwise publish as
+  // a hook that exists in nothing at all.
+  if (!got.length) problems.push(`${e.menu}::${e.name} has a Versions: no release order can expand`);
 }
 if (problems.length) {
   console.error('uix-callbacks.lua does not agree with meta.json:');
@@ -132,11 +168,89 @@ table.legend th{width:9em;white-space:nowrap;text-align:left;vertical-align:top}
   .card table th,table.legend th{width:auto;white-space:normal}}
 `;
 
+// ---- availability, per line -------------------------------------------------
+// Computed here and shipped rendered, rather than recomputed in the browser: the
+// row badge and the card must never disagree about which releases have a hook.
+
+function availability(e) {
+  return LINE_NAMES.map((l) => {
+    const rs = releasesIn(l), on = inLine(e, l), head = LINES[l].head;
+    if (!on.length) return { line: l, tone: 'no', text: `never in the ${l} line` };
+    const whole = on.length === rs.length;
+    const gaps = on.length !== rs.indexOf(on[on.length - 1]) - rs.indexOf(on[0]) + 1;
+    if (whole) return { line: l, tone: 'ok', text: `every ${l} release (${rs[0]} to ${head})` };
+    if (gaps) return { line: l, tone: 'warn', text: `${l}: ${e.keys.Versions.split(',').map((x) => x.trim()).filter((x) => lineOf(x) === l).join(', ').replace(/\.\./g, ' to ')}` };
+    if (on[on.length - 1] === head) return { line: l, tone: 'new', text: `${l} from ${on[0]} onwards` };
+    return { line: l, tone: 'gone', text: `${l} up to ${on[on.length - 1]}, gone since` };
+  });
+}
+
+// One word for the row: is it in both current releases, one, or neither.
+function standing(e) {
+  const heads = LINE_NAMES.filter((l) => inLine(e, l).includes(LINES[l].head));
+  if (!heads.length) return 'gone';
+  if (heads.length === LINE_NAMES.length) return 'both';
+  return heads[0];
+}
+
+const publishedOf = new Map(meta.versions.map((v) => [v.version, v.published]));
+
+// Present in the oldest release of its line for a reason that is not an addition:
+// at the 8.x floor everything simply predates the scan, and at the 9.x floor a hook
+// the 8.x line already had arrived with the branch rather than being written for it.
+function inherited(e, l) {
+  const rs = releasesIn(l);
+  if (!inLine(e, l).length || inLine(e, l)[0] !== rs[0]) return false;
+  const i = LINE_NAMES.indexOf(l);
+  if (i === 0) return true; // the oldest line's floor is the pre-8.0 baseline
+  const older = inLine(e, LINE_NAMES[i - 1]);
+  return !!older.length && publishedOf.get(older[0]) < publishedOf.get(rs[0]);
+}
+
+// The releases of one line where this hook appeared or disappeared - the only thing
+// a per-release filter can usefully say. "Present in 8.0.2.0" is true of 209 hooks
+// and so tells a reader nothing; "changed in 8.0.2.0" is true of eight.
+function changesIn(e, l) {
+  const rs = releasesIn(l), on = new Set(inLine(e, l)), out = [];
+  let prev = false;
+  for (let i = 0; i < rs.length; i++) {
+    const here = on.has(rs[i]);
+    if (here && !prev && !(i === 0 && inherited(e, l))) out.push(rs[i]);
+    if (!here && prev) out.push(rs[i]);
+    prev = here;
+  }
+  return out;
+}
+
+const changedIn = new Map();      // release -> [added, dropped]
+for (const l of LINE_NAMES) {
+  const rs = releasesIn(l);
+  for (const v of rs) changedIn.set(v, [0, 0]);
+  for (const e of entries) {
+    const on = new Set(inLine(e, l));
+    for (const v of changesIn(e, l)) changedIn.get(v)[on.has(v) ? 0 : 1]++;
+  }
+}
+// `(0)` and not an omission: a release that touched code without adding or dropping
+// a hook is a fact about that release, and leaving it out reads as a gap in the list.
+const changeLabel = (v) => {
+  const [a, d] = changedIn.get(v);
+  return `${v} (${[a ? '+' + a : '', d ? '-' + d : ''].filter(Boolean).join(' ') || '0'})`;
+};
+
 // ---- the list --------------------------------------------------------------
 
 const rows = entries.map((e) => {
+  // A token per release the hook merely existed in would be up to 33 of them and
+  // nothing in the bar asks for it any more. What the bar asks for is the current
+  // releases and the ones that changed something, which is at most a handful.
   const facets = ['m-' + e.menu, 'k-' + e.keys.Kind, 'a-' + e.keys.Aggregation, 'h-' + e.keys.Holder,
-    described(e) ? 'described' : 'undescribed', ...versionsOf(e), isNew(e) ? 'new' : ''].filter(Boolean).join(' ');
+    described(e) ? 'described' : 'undescribed', 'in-' + standing(e),
+    inLine(e, LINE_NAMES[LINE_NAMES.length - 1]).includes(NEWEST) ? 'latest' : '',
+    ...LINE_NAMES.filter((l) => inLine(e, l).includes(LINES[l].head)).map((l) => 'head-' + l),
+    ...LINE_NAMES.filter((l) => inherited(e, l)).map((l) => 'base-' + l),
+    ...LINE_NAMES.flatMap((l) => changesIn(e, l)).map((v) => 'chg-' + tokenOf(v)),
+    isNew(e) ? 'new' : ''].filter(Boolean).join(' ');
   return `<div class="row" id="${id(e)}" data-f="${esc(facets)}" data-k="${esc(e.menu + '::' + e.name)}">
 <button class="hd disc" type="button">\
 <span class="nm">${esc(e.name)}${isNew(e) ? '<span class="new">NEW</span>' : ''}</span>\
@@ -164,7 +278,7 @@ const payload = Object.fromEntries(entries.map((e) => [e.menu + '::' + e.name, {
   ret: e.keys.Returns || null,
   rf: list(e.keys['Return fields']),
   since: e.keys.Since,
-  v: versionsOf(e).join(' '),
+  av: availability(e),
   removed: e.keys.Removed || null,
   seen: e.keys['Seen at'] || null,
   by: e.keys['Added by'] || null,
@@ -184,14 +298,9 @@ const overrides = countOf((e) => e.keys.Kind === 'override');
 
 const JS = `
 var D=JSON.parse(document.getElementById('data').textContent);
-var VS=${JSON.stringify(VERSIONS)},NEW='${tokenOf(NEWEST)}';
+var LINES=${JSON.stringify(LINES)};
 var KIND=${JSON.stringify(KIND)},AGG=${JSON.stringify(AGG)},HOLDER=${JSON.stringify(HOLDER)};
 var E=function(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
-// The one implementation, shipped rather than ported: the rows and the cards must
-// never disagree about which versions something is in.
-${versionRange.toString()}
-var vrange=function(c){var h=' '+c.v+' ';
-  return versionRange(VS,VS.filter(function(v){return h.indexOf(' v'+v.split('.').join('_')+' ')>=0;}));};
 var says=function(m,k){return m[k]?'<b class="t-'+m[k][0]+'">'+E(m[k][2])+'</b>':'<b class="t-no">'+E(k)+'</b>';};
 var word=function(m,k){return m[k]?'<b class="t-'+m[k][0]+'">'+E(m[k][1])+'</b>':'<b class="t-no">'+E(k)+'</b>';};
 
@@ -246,8 +355,8 @@ function card(k){
         return '<code>.'+E(f)+'</code>';}).join(', '):'')+
       (d.ret?'<br>'+E(d.ret):'')]);
   }
-  var r=vrange(c);
-  rows.push(['Versions','<b class="t-'+r.tone+'">'+E(r.long)+'</b>'+
+  rows.push(['Available',c.av.map(function(a){
+      return '<b class="t-'+a.tone+'">'+E(a.text)+'</b>';}).join('<br>')+
     '<br><span class="k">first seen in</span> '+E(c.since)+
     (c.removed?'<br><b class="t-gone">'+E(c.removed)+'</b>':'')]);
   if(c.by) rows.push(['Added by',E(c.by)]);
@@ -302,7 +411,16 @@ function jump(){
   var h=location.hash.slice(1); if(!h) return;
   var el=document.getElementById(h); if(!el) return;
   if(el.classList.contains('row')){
-    if(el.classList.contains('hide')){q.value='';sel.forEach(function(s){s.value='';});apply();}
+    if(el.classList.contains('hide')){q.value='';
+      // '' is no longer an option on every select, and setting it anyway leaves one
+      // blank. Widen each to the first of its options the target actually satisfies.
+      var f=' '+el.dataset.f+' ';
+      sel.forEach(function(s){
+        if(s.querySelector('option[value=""]')){s.value='';return;}
+        var opt=[].slice.call(s.querySelectorAll('option')).filter(function(o){
+          return f.indexOf(' '+o.value+' ')>=0;})[0];
+        if(opt) s.value=opt.value;});
+      apply();}
     open(el,true);
   }else{el.scrollIntoView();}
 }
@@ -316,6 +434,18 @@ const select = (label, vals, def = '') =>
   vals.map(([v, l]) => `<option value="${esc(v)}"${v === def ? ' selected' : ''}>${esc(l)}</option>`).join('') +
   '</select>';
 
+// 33 releases in one flat list is unreadable, and the two lines are the division a
+// reader already has in mind.
+// No "all" option: every hook belongs to some release, so the honest default is the
+// current one rather than a mixture of live and long-dropped entries. A deep link
+// into something the default hides is handled in the page script instead.
+const selectGrouped = (label, groups, def) =>
+  `<select data-def="${esc(def)}" aria-label="${esc(label)}">` +
+  groups.map(([g, vals]) => (g ? `<optgroup label="${esc(g)}">` : '') +
+    vals.map(([v, l]) => `<option value="${esc(v)}"${v === def ? ' selected' : ''}>${esc(l)}</option>`).join('')
+    + (g ? '</optgroup>' : '')).join('') +
+  '</select>';
+
 const aggRow = (k) => `<tr><th>${esc(AGG[k][1])}</th><td>${esc(AGG[k][2])}. ` +
   `${countOf((e) => e.keys.Aggregation === k)} of them.</td></tr>`;
 
@@ -323,8 +453,9 @@ const body = `<h1>UIX callbacks</h1>
 <p class="lede">Every hook <a href="https://github.com/kuertee/x4-mod-ui-extensions">UI Extensions and HUD</a> puts
 into X4's menus. UIX ships patched copies of the vanilla menu files with callback dispatch points added, and a mod
 registers a function against one by name: that is how a UI mod changes a menu without replacing the file, and how two
-mods change the same menu without fighting. Read out of the mod's own <code>.xpl</code> files at
-${VERSIONS.join(' and ')}.</p>
+mods change the same menu without fighting. Read out of the mod's own <code>.xpl</code> files at every one of its
+${VERSIONS.length} releases from ${VERSIONS[0]} onwards, so each hook carries the release it appeared in. The current
+ones are ${LINE_NAMES.map((l) => `${LINES[l].head} (${l})`).join(' and ')}.</p>
 <p class="lede">${meta.callbacks} callbacks across ${meta.menus} menus, ${overrides} of which are given a return value
 the menu then uses. The mod's own readme says no list of them exists and to search the code, so this is that list, and
 the descriptions are written by hand: ${describedCount} of ${meta.callbacks} so far.</p>
@@ -367,11 +498,19 @@ site announces it, and it is the field a reader cannot guess, so it is measured:
 <table>${Object.keys(AGG).filter((k) => countOf((e) => e.keys.Aggregation === k)).map(aggRow).join('')}</table></td></tr>
 <tr><th>Registered on</th><td>${badge(HOLDER, 'menu', false)}.<br>${badge(HOLDER, 'Helper', false)}.<br>
 ${badge(HOLDER, 'uix_menu', false)}.</td></tr>
-<tr><th>Versions</th><td><b class="t-ok">all</b> in every release covered here (${VERSIONS.join(', ')}).<br>
-<b class="t-new">${esc('≥ ' + NEWEST)}</b> from that release onwards, so new since the one before it, and marked
-<span class="new">NEW</span> on its row.<br>
-<b class="t-gone">${esc('≤ ' + VERSIONS[0])}</b> up to that release, and gone since. A hook that disappears takes every
-mod registered against it with it, silently: the registration still succeeds and is simply never called.</td></tr>
+<tr><th>Available</th><td>The <b>8.x</b> and <b>9.x</b> lines run in parallel - ${LINES['8.x'].head} and
+${LINES['9.x'].head} are both current - so a card answers per line, and the row's
+<span class="new">NEW</span> marks the latest additions to either
+(${LINE_NAMES.filter((l) => NEWEST_ADDING[l]).map((l) => NEWEST_ADDING[l]).join(' and ')}).<br>
+<b class="t-ok">every 8.x release</b> present throughout that line.<br>
+<b class="t-new">9.x from ${LINES['9.x'].releases[1]} onwards</b> added there, and still current.<br>
+<b class="t-no">never in the 8.x line</b> a hook that line never had, so a mod using it will not run on it.<br>
+<b class="t-gone">8.x up to …, gone since</b> dropped. A hook that disappears takes every mod registered against it
+with it, silently: the registration still succeeds and is simply never called.<br>
+The <b>Available in</b> filter reads the same way: each line offers what its current release has, then what every
+release <b>changed</b>. <code>9.0.0.13 (+17)</code> is the seventeen hooks that release introduced, not the 293 it
+carries - "present in" is true of nearly everything and so says nothing. <code>${NEWEST} (0)</code> means that
+release altered UIX without adding or dropping a hook, which is most of them.</td></tr>
 <tr><th>Copying</th><td>An open card carries <b>Copy name</b>, <b>Copy registration</b> and <b>Copy link</b>; the last
 gives a URL that reopens that card.</td></tr>
 </table>
@@ -395,8 +534,8 @@ it belongs to are never apart.</p>
 -- Args: active
 -- Returns: result
 -- Return fields: active
--- Since: ${VERSIONS[0]}
--- Versions: ${VERSIONS.join(', ')}
+-- Since: pre-8.0
+-- Versions: ${LINES['8.x'].releases[0]}..${LINES['8.x'].head}, ${LINES['9.x'].releases[0]}..${LINES['9.x'].head}
 -- Seen at: menu_transporter.xpl:705 (${NEWEST})
 -- Added by: kuertee
 --- Decides whether the transporter room's "Go to" button is enabled.
@@ -405,8 +544,8 @@ it belongs to are never apart.</p>
 function menu_transporter.display_on_set_room_active(active) end</code></pre>
 <p>The <code>---</code> lines are the description, and the text after the <code>#</code> on a <code>---@param</code> or
 <code>---@return</code> says what that one value is. Everything reading <code>-- Key: value</code> is generated from the
-extraction and rewritten whenever UIX moves on; the authored kinds are carried across untouched, and
-<code>Since:</code> is stamped once and then owned by the file.
+extraction and rewritten whenever UIX moves on, <code>Since:</code> included - it is measured against every release,
+not remembered - while the authored kinds are carried across untouched.
 <a href="https://github.com/chemodun/chemodun.github.io/blob/main/src/uix-callbacks/uix-callbacks.lua">The file is on
 GitHub</a>, and a description added to it is a pull request against that one file.</p>
 </details>
@@ -436,8 +575,20 @@ ${select('Registered on', Object.keys(HOLDER).filter((k) => countOf((e) => e.key
     .map((k) => ['h-' + k, `${HOLDER[k][1]} (${countOf((e) => e.keys.Holder === k)})`]))}
 ${select('Description', [['described', `described (${describedCount})`],
     ['undescribed', `not described yet (${meta.callbacks - describedCount})`]])}
-${select('Release', [...VERSIONS.map((v) => [tokenOf(v), `in ${v} (${countOf((e) => versionsOf(e).includes(tokenOf(v)))})`]),
-    ['new', `new in ${NEWEST} (${countOf(isNew)})`]])}
+${selectGrouped('Available in',
+  // Newest line first, and within a line the head's "everything here" over what each
+  // release changed, newest first. Every release is listed, including the ones that
+  // changed nothing - the oldest line's floor excepted, since the baseline item at
+  // the bottom of that group is the same release said properly.
+  [...LINE_NAMES].reverse().map((l) => [l, [
+    ['head-' + l, `available in ${LINES[l].head} (${countOf((e) => inLine(e, l).includes(LINES[l].head))})`],
+    ...releasesIn(l).slice().reverse()
+      .filter((v) => !(LINE_NAMES.indexOf(l) === 0 && v === releasesIn(l)[0]))
+      .map((v) => ['chg-' + tokenOf(v), changeLabel(v)]),
+    ...(countOf((e) => inherited(e, l)) && LINE_NAMES.indexOf(l) === 0
+      ? [['base-' + l, `${releasesIn(l)[0]} and earlier (${countOf((e) => inherited(e, l))})`]] : []),
+  ]]),
+  'head-' + LINE_NAMES[LINE_NAMES.length - 1])}
 <button id="clr" type="button">Reset</button><span class="n" id="n"></span>
 ${legend([['Name'], ['Menu', 'The name Helper.getMenu() takes'],
   ['Kind', 'Kind: whether the return value is used'],
@@ -453,7 +604,8 @@ ${rows}
 const html = shell({
   title: 'UIX callbacks',
   description: `Every callback kuertee's UI Extensions and HUD puts into X4: Foundations' menus - what dispatches it, `
-    + `what it is handed, what it may return and which release has it, for ${VERSIONS.join(' and ')}.`,
+    + `what it is handed, what it may return and which UIX release it appeared in, across all ${VERSIONS.length}`
+    + ` releases from ${VERSIONS[0]} to ${NEWEST}.`,
   trail: [
     { label: 'Home', href: '/' },
     { label: 'For X4: Foundations', href: '/x4/' },

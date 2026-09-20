@@ -1,0 +1,126 @@
+name: UIX releases
+
+# The UIX callbacks reference is measured against every release of kuertee's mod
+# from 8.0.0.1 onwards - that is what `Since:` and `Available` on the page mean.
+# A new release therefore dates the reference the moment it appears, and nothing
+# says so: the page keeps publishing the axis it was last built with.
+#
+# This checks weekly, and when there is a release the history lacks it runs the
+# whole pipeline and opens a pull request with the result. It opens a PR rather
+# than committing because the regeneration also rewrites the 295 entries' keys,
+# and that diff is worth a read before it is the live reference.
+#
+# The backfill is NOT this job. data/history.json is committed and already covers
+# every release from 8.0.0.1, so a run here extracts only what is new - one
+# release, plus the two old ones whose full extraction out/ does not carry.
+
+on:
+  schedule:
+    - cron: '43 5 * * 2'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: uix-releases
+  cancel-in-progress: true
+
+env:
+  BRANCH: uix-callbacks/new-releases
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # No npm ci anywhere in this job. The pipeline is node builtins and fetch, and
+      # the page builder this validates with needs nothing installed either - only
+      # the markdown pages do, and none of them is touched here.
+      - id: check
+        run: |
+          set +e
+          node src/uix-callbacks/extract/build-history.js --check > check.txt 2>&1
+          code=$?
+          cat check.txt
+          if [ $code -eq 0 ]; then echo "state=current" >> "$GITHUB_OUTPUT"
+          elif [ $code -eq 3 ]; then echo "state=new" >> "$GITHUB_OUTPUT"
+          else echo "state=failed" >> "$GITHUB_OUTPUT"
+          fi
+
+      # A GitHub outage is a failed run, not "no new releases" and not a pull request
+      # full of nothing. The distinction matters, or a bad week rewrites the axis.
+      - if: steps.check.outputs.state == 'failed'
+        run: |
+          echo "::error::could not read the UIX releases; no check this run"
+          sed 's/^/  /' check.txt
+          exit 1
+
+      - if: steps.check.outputs.state == 'new'
+        run: |
+          node src/uix-callbacks/extract/build-history.js  > update.txt 2>&1
+          node src/uix-callbacks/extract/gen-meta.js --site >> update.txt 2>&1
+          cat update.txt
+
+      # build-html.js is the gate: it refuses to build when uix-callbacks.lua and
+      # data/meta.json disagree about the callbacks, the menus or the axis. If the
+      # extraction misread a new release, the run stops here rather than at review.
+      - if: steps.check.outputs.state == 'new'
+        run: node src/uix-callbacks/build-html.js
+
+      - if: steps.check.outputs.state == 'new'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- src/uix-callbacks; then
+            echo "::warning::a new release appeared but changed nothing in the reference"
+            exit 0
+          fi
+
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -C "$BRANCH"
+          git add src/uix-callbacks
+          git commit -m "uix-callbacks: take $(grep -c '^  new: ' check.txt) new UIX release(s)"
+          # Rebuilt from main every run, never added to, so the force is the point: an
+          # unmerged branch from last week is stale, and this run already covers every
+          # release it did. --force-with-lease cannot help here anyway - the checkout is
+          # shallow and has no remote-tracking ref for a branch only this job writes.
+          git push --force origin "$BRANCH"
+
+          {
+            echo "A UIX release appeared that \`data/history.json\` did not cover, so the"
+            echo "version axis has been rebuilt and the reference regenerated."
+            echo
+            echo '```'
+            sed 's/^/  /' check.txt
+            echo '```'
+            echo
+            echo "What the regeneration did:"
+            echo
+            echo '```'
+            sed 's/^/  /' update.txt
+            echo '```'
+            echo
+            echo "The authored descriptions are carried across by \`gen-meta.js\` and the"
+            echo "round-trip it reports covers every entry, so a non-zero prose count here"
+            echo "means none were lost. What should move is \`Since:\`, \`Versions:\`,"
+            echo "\`Seen at:\` and any genuinely new callback."
+            echo
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > body.md
+
+          # One pull request for the subject, updated rather than duplicated, so a
+          # quiet month is one branch instead of four.
+          n=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$n" ]; then
+            gh pr edit "$n" --body-file body.md
+            echo "updated PR #$n"
+          else
+            gh pr create --head "$BRANCH" --title 'uix-callbacks: new UIX releases' --body-file body.md
+          fi

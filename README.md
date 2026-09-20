@@ -176,20 +176,22 @@ The layout follows the commands reference, because the shape of the data is the 
 `src/uix-callbacks/build-html.js` builds `/x4/modding-support/ui-modding/uix-callbacks/` from `src/uix-callbacks/uix-callbacks.lua`.
 
 ```text
-uix-callbacks.lua  the reference itself: 276 callbacks in 18 menus, one table per menu
-meta.js            the parser, copied here by the extraction half
+uix-callbacks.lua  the reference itself: 295 callbacks in 19 menus, one table per menu
+meta.js            the parser, shared with the extraction half beside it
 data/meta.json     the releases covered, and the counts the extraction measured
+data/history.json  which callbacks each UIX release dispatches: the version axis
+extract/           the extraction half, and the pipeline the weekly workflow runs
 ```
 
-kuertee's [UI Extensions and HUD](https://github.com/kuertee/x4-mod-ui-extensions) ships patched copies of the vanilla menu files with callback dispatch points added, and a mod registers a function against one by name. The mod's own readme says no list of them exists and to search the code, so this is that list, read out of its `.xpl` files at two release tags.
+kuertee's [UI Extensions and HUD](https://github.com/kuertee/x4-mod-ui-extensions) ships patched copies of the vanilla menu files with callback dispatch points added, and a mod registers a function against one by name. The mod's own readme says no list of them exists and to search the code, so this is that list, read out of its `.xpl` files at every one of its 33 releases from 8.0.0.1 onwards.
 
-**The `.lua` file is the reference, not a rendering of it.** It is a Lua Language Server meta file, which means it is also an editor library: point a language server at it and a handler gets completion and signatures. The descriptions live in it and nowhere else, so a description and the hook it belongs to are never apart, and adding one is a pull request against a single file. Everything reading `-- Key: value` is generated and rewritten whenever UIX moves on; the `---` prose and the text after a `---@param` or `---@return` `#` are authored and carried across untouched. `Since:` is neither: it is stamped once, when a callback first appears, and then owned by the file.
+**The `.lua` file is the reference, not a rendering of it.** It is a Lua Language Server meta file, which means it is also an editor library: point a language server at it and a handler gets completion and signatures. The descriptions live in it and nowhere else, so a description and the hook it belongs to are never apart, and adding one is a pull request against a single file. Everything reading `-- Key: value` is generated and rewritten whenever UIX moves on, `Since:` included - it is measured against every release rather than remembered - while the `---` prose and the text after a `---@param` or `---@return` `#` are authored and carried across untouched.
 
-The version axis is the **mod's** release tags, not the game's, because a callback appears when kuertee adds it. `Aggregation` is the field the page exists for: nothing at a dispatch site says what happens when two mods register against the same hook, and the answer is one of six contracts.
+The version axis is the **mod's** releases, not the game's, because a callback appears when kuertee adds it. Its 8.x and 9.x lines run in parallel, so availability is answered per line and a hook already present at the 8.0.0.1 floor is `pre-8.0` rather than given a number the scan cannot prove. `Aggregation` is the field the page exists for: nothing at a dispatch site says what happens when two mods register against the same hook, and the answer is one of six contracts.
 
-The layout follows the C functions page - a filter bar over a flat list, with each card assembled in the browser when its row is opened. Facets are menu, kind, aggregation, holder, whether a description has been written, and release. 366 KB.
+The layout follows the C functions page - a filter bar over a flat list, with each card assembled in the browser when its row is opened. Facets are menu, kind, aggregation, holder, whether a description has been written, and release. The release filter is grouped by line, newest line first, and defaults to the current release rather than to everything: each group offers its head, then what every release of that line changed (`9.0.0.13 (+17)`, `9.0.0.14 (0)`), because "present in 8.0.2.0" is true of 209 hooks and tells a reader nothing. 435 KB.
 
-The extraction half lives outside this repo, in a working copy of the UIX sources; it writes `uix-callbacks.lua`, `meta.js` and `data/meta.json` here and nothing else.
+The extraction half is `src/uix-callbacks/extract/`, with [its own README](src/uix-callbacks/extract/README.md). It needs no dependencies and no clone: the releases come from the GitHub API and a release's sources from one tarball, both over node's `fetch`. `.github/workflows/uix-releases.yml` runs `npm run uix:check` weekly and, when a release appears that `data/history.json` does not cover, runs the pipeline and opens a pull request with the regenerated reference.
 
 ### The two changes pages
 

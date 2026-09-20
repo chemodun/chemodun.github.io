@@ -1,0 +1,972 @@
+{
+ "repo": "kuertee/x4-mod-ui-extensions",
+ "floor": "8.0.0.1",
+ "generated": "2026-09-20",
+ "lines": {
+  "8.x": [
+   {
+    "tag": "8.0.0.1",
+    "name": "8.0.0.1-beta",
+    "published": "2025-07-12",
+    "prerelease": true,
+    "counts": {
+     "files": 19,
+     "sites": 193,
+     "callbacks": 179,
+     "byAggregation": {
+      "none": 114,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 30,
+      "multi-value": 11,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 114,
+      "override": 65
+     },
+     "byHolder": {
+      "menu": 165,
+      "Helper": 14
+     }
+    },
+    "added": ["customgame::buttonNewGame_preNewGame", "customgame::buttonReset_on_end", "customgame::cleanup", "customgame::display_on_after_category_name", "customgame::display_on_after_category_options", "customgame::display_on_after_main_options", "customgame::display_on_after_property_name", "customgame::display_on_start", "customgame::dropdownProperty_on_start", "customgame::editboxProperty_on_end", "customgame::openPlayerPropertyShipConfig_on_end", "customgame::openShipConfig_on_end", "customgame::openShipConfig_on_start", "customgame::playerMacro_on_end", "customgame::removeFactionRelationHelper_on_end", "customgame::setPlayerMacro_on_end", "customgame::setPlayerSector_on_end", "customgame::slidercellFaction_on_end", "customgame::universeSector_on_end", "gameoptions::addSavegameRow_changeSaveGameDisplayName", "gameoptions::addSavegameRow_getIsBoldFilename", "gameoptions::addSavegameRow_getRowHeightForExtraInfo", "gameoptions::addSavegameRow_isListSaveGame", "gameoptions::addSavegameRow_postSaveGameRowAdd", "gameoptions::addSavegameRow_preSaveGameRowAdd", "gameoptions::callbackDeleteSave_onDeleteSave", "gameoptions::displayOptions_modifyOptions", "gameoptions::displaySaveGameOptions_postSaveGameRowAdd", "gameoptions::displaySaveGameOptions_preSaveGameRowAdd", "gameoptions::displaySaveGameOptions_sortSaveGames", "gameoptions::displaySavegameOptions_isShowUnusedSaveGame", "gameoptions::displaySavegameOptions_onGetSaveGames", "gameoptions::loadGameCallback_preLoadGame", "gameoptions::newGameCallback_preNewGame", "gameoptions::onUpdate_start", "gameoptions::submenuHandler_preDisplayOptions", "helper::checkTopLevelConditions_get_is_entry_available", "helper::checkboxSetTradeRuleOverride_pre_update_expanded_node", "helper::createFrameHandle_on_start", "helper::createLSOStorageNode_get_ware_name", "helper::createTransactionLog_set_graph_height", "helper::dropdownTradeRule_pre_update_expanded_node", "helper::onCollapseLSOStorageNode", "helper::onExpandLSOStorageNode", "helper::onExpandLSOStorageNode_list_incoming_trade", "helper::onExpandLSOStorageNode_pre_buy_offer_title", "helper::onExpandLSOStorageNode_pre_sell_offer_title", "helper::onUpdate", "helper::registerMenu_onShow", "helper::updateLSOStorageNode_pre_update_expanded_node", "menu_docked::cleanup", "menu_docked::display_on_after_main_interactions", "menu_docked::rd_addReactiveDockingDockMenu", "menu_docked::sto_addTurretBehavioursDockMenu", "menu_encyclopedia::addDetailRow_known_cluster_production_module_entries", "menu_encyclopedia::addDetailRow_known_sector_production_module_entries", "menu_encyclopedia::addDetailRow_post_missile_entry", "menu_encyclopedia::cleanup", "menu_encyclopedia::display_on_start", "menu_encyclopedia::onShowMenu_addOtherShipTypes", "menu_encyclopedia::onShowMenu_addingIndexEntries", "menu_encyclopedia::onShowMenu_addingIndexNumEntries", "menu_encyclopedia::onShowMenu_addingTypeIndexEntries", "menu_encyclopedia::onShowMenu_override_capitalsizecategory", "menu_encyclopedia::onShowMenu_override_menu_printed_variables", "menu_encyclopedia::onShowMenu_override_sizecategory", "menu_interactmenu::aegs_map_rightMenu_shipBuilding_insert", "menu_interactmenu::aegs_map_rightMenu_shipOverview_insert", "menu_interactmenu::aegs_map_rightMenu_shipassignments_insert_01", "menu_interactmenu::aegs_map_rightMenu_shipassignments_insert_02", "menu_interactmenu::aegs_map_rightMenu_shipassignments_insert_03", "menu_interactmenu::createContentTable_getIsActionValid", "menu_interactmenu::createContentTable_getIsSectionValid", "menu_interactmenu::createContentTable_getIsSubsectionValid", "menu_interactmenu::draw_on_start", "menu_interactmenu::interactMenu_clickAction", "menu_interactmenu::interactMenu_clickSubsection", "menu_map::aegs_map_loadoutinfo_double_insert", "menu_map::aegs_map_shipInformation_shiptypename_override", "menu_map::aegs_map_ship_assignments_insert", "menu_map::aegs_map_ship_subordinateassignments_insert", "menu_map::buttonMissionActivate_on_activate", "menu_map::buttonRenameConfirm_onMultiRename_on_after_rename", "menu_map::buttonRenameConfirm_onMultiRename_on_before_rename", "menu_map::buttonToggleObjectList_on_start", "menu_map::createInfoFrame2_on_menu_infoModeRight", "menu_map::createInfoFrame_on_menu_infoTableMode", "menu_map::createMissionContext_addMissionAcceptedButtons", "menu_map::createMissionContext_addMissionOfferButtons", "menu_map::createMissionContext_getIsMissionAcceptable", "menu_map::createMissionContext_getIsMissionBriefingAvailable", "menu_map::createMissionContext_on_end", "menu_map::createMissionContext_startDescriptionTable", "menu_map::createMissionMode_on_missionoffer_guild_start", "menu_map::createMissionMode_replaceMissionModeCurrent", "menu_map::createPropertyOwned_on_add_other_objects_infoTableData", "menu_map::createPropertyOwned_on_add_ship_infoTableData", "menu_map::createPropertyOwned_on_createPropertySection_unassignedships", "menu_map::createPropertyOwned_on_init_infoTableData", "menu_map::createPropertyOwned_on_start", "menu_map::createPropertyRow_after_config_change", "menu_map::createPropertyRow_after_row_height", "menu_map::createPropertyRow_before_config_change", "menu_map::createPropertyRow_on_init_vars", "menu_map::createPropertyRow_on_set_locationtext", "menu_map::createPropertyRow_override_row_location_createText", "menu_map::createPropertyRow_override_row_shipname_createText", "menu_map::createRightBar_on_start", "menu_map::createSideBar_on_start", "menu_map::displayDefaultBehaviour_change_param_behaviouractive", "menu_map::getContainerNameAndColors_on_name_construct", "menu_map::getPropertyOwnedFleetDataInternal_addToFleetIcons", "menu_map::ic_onRowChanged", "menu_map::ic_onSelectElement", "menu_map::ic_onTableRightMouseClick", "menu_map::onRenderTargetSelect_on_leave", "menu_map::onRenderTargetSelect_on_propertyowned_newmode", "menu_map::onSetActiveStateForCVMode_on_createPropertyOwned", "menu_map::rd_addReactiveDockingMapMenu", "menu_map::refreshInfoFrame2_on_start", "menu_map::sto_addTurretBehavioursMapMenu", "menu_map::updatePlotSize_on_before_extend", "menu_map::utRenaming_buttonRenameConfirm", "menu_map::utRenaming_createRenameContext_get_startname", "menu_map::utRenaming_infoChangeObjectName", "menu_map::utRenaming_setupInfoSubmenuRows_on_end", "menu_playerinfo::buttonTogglePlayerInfo_on_start", "menu_playerinfo::cleanup", "menu_playerinfo::createFactions_on_after_declare_war_button", "menu_playerinfo::createFactions_on_before_render_licences", "menu_playerinfo::createInfoFrame_on_info_frame_mode", "menu_playerinfo::createInfoFrame_on_start", "menu_playerinfo::createPlayerInfo_on_start", "menu_playerinfo::onRowChanged", "menu_ship_configuration::buttonSelectPaintMod_onStart", "menu_ship_configuration::checkEquipment_onUpgradeSlots", "menu_ship_configuration::cleanup", "menu_ship_configuration::displayModifyPaintSlots_assigningPaintsToGroups", "menu_ship_configuration::displayModifyPaintSlots_onShowingButton", "menu_ship_configuration::displayModifyPlan_onSelectedShips", "menu_ship_configuration::displaySlots_on_after_create_store_loadout_button", "menu_ship_configuration::displaySlots_on_before_create_button_mouseovertext", "menu_ship_configuration::displaySlots_on_before_create_store_loadout_button", "menu_ship_configuration::evaluateShipOptions_override_shiptypename", "menu_ship_configuration::getDataAndDisplay_beforeDisplay", "menu_ship_configuration::insertWare_onPriceCalculation", "menu_ship_configuration::prepareModWares_onEnd", "menu_ship_configuration::repairandupgrade_after_build_order_created", "menu_station_configuration::cleanup", "menu_station_configuration::displayModules_on_before_create_button_mouseovertext", "menu_station_configuration::displayPlan_getWareName", "menu_station_configuration::displayPlan_render_incoming_ware", "menu_station_overview::cleanup", "menu_station_overview::display_get_station_name_extras", "menu_station_overview::onExpandTradeWares_insert_ware_to_allwares", "menu_station_overview::onExpandTradeWares_on_start", "menu_station_overview::onShowMenu_start", "menu_station_overview::setupFlowchartData_on_start", "menu_station_overview::setupFlowchartData_pre_trade_wares_button", "menu_station_overview::updateExpandedNode_at_end", "menu_station_overview::updateExpandedNode_at_start", "menu_toplevel::cleanup", "menu_toplevel::createInfoFrame_on_add_table", "menu_toplevel::createInfoFrame_on_before_frame_display", "menu_toplevel::kHUD_add_HUD_tables", "menu_toplevel::kHUD_add_tables", "menu_toplevel::kHUD_get_is_show_custom_hud", "menu_toplevel::onUpdate_before_frame_update", "menu_toplevel::onUpdate_start", "menu_trader_blueprintsorlicences::display_on_after_create_equipment_text", "menu_transactionlog::cleanup", "menu_transactionlog::createFrame_on_create_transaction_log", "menu_transporter::addEntry_on_set_room_name", "menu_transporter::display_onButtonCreate", "menu_transporter::display_on_set_buttontable", "menu_transporter::display_on_set_room_active", "menu_userquestion::cleanup_end", "menu_userquestion::createInfoFrame_custom_frame_properties", "menu_userquestion::createTable_new_custom_table"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.0.2",
+    "name": "8.0.0.2-beta",
+    "published": "2025-07-22",
+    "prerelease": true,
+    "counts": {
+     "files": 20,
+     "sites": 211,
+     "callbacks": 197,
+     "byAggregation": {
+      "none": 127,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 11,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 127,
+      "override": 70
+     },
+     "byHolder": {
+      "menu": 183,
+      "Helper": 14
+     }
+    },
+    "added": ["menu_diplomacy::buttonTogglePlayerInfo_on_start", "menu_diplomacy::cleanup", "menu_diplomacy::createFactionDetailsContext_on_add_detail_tabs", "menu_diplomacy::createFactionDetailsContext_on_before_detail_tabs", "menu_diplomacy::createFactionDetailsContext_on_before_detailtable", "menu_diplomacy::createFactionDetailsContext_on_render_detail_tab", "menu_diplomacy::createFactions_after_relationtext", "menu_diplomacy::createFactions_after_sorter", "menu_diplomacy::createFactions_on_after_declare_war_button", "menu_diplomacy::createFactions_on_before_render_licences", "menu_diplomacy::createFactions_relationtext_setText2", "menu_diplomacy::createInfoFrame_on_info_frame_mode", "menu_diplomacy::createInfoFrame_on_start", "menu_diplomacy::createPlayerInfo_on_start", "menu_diplomacy::init", "menu_diplomacy::onRowChanged", "menu_diplomacy::relationSorter", "menu_playerinfo::init"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.0.3",
+    "name": "8.0.0.3",
+    "published": "2025-07-24",
+    "prerelease": true,
+    "counts": {
+     "files": 20,
+     "sites": 211,
+     "callbacks": 197,
+     "byAggregation": {
+      "none": 127,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 11,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 127,
+      "override": 70
+     },
+     "byHolder": {
+      "menu": 183,
+      "Helper": 14
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "8.0.0.4",
+    "name": "8.0.0.4",
+    "published": "2025-07-31",
+    "prerelease": true,
+    "counts": {
+     "files": 20,
+     "sites": 211,
+     "callbacks": 197,
+     "byAggregation": {
+      "none": 127,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 11,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 127,
+      "override": 70
+     },
+     "byHolder": {
+      "menu": 183,
+      "Helper": 14
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "8.0.0.6",
+    "name": "8.0.0.6",
+    "published": "2025-08-17",
+    "prerelease": true,
+    "counts": {
+     "files": 20,
+     "sites": 213,
+     "callbacks": 199,
+     "byAggregation": {
+      "none": 128,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 128,
+      "override": 71
+     },
+     "byHolder": {
+      "menu": 185,
+      "Helper": 14
+     }
+    },
+    "added": ["menu_map::onRenderTargetDoubleClick_at_end", "menu_map::onRenderTargetDoubleClick_at_start"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.0.6.1",
+    "name": "8.0.0.6.1",
+    "published": "2025-08-22",
+    "prerelease": true,
+    "counts": {
+     "files": 20,
+     "sites": 213,
+     "callbacks": 199,
+     "byAggregation": {
+      "none": 128,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 128,
+      "override": 71
+     },
+     "byHolder": {
+      "menu": 185,
+      "Helper": 14
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "8.0.0.7-rc1",
+    "name": "8.0.0.7-rc1",
+    "published": "2025-08-28",
+    "prerelease": true,
+    "counts": {
+     "files": 21,
+     "sites": 214,
+     "callbacks": 200,
+     "byAggregation": {
+      "none": 129,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 129,
+      "override": 71
+     },
+     "byHolder": {
+      "menu": 186,
+      "Helper": 14
+     }
+    },
+    "added": ["menu_research::expandNode_before_start_button"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.0.7.1-beta",
+    "name": "8.0.0.7.1-beta",
+    "published": "2025-09-01",
+    "prerelease": true,
+    "counts": {
+     "files": 21,
+     "sites": 214,
+     "callbacks": 200,
+     "byAggregation": {
+      "none": 129,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 129,
+      "override": 71
+     },
+     "byHolder": {
+      "menu": 186,
+      "Helper": 14
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "8.0.0.8",
+    "name": "8.0.0.8",
+    "published": "2025-09-11",
+    "prerelease": false,
+    "counts": {
+     "files": 21,
+     "sites": 214,
+     "callbacks": 200,
+     "byAggregation": {
+      "none": 129,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 129,
+      "override": 71
+     },
+     "byHolder": {
+      "menu": 186,
+      "Helper": 14
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "8.0.0.11",
+    "name": "8.0.0.11",
+    "published": "2025-09-24",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 215,
+     "callbacks": 201,
+     "byAggregation": {
+      "none": 130,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 130,
+      "override": 71
+     },
+     "byHolder": {
+      "menu": 187,
+      "Helper": 14
+     }
+    },
+    "added": ["menu_interactmenu::createContentTable_AppendToMenu"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.1.0",
+    "name": "8.0.1.0",
+    "published": "2025-09-28",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 215,
+     "callbacks": 201,
+     "byAggregation": {
+      "none": 130,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 130,
+      "override": 71
+     },
+     "byHolder": {
+      "menu": 187,
+      "Helper": 14
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "8.0.2.0",
+    "name": "8.0.2.0",
+    "published": "2025-10-15",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 223,
+     "callbacks": 209,
+     "byAggregation": {
+      "none": 138,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 138,
+      "override": 71
+     },
+     "byHolder": {
+      "menu": 195,
+      "Helper": 14
+     }
+    },
+    "added": ["menu_diplomacy::buttonSelectObject_before_open_map", "menu_diplomacy::buttonStartAction_start_operation", "menu_diplomacy::createActionConfigContext_after_action_targets", "menu_diplomacy::createActionConfigContext_after_agent_selection", "menu_diplomacy::createActionConfigContext_archive_operation", "menu_diplomacy::getData", "menu_interactmenu::insertLuaAction_insert_custom_action", "menu_interactmenu::prepareActions_prepare_custom_action", "menu_interactmenu::prepareSections_on_start"],
+    "removed": ["menu_interactmenu::createContentTable_AppendToMenu"]
+   },
+   {
+    "tag": "8.0.2.2",
+    "name": "8.0.2.2",
+    "published": "2025-10-17",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 223,
+     "callbacks": 209,
+     "byAggregation": {
+      "none": 138,
+      "chained": 8,
+      "short-circuit": 15,
+      "last-wins": 35,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 138,
+      "override": 71
+     },
+     "byHolder": {
+      "menu": 195,
+      "Helper": 14
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "8.0.2.3",
+    "name": "8.0.2.3",
+    "published": "2025-10-20",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 230,
+     "callbacks": 216,
+     "byAggregation": {
+      "none": 143,
+      "chained": 9,
+      "short-circuit": 15,
+      "last-wins": 36,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 143,
+      "override": 73
+     },
+     "byHolder": {
+      "menu": 201,
+      "Helper": 15
+     }
+    },
+    "added": ["helper::createTransactionLog_on_before_adding_entry", "menu_diplomacy::createActionConfigContext_after_action_gift", "menu_diplomacy::createActionConfigContext_after_action_requirements", "menu_diplomacy::createActionConfigContext_modify_giftwareoptions", "menu_diplomacy::createActionConfigContext_modify_wareoptions", "menu_diplomacy::createActionConfigContext_on_giftware_dropdown_confirmed", "menu_diplomacy::dropdownSelectWare"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.3.0",
+    "name": "8.0.3.0",
+    "published": "2025-10-31",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 231,
+     "callbacks": 217,
+     "byAggregation": {
+      "none": 142,
+      "chained": 10,
+      "short-circuit": 15,
+      "last-wins": 37,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 142,
+      "override": 75
+     },
+     "byHolder": {
+      "menu": 202,
+      "Helper": 15
+     }
+    },
+    "added": ["menu_interactmenu::insertInteractionContent_on_start"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.3.1",
+    "name": "8.0.3.1",
+    "published": "2025-11-11",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 232,
+     "callbacks": 218,
+     "byAggregation": {
+      "none": 142,
+      "chained": 11,
+      "short-circuit": 15,
+      "last-wins": 37,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 142,
+      "override": 76
+     },
+     "byHolder": {
+      "menu": 203,
+      "Helper": 15
+     }
+    },
+    "added": ["menu_map::onShowMenu_orderdefs_forcedorderatfront"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.3.4",
+    "name": "8.0.3.4",
+    "published": "2025-12-08",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 233,
+     "callbacks": 219,
+     "byAggregation": {
+      "none": 143,
+      "chained": 11,
+      "short-circuit": 15,
+      "last-wins": 37,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 143,
+      "override": 76
+     },
+     "byHolder": {
+      "menu": 204,
+      "Helper": 15
+     }
+    },
+    "added": ["menu_map::addCrewSection_after_full_crew_list"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.3.5",
+    "name": "8.0.3.5",
+    "published": "2025-12-15",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 233,
+     "callbacks": 219,
+     "byAggregation": {
+      "none": 143,
+      "chained": 11,
+      "short-circuit": 15,
+      "last-wins": 37,
+      "multi-value": 12,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 143,
+      "override": 76
+     },
+     "byHolder": {
+      "menu": 204,
+      "Helper": 15
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "8.0.4.0",
+    "name": "8.0.4.0",
+    "published": "2026-02-09",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 251,
+     "callbacks": 237,
+     "byAggregation": {
+      "none": 145,
+      "chained": 11,
+      "short-circuit": 15,
+      "last-wins": 52,
+      "multi-value": 13,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 145,
+      "override": 92
+     },
+     "byHolder": {
+      "menu": 222,
+      "Helper": 15
+     }
+    },
+    "added": ["menu_diplomacy::createContextFrame_on_end", "menu_diplomacy::createContextFrame_on_start", "menu_diplomacy::refreshContextFrame_on_end", "menu_diplomacy::refreshContextFrame_on_start", "menu_encyclopedia::cpsdo_onShowMenu_addOtherShipTypes", "menu_interactmenu::cpsdo_map_rightMenu_shipBuildShip_insert", "menu_interactmenu::cpsdo_map_rightMenu_shipLogistic_insert", "menu_map::cpsdo_map_loadoutinfo_sessystem_display_insert", "menu_map::cpsdo_map_shipInformation_shiptypename_replace", "menu_map::createContextFrame_on_end", "menu_map::createContextFrame_on_start", "menu_map::refreshContextFrame_on_end", "menu_map::refreshContextFrame_on_start", "menu_playerinfo::createContextFrame_on_end", "menu_playerinfo::createContextFrame_on_start", "menu_playerinfo::refreshContextFrame_on_end", "menu_playerinfo::refreshContextFrame_on_start", "menu_ship_configuration::cpsdo_evaluateShipOptions_override_shiptypename"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.4.1",
+    "name": "8.0.4.1",
+    "published": "2026-03-08",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 256,
+     "callbacks": 242,
+     "byAggregation": {
+      "none": 147,
+      "chained": 11,
+      "short-circuit": 15,
+      "last-wins": 55,
+      "multi-value": 13,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 147,
+      "override": 95
+     },
+     "byHolder": {
+      "menu": 227,
+      "Helper": 15
+     }
+    },
+    "added": ["menu_map::MtCst_map_shipInformation_newrowsafterboardingstrength", "menu_map::createObjectList_on_add_entry_infoTableData", "menu_map::createObjectList_on_createPropertySection", "menu_map::createObjectList_on_init_infoTableData", "menu_map::onRenderTargetSelect_on_objectlist_newmode"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.4.2",
+    "name": "8.0.4.2",
+    "published": "2026-03-10",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 256,
+     "callbacks": 242,
+     "byAggregation": {
+      "none": 147,
+      "chained": 11,
+      "short-circuit": 15,
+      "last-wins": 55,
+      "multi-value": 13,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 147,
+      "override": 95
+     },
+     "byHolder": {
+      "menu": 227,
+      "Helper": 15
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "8.0.4.5",
+    "name": "8.0.4.5",
+    "published": "2026-05-10",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 265,
+     "callbacks": 250,
+     "byAggregation": {
+      "none": 155,
+      "chained": 11,
+      "short-circuit": 15,
+      "last-wins": 55,
+      "multi-value": 13,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 155,
+      "override": 95
+     },
+     "byHolder": {
+      "menu": 235,
+      "Helper": 15
+     }
+    },
+    "added": ["menu_map::createPropertyOwned_on_every_playerobject", "menu_map::info_sub_menu_create", "menu_map::info_sub_menu_is_valid_for", "menu_map::info_sub_menu_to_show", "menu_map::onUpdateTableSelection_at_end", "menu_map::on_create_main_frame", "menu_map::on_menu_cleanup", "menu_map::on_menu_minimize"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.4.9",
+    "name": "8.0.4.9",
+    "published": "2026-06-28",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 272,
+     "callbacks": 255,
+     "byAggregation": {
+      "none": 159,
+      "chained": 12,
+      "short-circuit": 15,
+      "last-wins": 55,
+      "multi-value": 13,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 159,
+      "override": 96
+     },
+     "byHolder": {
+      "menu": 240,
+      "Helper": 15
+     }
+    },
+    "added": ["gameoptions::displayControls_modifyControlsOrder", "gameoptions::remapInput_useCheckAll", "gameoptions::submenuHandler_customPage", "gameoptions::submenuHandler_isControlsPage", "menu_interactmenu::prepareSections_on_end"],
+    "removed": []
+   },
+   {
+    "tag": "8.0.4.10",
+    "name": "8.0.4.10",
+    "published": "2026-07-04",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 273,
+     "callbacks": 256,
+     "byAggregation": {
+      "none": 160,
+      "chained": 12,
+      "short-circuit": 15,
+      "last-wins": 55,
+      "multi-value": 13,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 160,
+      "override": 96
+     },
+     "byHolder": {
+      "menu": 241,
+      "Helper": 15
+     }
+    },
+    "added": ["gameoptions::remapInput_enrichConflicts", "gameoptions::remapInput_resolveConflicts"],
+    "removed": ["gameoptions::remapInput_useCheckAll"]
+   }
+  ],
+  "9.x": [
+   {
+    "tag": "9.0.0.3",
+    "name": "9.0.0.3",
+    "published": "2026-06-15",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 276,
+     "callbacks": 261,
+     "byAggregation": {
+      "none": 161,
+      "chained": 11,
+      "short-circuit": 15,
+      "last-wins": 59,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 161,
+      "override": 100
+     },
+     "byHolder": {
+      "menu": 246,
+      "Helper": 15
+     }
+    },
+    "added": ["customgame::buttonNewGame_preNewGame", "customgame::buttonReset_on_end", "customgame::cleanup", "customgame::display_on_after_category_name", "customgame::display_on_after_category_options", "customgame::display_on_after_main_options", "customgame::display_on_after_property_name", "customgame::display_on_start", "customgame::dropdownProperty_on_start", "customgame::editboxProperty_on_end", "customgame::openPlayerPropertyShipConfig_on_end", "customgame::openShipConfig_on_end", "customgame::openShipConfig_on_start", "customgame::playerMacro_on_end", "customgame::removeFactionRelationHelper_on_end", "customgame::setPlayerMacro_on_end", "customgame::setPlayerSector_on_end", "customgame::slidercellFaction_on_end", "customgame::universeSector_on_end", "gameoptions::addSavegameRow_changeSaveGameDisplayName", "gameoptions::addSavegameRow_getIsBoldFilename", "gameoptions::addSavegameRow_getRowHeightForExtraInfo", "gameoptions::addSavegameRow_isListSaveGame", "gameoptions::addSavegameRow_postSaveGameRowAdd", "gameoptions::addSavegameRow_preSaveGameRowAdd", "gameoptions::callbackDeleteSave_onDeleteSave", "gameoptions::displayOptions_modifyOptions", "gameoptions::displaySaveGameOptions_postSaveGameRowAdd", "gameoptions::displaySaveGameOptions_preSaveGameRowAdd", "gameoptions::displaySaveGameOptions_sortSaveGames", "gameoptions::displaySavegameOptions_isShowUnusedSaveGame", "gameoptions::displaySavegameOptions_onGetSaveGames", "gameoptions::loadGameCallback_preLoadGame", "gameoptions::newGameCallback_preNewGame", "gameoptions::onUpdate_start", "gameoptions::submenuHandler_preDisplayOptions", "helper::checkTopLevelConditions_get_is_entry_available", "helper::checkboxSetTradeRuleOverride_pre_update_expanded_node", "helper::createFrameHandle_on_start", "helper::createLSOStorageNode_get_ware_name", "helper::createTransactionLog_on_before_adding_entry", "helper::createTransactionLog_set_graph_height", "helper::dropdownTradeRule_pre_update_expanded_node", "helper::onCollapseLSOStorageNode", "helper::onExpandLSOStorageNode", "helper::onExpandLSOStorageNode_list_incoming_trade", "helper::onExpandLSOStorageNode_pre_buy_offer_title", "helper::onExpandLSOStorageNode_pre_sell_offer_title", "helper::onUpdate", "helper::registerMenu_onShow", "helper::updateLSOStorageNode_pre_update_expanded_node", "menu_diplomacy::buttonSelectObject_before_open_map", "menu_diplomacy::buttonStartAction_start_operation", "menu_diplomacy::buttonTogglePlayerInfo_on_start", "menu_diplomacy::cleanup", "menu_diplomacy::createActionConfigContext_after_action_gift", "menu_diplomacy::createActionConfigContext_after_action_requirements", "menu_diplomacy::createActionConfigContext_after_action_targets", "menu_diplomacy::createActionConfigContext_after_agent_selection", "menu_diplomacy::createActionConfigContext_archive_operation", "menu_diplomacy::createActionConfigContext_modify_giftwareoptions", "menu_diplomacy::createActionConfigContext_modify_wareoptions", "menu_diplomacy::createActionConfigContext_on_giftware_dropdown_confirmed", "menu_diplomacy::createContextFrame_on_end", "menu_diplomacy::createContextFrame_on_start", "menu_diplomacy::createFactionDetailsContext_on_add_detail_tabs", "menu_diplomacy::createFactionDetailsContext_on_before_detail_tabs", "menu_diplomacy::createFactionDetailsContext_on_before_detailtable", "menu_diplomacy::createFactionDetailsContext_on_render_detail_tab", "menu_diplomacy::createFactions_after_relationtext", "menu_diplomacy::createFactions_after_sorter", "menu_diplomacy::createFactions_on_after_declare_war_button", "menu_diplomacy::createFactions_on_before_render_licences", "menu_diplomacy::createFactions_relationtext_setText2", "menu_diplomacy::createInfoFrame_on_info_frame_mode", "menu_diplomacy::createInfoFrame_on_start", "menu_diplomacy::createLeftBar_on_start", "menu_diplomacy::createPlayerInfo_on_start", "menu_diplomacy::dropdownSelectWare", "menu_diplomacy::getData", "menu_diplomacy::init", "menu_diplomacy::onRowChanged", "menu_diplomacy::refreshContextFrame_on_end", "menu_diplomacy::refreshContextFrame_on_start", "menu_diplomacy::relationSorter", "menu_docked::cleanup", "menu_docked::display_on_after_main_interactions", "menu_docked::rd_addReactiveDockingDockMenu", "menu_docked::sto_addTurretBehavioursDockMenu", "menu_encyclopedia::addDetailRow_get_shield_disruption_text", "menu_encyclopedia::addDetailRow_known_cluster_production_module_entries", "menu_encyclopedia::addDetailRow_known_sector_production_module_entries", "menu_encyclopedia::addDetailRow_post_missile_entry", "menu_encyclopedia::cleanup", "menu_encyclopedia::cpsdo_onShowMenu_addOtherShipTypes", "menu_encyclopedia::display_on_start", "menu_encyclopedia::onShowMenu_addOtherShipTypes", "menu_encyclopedia::onShowMenu_addingIndexEntries", "menu_encyclopedia::onShowMenu_addingIndexNumEntries", "menu_encyclopedia::onShowMenu_addingTypeIndexEntries", "menu_encyclopedia::onShowMenu_override_capitalsizecategory", "menu_encyclopedia::onShowMenu_override_menu_printed_variables", "menu_encyclopedia::onShowMenu_override_sizecategory", "menu_interactmenu::aegs_map_rightMenu_shipBuilding_insert", "menu_interactmenu::aegs_map_rightMenu_shipOverview_insert", "menu_interactmenu::aegs_map_rightMenu_shipassignments_insert_01", "menu_interactmenu::aegs_map_rightMenu_shipassignments_insert_02", "menu_interactmenu::aegs_map_rightMenu_shipassignments_insert_03", "menu_interactmenu::cpsdo_map_rightMenu_shipBuildShip_insert", "menu_interactmenu::cpsdo_map_rightMenu_shipLogistic_insert", "menu_interactmenu::createContentTable_getIsActionValid", "menu_interactmenu::createContentTable_getIsSectionValid", "menu_interactmenu::createContentTable_getIsSubsectionValid", "menu_interactmenu::draw_on_start", "menu_interactmenu::insertInteractionContent_on_start", "menu_interactmenu::insertLuaAction_insert_custom_action", "menu_interactmenu::interactMenu_clickAction", "menu_interactmenu::interactMenu_clickSubsection", "menu_interactmenu::prepareActions_prepare_custom_action", "menu_interactmenu::prepareSections_on_end", "menu_interactmenu::prepareSections_on_start", "menu_map::MtCst_map_shipInformation_newrowsafterboardingstrength", "menu_map::addCrewSection_after_full_crew_list", "menu_map::aegs_map_loadoutinfo_double_insert", "menu_map::aegs_map_propertyowned_constructionships_insert", "menu_map::aegs_map_shipInformation_shiptypename_override", "menu_map::aegs_map_ship_assignments_insert", "menu_map::aegs_map_ship_subordinateassignments_insert", "menu_map::buttonMissionActivate_on_activate", "menu_map::buttonRenameConfirm_onMultiRename_on_after_rename", "menu_map::buttonRenameConfirm_onMultiRename_on_before_rename", "menu_map::buttonToggleObjectList_on_start", "menu_map::closeContextMenu_on_before", "menu_map::cpsdo_map_loadoutinfo_sessystem_display_insert", "menu_map::cpsdo_map_shipInformation_shiptypename_replace", "menu_map::createContextFrame_on_end", "menu_map::createContextFrame_on_start", "menu_map::createInfoFrame2_on_menu_infoModeRight", "menu_map::createInfoFrame_on_menu_infoTableMode", "menu_map::createMissionContext_addMissionAcceptedButtons", "menu_map::createMissionContext_addMissionOfferButtons", "menu_map::createMissionContext_getIsMissionAcceptable", "menu_map::createMissionContext_getIsMissionBriefingAvailable", "menu_map::createMissionContext_on_end", "menu_map::createMissionContext_startDescriptionTable", "menu_map::createMissionMode_on_missionoffer_guild_start", "menu_map::createMissionMode_replaceMissionModeCurrent", "menu_map::createObjectList_on_add_entry_infoTableData", "menu_map::createObjectList_on_createPropertySection", "menu_map::createObjectList_on_init_infoTableData", "menu_map::createPropertyOwned_on_add_other_objects_infoTableData", "menu_map::createPropertyOwned_on_add_ship_infoTableData", "menu_map::createPropertyOwned_on_category_tab_title", "menu_map::createPropertyOwned_on_createPropertySection", "menu_map::createPropertyOwned_on_createPropertySection_unassignedships", "menu_map::createPropertyOwned_on_every_playerobject", "menu_map::createPropertyOwned_on_init_infoTableData", "menu_map::createPropertyOwned_on_start", "menu_map::createPropertyOwned_on_tabtable_end", "menu_map::createPropertyRow_after_config_change", "menu_map::createPropertyRow_after_row_height", "menu_map::createPropertyRow_before_config_change", "menu_map::createPropertyRow_on_init_vars", "menu_map::createPropertyRow_on_set_locationtext", "menu_map::createPropertyRow_override_row_location_createText", "menu_map::createPropertyRow_override_row_shipname_createText", "menu_map::createRightBar_on_start", "menu_map::createSideBar_on_start", "menu_map::displayDefaultBehaviour_change_param_behaviouractive", "menu_map::displayOrderParam_change_paramactive", "menu_map::getContainerNameAndColors_on_name_construct", "menu_map::getPropertyOwnedFleetDataInternal_addToFleetIcons", "menu_map::ic_onRowChanged", "menu_map::ic_onSelectElement", "menu_map::ic_onTableRightMouseClick", "menu_map::info_sub_menu_create", "menu_map::info_sub_menu_is_valid_for", "menu_map::info_sub_menu_to_show", "menu_map::onInteractMenuCallback_on_custom_type", "menu_map::onRenderTargetDoubleClick_at_end", "menu_map::onRenderTargetDoubleClick_at_start", "menu_map::onRenderTargetSelect_on_leave", "menu_map::onRenderTargetSelect_on_objectlist_newmode", "menu_map::onRenderTargetSelect_on_propertyowned_newmode", "menu_map::onSetActiveStateForCVMode_on_createPropertyOwned", "menu_map::onShowMenu_orderdefs_forcedorderatfront", "menu_map::onUpdateTableSelection_at_end", "menu_map::on_create_main_frame", "menu_map::on_menu_cleanup", "menu_map::on_menu_minimize", "menu_map::rd_addReactiveDockingMapMenu", "menu_map::refreshContextFrame_on_end", "menu_map::refreshContextFrame_on_start", "menu_map::refreshInfoFrame2_on_start", "menu_map::sto_addTurretBehavioursMapMenu", "menu_map::updatePlotSize_on_before_extend", "menu_map::utRenaming_buttonRenameConfirm", "menu_map::utRenaming_createRenameContext_get_startname", "menu_map::utRenaming_infoChangeObjectName", "menu_map::utRenaming_setupInfoSubmenuRows_on_end", "menu_playerinfo::buttonTogglePlayerInfo_on_start", "menu_playerinfo::cleanup", "menu_playerinfo::createContextFrame_on_end", "menu_playerinfo::createContextFrame_on_start", "menu_playerinfo::createFactions_on_after_declare_war_button", "menu_playerinfo::createFactions_on_before_render_licences", "menu_playerinfo::createInfoFrame_on_info_frame_mode", "menu_playerinfo::createInfoFrame_on_start", "menu_playerinfo::createLeftBar_on_start", "menu_playerinfo::createPlayerInfo_on_start", "menu_playerinfo::init", "menu_playerinfo::onRowChanged", "menu_playerinfo::refreshContextFrame_on_end", "menu_playerinfo::refreshContextFrame_on_start", "menu_research::expandNode_before_start_button", "menu_ship_configuration::buttonSelectPaintMod_onStart", "menu_ship_configuration::checkEquipment_onUpgradeSlots", "menu_ship_configuration::cleanup", "menu_ship_configuration::cpsdo_evaluateShipOptions_override_shiptypename", "menu_ship_configuration::displayModifyPaintSlots_assigningPaintsToGroups", "menu_ship_configuration::displayModifyPaintSlots_onShowingButton", "menu_ship_configuration::displayModifyPlan_onSelectedShips", "menu_ship_configuration::displaySlots_on_after_create_store_loadout_button", "menu_ship_configuration::displaySlots_on_before_create_button_mouseovertext", "menu_ship_configuration::displaySlots_on_before_create_store_loadout_button", "menu_ship_configuration::evaluateShipOptions_override_shiptypename", "menu_ship_configuration::getDataAndDisplay_beforeDisplay", "menu_ship_configuration::insertWare_onPriceCalculation", "menu_ship_configuration::prepareModWares_onEnd", "menu_ship_configuration::repairandupgrade_after_build_order_created", "menu_station_configuration::cleanup", "menu_station_configuration::displayModules_on_before_create_button_mouseovertext", "menu_station_configuration::displayPlan_getWareName", "menu_station_configuration::displayPlan_render_incoming_ware", "menu_station_overview::cleanup", "menu_station_overview::display_get_station_name_extras", "menu_station_overview::onExpandTradeWares_insert_ware_to_allwares", "menu_station_overview::onExpandTradeWares_on_start", "menu_station_overview::onShowMenu_start", "menu_station_overview::setupFlowchartData_on_start", "menu_station_overview::setupFlowchartData_pre_trade_wares_button", "menu_station_overview::updateExpandedNode_at_end", "menu_station_overview::updateExpandedNode_at_start", "menu_toplevel::cleanup", "menu_toplevel::createInfoFrame_on_add_table", "menu_toplevel::createInfoFrame_on_before_frame_display", "menu_toplevel::kHUD_add_HUD_tables", "menu_toplevel::kHUD_add_tables", "menu_toplevel::kHUD_get_is_show_custom_hud", "menu_toplevel::onUpdate_before_frame_update", "menu_toplevel::onUpdate_start", "menu_trader_blueprintsorlicences::display_on_after_create_equipment_text", "menu_transactionlog::cleanup", "menu_transactionlog::createFrame_on_create_transaction_log", "menu_transporter::addEntry_on_set_room_name", "menu_transporter::display_onButtonCreate", "menu_transporter::display_on_set_buttontable", "menu_transporter::display_on_set_room_active", "menu_userquestion::cleanup_end", "menu_userquestion::createInfoFrame_custom_frame_properties", "menu_userquestion::createTable_new_custom_table"],
+    "removed": []
+   },
+   {
+    "tag": "9.0.0.4",
+    "name": "9.0.0.4",
+    "published": "2026-06-17",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 276,
+     "callbacks": 261,
+     "byAggregation": {
+      "none": 161,
+      "chained": 11,
+      "short-circuit": 15,
+      "last-wins": 59,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 161,
+      "override": 100
+     },
+     "byHolder": {
+      "menu": 246,
+      "Helper": 15
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "9.0.0.6",
+    "name": "9.0.0.6",
+    "published": "2026-06-28",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 283,
+     "callbacks": 266,
+     "byAggregation": {
+      "none": 165,
+      "chained": 12,
+      "short-circuit": 15,
+      "last-wins": 59,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 165,
+      "override": 101
+     },
+     "byHolder": {
+      "menu": 251,
+      "Helper": 15
+     }
+    },
+    "added": ["gameoptions::callbackExtensionSettingEnabled_set", "gameoptions::displayControls_modifyControlsOrder", "gameoptions::remapInput_useCheckAll", "gameoptions::submenuHandler_customPage", "gameoptions::submenuHandler_isControlsPage"],
+    "removed": []
+   },
+   {
+    "tag": "9.0.0.7",
+    "name": "9.0.0.7",
+    "published": "2026-07-04",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 285,
+     "callbacks": 268,
+     "byAggregation": {
+      "none": 167,
+      "chained": 12,
+      "short-circuit": 15,
+      "last-wins": 59,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 167,
+      "override": 101
+     },
+     "byHolder": {
+      "menu": 253,
+      "Helper": 15
+     }
+    },
+    "added": ["gameoptions::remapInput_enrichConflicts", "gameoptions::remapInput_resolveConflicts", "menu_ship_configuration::uix_fire_createTitleBar_on_create_controls"],
+    "removed": ["gameoptions::remapInput_useCheckAll"]
+   },
+   {
+    "tag": "9.0.0.8",
+    "name": "9.0.0.8",
+    "published": "2026-07-11",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 286,
+     "callbacks": 269,
+     "byAggregation": {
+      "none": 168,
+      "chained": 12,
+      "short-circuit": 15,
+      "last-wins": 59,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 168,
+      "override": 101
+     },
+     "byHolder": {
+      "menu": 254,
+      "Helper": 15
+     }
+    },
+    "added": ["menu_docked::display_on_after_weaponconfig_weapon_row"],
+    "removed": []
+   },
+   {
+    "tag": "9.0.0.9",
+    "name": "9.0.0.9",
+    "published": "2026-07-18",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 294,
+     "callbacks": 276,
+     "byAggregation": {
+      "none": 170,
+      "chained": 12,
+      "short-circuit": 15,
+      "last-wins": 64,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 170,
+      "override": 106
+     },
+     "byHolder": {
+      "menu": 260,
+      "uix_menu": 1,
+      "Helper": 15
+     }
+    },
+    "added": ["helper::addEquipmentInfoRow_on_create_value", "helper::createEquipmentInfoContext_on_after_stats", "helper::createEquipmentInfoContext_on_before_stats", "helper::createEquipmentInfoContext_on_create_frame", "menu_ship_configuration::displaySlots_on_create_upgrade_button", "menu_ship_configuration::getDataAndDisplay_on_assemble_possible_upgrades", "menu_ship_configuration::onShowMenu_on_check_selectable_ship_owner"],
+    "removed": []
+   },
+   {
+    "tag": "9.0.0.12",
+    "name": "9.0.0.12",
+    "published": "2026-08-16",
+    "prerelease": false,
+    "counts": {
+     "files": 20,
+     "sites": 294,
+     "callbacks": 276,
+     "byAggregation": {
+      "none": 170,
+      "chained": 12,
+      "short-circuit": 15,
+      "last-wins": 64,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 170,
+      "override": 106
+     },
+     "byHolder": {
+      "menu": 260,
+      "uix_menu": 1,
+      "Helper": 15
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "9.0.0.13",
+    "name": "9.0.0.13",
+    "published": "2026-09-06",
+    "prerelease": false,
+    "counts": {
+     "files": 21,
+     "sites": 312,
+     "callbacks": 293,
+     "byAggregation": {
+      "none": 175,
+      "chained": 23,
+      "short-circuit": 15,
+      "last-wins": 65,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 175,
+      "override": 118
+     },
+     "byHolder": {
+      "menu": 276,
+      "uix_menu": 1,
+      "Helper": 16
+     }
+    },
+    "added": ["helper::createRightSideBar_on_prepare_entries", "menu_encyclopedia::createIndex_on_end", "menu_encyclopedia::onShowMenu_on_set_shiptypename", "menu_map::createLegend_on_end", "menu_map::createPropertyOwned_on_set_supportsbuildtasks", "menu_playerinfo::setupEmpireRows_on_set_shiptypename", "menu_ship_configuration::displayStats_on_set_shiptypename", "menu_ship_configuration::isAmmoCompatible_on_check_compatible", "menu_ship_configuration::onShowMenu_end", "menu_ship_configuration::onShowMenu_start", "menu_station_overview::getAccountText_on_get_text", "menu_station_overview::getFlowchartProductionNodes_on_get_nodes", "menu_station_overview::getStationOverviewGraphWares_on_get_wares", "menu_station_overview::onShowMenu_on_set_title", "menu_station_overview::setStationOverviewGraphWare_on_set_ware", "menu_station_overview::uix_getStationOptions_on_end", "targetmonitor::GetTargetMonitorDetails_on_get_details"],
+    "removed": []
+   },
+   {
+    "tag": "9.0.0.14",
+    "name": "9.0.0.14",
+    "published": "2026-09-11",
+    "prerelease": false,
+    "counts": {
+     "files": 21,
+     "sites": 312,
+     "callbacks": 293,
+     "byAggregation": {
+      "none": 175,
+      "chained": 23,
+      "short-circuit": 15,
+      "last-wins": 65,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 175,
+      "override": 118
+     },
+     "byHolder": {
+      "menu": 276,
+      "uix_menu": 1,
+      "Helper": 16
+     }
+    },
+    "added": [],
+    "removed": []
+   }
+  ]
+ }
+}
