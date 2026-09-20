@@ -324,8 +324,10 @@ function AddLogbookEntry(category, title, text, ...) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - nine rungs over a station, a ship, a derived entity and the player, each a
--- +1000 / -1000 pair with the account read back either side; arity stated by the engine in words
+-- Probed: 8.00, 9.00 - nine rungs over a station, a ship, a derived entity and the player, each a
+-- +1000 / -1000 pair with the account read back either side; arity stated by the engine in words.
+-- 9.00 repeated the station and the ship: the container's account moves by the amount, the player
+-- purse does not move at any of the three readings, and the player is refused as not a container
 ---@param containerID any The container whose account to change, as a 64-bit component ID.
 ---@param amount number The amount to add. Negative takes it away.
 ---@return number transferred The amount actually moved. Nothing is returned when the call is refused.
@@ -598,7 +600,10 @@ function CallWidgetEventScripts(widgetID, eventName, ...) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - four pairs including the same two objects in both orders, arity 2
+-- Probed: 8.00, 9.00 - four pairs including the same two objects in both orders, arity 2; five
+-- more pairs in both orders on 9.00 against one reference ship, where every station answered
+-- `false` as the subordinate and `true` as the commander, and ship against ship was `true` both
+-- ways
 ---@param subordinateID any The controllable that would be subordinate.
 ---@param commanderID any The controllable that would command it.
 ---@return boolean canBeSubordinate True when the two classes are compatible - not that the assignment is allowed.
@@ -740,7 +745,8 @@ function ClearLogbook(age, category) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - read back through GetTradeShipData, before and twice after
+-- Probed: 8.00, 9.00 - read back through GetTradeShipData, before and twice after; 9.00 repeated
+-- it on a second L trader with two trades queued and read 0 on both reads after the call
 ---@param shipID any The ship whose trade queue should be cleared.
 function ClearTradeQueue(shipID) end
 
@@ -1697,8 +1703,9 @@ function ExistsText(page, line) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site; also read against kuertee_ui_extensions
 -- Seen at: kuertee_ui_extensions ui/addons/ego_detailmonitor/menu_map.xpl:34321
--- Probed: 8.00 - a hop ladder of sector pairs in both directions plus a sector against itself,
--- arity and the parameter name `fromsector` both stated by the engine in words
+-- Probed: 8.00, 9.00 - a hop ladder of sector pairs in both directions plus a sector against
+-- itself, the ladder repeated over five 9.00 clicks; arity and the parameter name `fromsector`
+-- are the engine's own words on 8.00, where a cdata argument was passed
 ---@param startSector any The sector to start from, as a 64-bit component ID.
 ---@param endSector any The sector to reach, as a 64-bit component ID.
 ---@return number numgates The gate transitions between the two sectors.
@@ -2011,10 +2018,19 @@ function GetBoostToggleOption() end
 --- `min=2000000, max=3000000` here while being its own account holder, so
 --- `scriptproperties.xml`'s "has a budget or is its own account holder" is not an exclusive or,
 --- and a budget needs no precondition beyond class `container`.
+---
+--- **`min` is not an independent floor: it is two thirds of `max`, rounded.** Every container
+--- that answered a non-zero pair fits exactly - 2000000 / 3000000 on that factory, 263914287 /
+--- 395871430 on a player HQ and 1362311345 / 2043467017 on a player shipyard. What `max` itself
+--- tracks is unmeasured. A container can also have no budget at all: a player wharf and every
+--- ship tried answered `0` to both keys rather than refusing the call.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - a player factory, bare, with each key alone and with all three together
+-- Probed: 8.00, 9.00 - a player factory, bare, with each key alone and with all three together;
+-- the same four shapes on 9.00 over four ships and four stations, `responsibility` refused by
+-- name as an unknown key every time, and the `min` = 2/3 `max` relation measured on the three
+-- containers that answered a non-zero pair
 ---@param container any The container to ask about.
 ---@param ... string Property names, `"min"` or `"max"`.
 ---@return ... number One value per requested property, in order.
@@ -2035,8 +2051,11 @@ function GetBuildAnchor(component) end
 --- Returns the build duration of the component's own macro, in seconds. It is a **constant from
 --- the ware table, not remaining build time**: every measured figure is the exact
 --- `<production time>` of that component's ware in `wares.xml`, and a *finished* Asgard still
---- answered its 516. A component whose ware carries no production entry, a station for one,
---- answers `0`, and so does a station with a construction plan pending.
+--- answered its 516. A station *module* is a ware like any other - the three ship fabrication bays
+--- answered 731, 1298 and 954, the production times of `module_gen_build_l_01`,
+--- `module_gen_build_dockarea_m_01` and `module_gen_build_xl_01`. A component whose ware carries
+--- no production entry, a station or a sector, answers `0`, and so does a station with a
+--- construction plan pending.
 ---
 --- Arity is 3 and the engine insists on it - one argument is answered
 --- `Invalid number of arguments (1, expected 3)` - but arguments 2 and 3 are inert. A wharf,
@@ -2046,7 +2065,10 @@ function GetBuildAnchor(component) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - six ships of four races, every figure matching its ware to the second
+-- Probed: 8.00, 9.00 - six ships of four races on 8.00; on 9.00 five more ships, three station
+-- build modules and a production module, every figure matching its ware's `default` production
+-- time in that version's own wares.xml to the second, the finished Asgard answering its 516 again,
+-- and 0 for a sector, a station and a wharf alike
 ---@param component any The component to ask about.
 ---@param unused1 any Inert, but the call needs three arguments.
 ---@param unused2 any Inert, but the call needs three arguments.
@@ -2068,7 +2090,8 @@ function GetBuildDuration(component, unused1, unused2) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - a shipyard and each of its three bays, arity 1
+-- Probed: 8.00, 9.00 - a shipyard and each of its three bays, arity 1; on 9.00 a shipyard and a
+-- wharf, 107 entries each, and empty on every other target tried
 ---@param containerID any The container or build module to ask about.
 ---@return BuilderMacro[]
 function GetBuilderMacros(containerID) end
@@ -2084,7 +2107,8 @@ function GetBuilderMacros(containerID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - a shipyard and its three bays, four macros, arity 2
+-- Probed: 8.00, 9.00 - a shipyard and its three bays, four macros, arity 2; the three bays again
+-- on 9.00, each answering with the macro it is building
 ---@param containerID any The container or build module that would build it.
 ---@param macro string A macro the builder can build, from `GetBuilderMacros`.
 ---@return string method The production method, `<macro>.<method>`.
@@ -2477,7 +2501,8 @@ function GetCommander(controllableid, fleetUnitID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - one three-ship fleet, every returned handle's class resolved
+-- Probed: 8.00, 9.00 - one three-ship fleet, every returned handle's class resolved; four 9.00
+-- ships, two answering with an npc handle and two with nil
 ---@param controllableid any The controllable whose commander to ask about.
 ---@return any commanderNPC The direct commander's pilot, class `npc`; nothing at the top of the chain.
 function GetCommanderEntity(controllableid) end
@@ -2606,7 +2631,8 @@ function GetContainedObjectsByOwner(owner, container) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - both arguments measured in-game, the class named by the engine
+-- Probed: 8.00, 9.00 - both arguments measured in-game, the class named by the engine on 8.00;
+-- both forms again over eight 9.00 clicks
 ---@param space? any The sector or zone whose ships to list. Omitted, it covers the whole universe.
 ---@param showOnMap? boolean True to return only ships shown on the player's map. Defaults to off.
 ---@return table ships Array of ship components.
@@ -2623,7 +2649,8 @@ function GetContainedShips(space, showOnMap) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - both forms measured in-game, the class named by the engine
+-- Probed: 8.00, 9.00 - both forms measured in-game, the class named by the engine on 8.00; both
+-- again over eight 9.00 clicks, with and without the space argument
 ---@param owner string The faction id, e.g. `"player"`.
 ---@param space? any The sector or zone to limit the search to. Omitted, it covers the whole galaxy.
 ---@return table ships Array of ship components.
@@ -2641,8 +2668,8 @@ function GetContainedShipsByOwner(owner, space) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - the one-argument form on three savegames, arity minimum stated by the engine
--- in words; any further parameter is unmeasured
+-- Probed: 8.00, 9.00 - the one-argument form on three savegames and again on 9.00, arity minimum
+-- stated by the engine in words on 8.00; any further parameter is unmeasured
 ---@param owner string The faction id, e.g. `"player"`.
 ---@return table spaces Array of space components.
 function GetContainedSpacesByOwner(owner) end
@@ -2759,8 +2786,9 @@ function GetControllerInfo() end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - six post ids answered for "name" and "icon"; every other column of the row
--- was refused by name, and a person returns nothing
+-- Probed: 8.00, 9.00 - six post ids answered for "name" and "icon"; every other column of the row
+-- was refused by name, and a person returns nothing. The six ids answer identically on both
+-- versions, value for value, over seven shared rungs
 ---@param controlPost string An id from libraries/posts.xml.
 ---@param ... string One or more of "name", "icon". At least one, or nothing is returned.
 ---@return ... any One value per name, in the order asked.
@@ -2970,7 +2998,8 @@ function GetEffectDistanceOption() end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
--- Probed: 8.00 - arity 1; empty on every target tried, a production module included
+-- Probed: 8.00, 9.00 - arity 1; empty on every target tried, a production module included, and
+-- empty again on every 9.00 target, none of which was a production module
 ---@param destructible any The destructible to ask about.
 ---@return table upgrades Empty in every measured case; the element type is unmeasured.
 function GetEfficiencyUpgrades(destructible) end
@@ -3020,9 +3049,10 @@ function getElementType(element) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - all six entity type ids answered for "name" and "icon"; every other column of
--- the row was refused by name; a person plus each of ten property names returned nothing, so
--- argument 1 is the key, never a component
+-- Probed: 8.00, 9.00 - all six entity type ids answered for "name" and "icon"; every other column
+-- of the row was refused by name; a person plus each of ten property names returned nothing, so
+-- argument 1 is the key, never a component. The six ids answer identically on both versions,
+-- value for value, over nine shared rungs
 ---@param entityType string An id from libraries/entitytypes.xml.
 ---@param ... string One or more property names. At least one, or nothing is returned.
 ---@return ... any One value per name, in the order asked.
@@ -3377,7 +3407,8 @@ function GetGammaOption() end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - both arguments and the return shape measured in-game
+-- Probed: 8.00, 9.00 - both arguments and the return shape measured in-game, all three call
+-- shapes repeated over eight 9.00 clicks
 ---@param space any The sector or zone whose gates to list.
 ---@param showOnMap? boolean True to return only gates revealed on the player's map. Defaults to off.
 ---@return table gates Array of gate components.
@@ -3451,7 +3482,9 @@ function GetHeader(tableID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - six holders, whole-array field histograms, arity 1
+-- Probed: 8.00, 9.00 - six holders, whole-array field histograms, arity 1; on 9.00 the player's
+-- 232 licences, each an eight-field record, with an empty array for a bogus faction string and
+-- for a component alike
 ---@param faction string The faction id that holds the licences, e.g. `"player"`.
 ---@return LicenceEntry[] licences Empty when the faction holds none - and equally when the argument is wrong.
 function GetHeldLicences(faction) end
@@ -4045,8 +4078,9 @@ function GetLibrarySize(libraryName) end
 -- Source: ui\addons\ego_targetmonitor\targetmonitor.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Probed: 8.00 - resolved against a ship, paired with the GetTargetMonitorDetails template that
--- carries the token, and the nil-placeholder failure reproduced
+-- Probed: 8.00, 9.00 - resolved against a ship, paired with the GetTargetMonitorDetails template
+-- that carries the token, and the nil-placeholder failure reproduced on 8.00; a string on all
+-- eight 9.00 targets
 ---@param placeholder string The template token to resolve, without the `$` delimiters, e.g. `"hullpercent"`.
 ---@param component any The component to read it from.
 ---@param templateConnectionName string The name of the template connection. Must be a string; `""` is accepted.
@@ -4308,7 +4342,8 @@ function GetMessageScreenPosition(messageID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - 54 calls over nine ship macros and a station macro, one non-empty
+-- Probed: 8.00, 9.00 - 54 calls over nine ship macros and a station macro, one non-empty; twelve
+-- more calls on 9.00, still at most one entry
 ---@param macro string The macro name of the ship to ask about.
 ---@return string[] macros The mining unit macros, empty when the macro carries none.
 function GetMiningUnitMacros(macro) end
@@ -4544,9 +4579,12 @@ function GetNPCs(containerID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - the reference point measured against three candidates over seven sectors and
--- then proved by moving the player: the gradient followed them, so no sector-local point can be
--- what the radius is measured from
+-- Probed: 8.00, 9.00 - the reference point measured against three candidates over seven sectors
+-- and then proved by moving the player: the gradient followed them, so no sector-local point can
+-- be what the radius is measured from. The same split on 9.00 over eight sectors: the player's
+-- own sector answers 0, 7, then 34 as the radius grows while every other sector answers 0 at
+-- every radius, and the first non-empty radius lands on the nearest npc's own distance from the
+-- player to the metre
 ---@param sectorID any The sector whose stations are searched, as a 64-bit component ID.
 ---@param distance number The radius in metres, measured from the player. 0 returns nothing.
 ---@return table npcs The people found, empty when none are in range.
@@ -4692,7 +4730,9 @@ function GetOwnLicences(factionID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - both arguments and the return shape measured in-game
+-- Probed: 8.00, 9.00 - both arguments and the return shape measured in-game; on 9.00 the bare
+-- call refused with "expected >= 1", seven role ids each answering, and a person refused as not
+-- of class controllable
 ---@param controllable any The ship or station whose people to report.
 ---@param role? string A role id from libraries/roles.xml, e.g. "marine", "service", "worker".
 ---@return table roleData Array of { amount: integer, name: string, role: string }, plus capacity, stored and (when role is given) rolestored.
@@ -4718,7 +4758,8 @@ function GetPersonalizedCrashReportsOption() end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - arity 1, every element's class resolved over the whole array
+-- Probed: 8.00, 9.00 - arity 1, every element's class resolved over the whole array, on both
+-- versions
 ---@param container any The ship or station whose docking bays to list.
 ---@return table dockingBays Array of `dockingbay` components; empty when the container has none.
 function GetPlatforms(container) end
@@ -4876,11 +4917,14 @@ function GetPossibleAdapters() end
 --- method, and the ware's method list is not what this reads.
 ---
 --- The module is class `module, destructible, production` and **not** `container` or `object`,
---- which is the class shape a container-guard silently skips.
+--- which is the class shape a container-guard silently skips. **The station holding it is not a
+--- substitute**: a player factory answered an empty array where its own production module
+--- answered the ware in full.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - two wares, two owners, entries dumped in full, arity 1
+-- Probed: 8.00, 9.00 - two wares, two owners, entries dumped in full, arity 1; on 9.00 a
+-- production module answered one entry in full while the station holding it answered empty
 ---@param moduleID any The production module to ask about.
 ---@return PossibleProduct[] products
 function GetPossibleProducts(moduleID) end
@@ -5335,8 +5379,8 @@ function GetStandardButtons(frame) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - 54 calls over nine ship macros and a station macro; no target has yet
--- returned more than two entries
+-- Probed: 8.00, 9.00 - 54 calls over nine ship macros and a station macro; no target has yet
+-- returned more than two entries, twelve more 9.00 calls included
 ---@param macro string The macro name of the ship to ask about.
 ---@return string[] macros The standard unit macros, empty when the macro carries none.
 function GetStandardUnitMacros(macro) end
@@ -5604,8 +5648,9 @@ function GetTargetElementInfo(targetElementQuery) end
 -- for an invalid component.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Probed: 8.00 - a sector, a player station and a player ship, keys enumerated on each, with the
--- nil and empty-string connection names measured against one another
+-- Probed: 8.00, 9.00 - a sector, a player station and a player ship, keys enumerated on each,
+-- with the nil and empty-string connection names measured against one another on 8.00; eight
+-- 9.00 targets, eight keys on a ship and seven on everything else
 ---@param component any The component to describe.
 ---@param templateConnectionName string The connection the template is bound to. Must be a string; `""` is accepted.
 ---@param isSofttarget boolean Whether the component is the current soft target.
@@ -5807,7 +5852,7 @@ function GetTradeList(tradeOfferContainer, currentShip, unknown) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - signature and return shape measured in-game
+-- Probed: 8.00, 9.00 - signature and return shape measured in-game, on both versions
 ---@param container any The ship or station whose orders to report.
 ---@return table orders Array of { amount, minamount, name, price, averageprice, id, station, stationname, isbuyoffer, isselloffer, ispassive, isshiptoship, iswareexchange }.
 function GetTradeOrders(container) end
@@ -5836,7 +5881,8 @@ function GetTradeOrders(container) end
 -- Usage: unverified - no vanilla call site
 -- Deprecated: 3.20 - the engine answers every call with `Obsolete since version 3.20,
 -- returns empty data!` and an empty table, on both versions
--- Probed: 8.00 - empty data, with the engine's obsolescence notice beside it
+-- Probed: 8.00, 9.00 - empty data, with the engine's obsolescence notice beside it, on both
+-- versions
 ---@param containerID any The container to ask about.
 ---@return TradeRestrictions restrictions
 function GetTradeRestrictions(containerID) end
@@ -5854,7 +5900,8 @@ function GetTradeRestrictions(containerID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
--- Probed: 8.00 - arity from the engine; no tagged connection has been reached to ask on
+-- Probed: 8.00, 9.00 - arity from the engine on both versions; no tagged connection has been
+-- reached to ask on
 ---@param component any The container the connection belongs to.
 ---@param templateConnectionName string The name of the template connection.
 ---@return table trades
@@ -5926,7 +5973,8 @@ function GetTradesForWare(component, ware, unknown) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - the whole structure, on a loaded miner and a trader with two trades queued
+-- Probed: 8.00, 9.00 - the whole structure, on a loaded miner and a trader with two trades
+-- queued; the same eight keys on four 9.00 ships, with `cargo` and `queue` empty
 ---@param shipID any The ship to ask about.
 ---@return TradeShipData shipdata
 function GetTradeShipData(shipID) end
@@ -6241,8 +6289,9 @@ function HasLicence(factionID, licenceID, otherFactionID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - 51 calls, the true and the silent case each matched against the map across
--- thirteen sectors
+-- Probed: 8.00, 9.00 - 51 calls, the true and the silent case each matched against the map across
+-- thirteen sectors; two 9.00 sectors, one silent with no shipyard in its seed data and one `true`
+-- with the player's own shipyard in it
 ---@param spaceID any The cluster, sector or zone to ask about.
 ---@return boolean? isShipyard `true`, or no value at all when there is none.
 function HasShipyard(spaceID) end
@@ -6276,8 +6325,9 @@ function HasTag(componentID, connectionName, tag) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - 51 calls, the true and the silent case each matched against the map across
--- thirteen sectors
+-- Probed: 8.00, 9.00 - 51 calls, the true and the silent case each matched against the map across
+-- thirteen sectors; two 9.00 sectors, both `true`, one for `wharf_alliance_toa` in its seed data
+-- and one for the player's own wharf
 ---@param spaceID any The cluster, sector or zone to ask about.
 ---@return boolean? hasWharf `true`, or no value at all when there is none.
 function HasWharf(spaceID) end
@@ -6535,14 +6585,20 @@ function IsComponentOperational(componentID) end
 --- **Both arguments are required.** The one-argument call this row used to declare is answered
 --- with `Invalid number of arguments (1, expected 2)` - there is no default space.
 ---
---- Argument 2 is a space of any granularity: **cluster, sector and zone are all accepted**, each
---- returning a plain `false` on a player headquarters. What makes a range "sufficient" is not
---- measured - no call has yet returned `true` - so the condition behind the answer is still the
---- name's own claim and nothing more.
+--- Argument 2 is a space of any granularity: **cluster, sector and zone are all accepted**, and on
+--- every target tried the three agree with one another. So **the answer follows the container, not
+--- the space it is asked about**. Every station measured answers `false` - a headquarters, a
+--- shipyard, a wharf and a factory - while four of five ships answer `true` and a carrier answers
+--- `false`, so it is not a class test either. What makes a range "sufficient" is still not
+--- measured, so the condition behind the boolean remains the name's own claim.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - four call shapes on a player HQ: bare, and against its zone, sector and cluster
+-- Probed: 8.00, 9.00 - four call shapes on a player HQ: bare, and against its zone, sector and
+-- cluster; the same four on each of nine 9.00 targets, where the bare call is refused as
+-- "(1, expected 2)" and the other three always agree with one another, so the space argument does
+-- not move the answer. Those runs are also the first to see it return `true`: four ships true,
+-- one ship and all four stations false
 ---@param containerID any The container to ask about.
 ---@param spaceID any The space to test the range against: a cluster, sector or zone.
 ---@return boolean isSufficient True if the range is sufficient.
@@ -6977,7 +7033,8 @@ function MakeGlobalAvailable(objectname) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - argument 2 typed by the engine's own rejection of a number
+-- Probed: 8.00, 9.00 - argument 2 typed by the engine's own rejection of a number, repeated on
+-- 9.00 against a station's defence computer and a ship's pilot
 ---@param entityID any The entity whose repair queue is reordered.
 ---@param componentID any The component to move to the top of that queue.
 function MakeRepairPriority(entityID, componentID) end
@@ -9400,7 +9457,8 @@ function SetLuaDebugOutput(message) end
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
--- Probed: 8.00 - one bare call, which printed the real name and signature; parked there
+-- Probed: 8.00, 9.00 - one bare call on each version, both printing the same real name and
+-- syntax, `SetPriorityMissionTargetMessage(posid, messageid)`; parked there
 ---@param posid any Position id. Named by the engine, type unmeasured.
 ---@param messageid any Message id. Named by the engine, type unmeasured.
 function SetMainMissiontargetMessage(posid, messageid) end
@@ -9991,9 +10049,11 @@ function SignalObject(objectID, param, param2, param3) end
 
 --- Flies **the player's own ship** to the given object under autopilot. The argument is the
 --- **destination**, not the ship: `GetAutoPilotTarget` reads the component straight back out
---- after the call, and the game writes `Autopilot engaged` with a `Fly to <object>` command
---- for the ship the player is piloting. A route through gates is planned as needed - the target
---- measured was 34,627km away in another sector. Returns nothing.
+--- after the call, and the game writes `Autopilot engaged` followed by the order it issued for
+--- the ship the player is piloting. **The order depends on what the destination is**: a station
+--- gives `Command: Fly to <object>`, a ship gives `Command: Follow <ship>`. A route through gates
+--- is planned as needed, and the screen reports `Flying to Jump Gate` while it runs - the targets
+--- measured were 34,627km and 122,094km away, both in another sector. Returns nothing.
 ---
 --- **The player has to be piloting a ship.** Called from the bridge with no ship under the
 --- player, it is accepted silently and nothing happens: no autopilot, no error, and
@@ -10004,7 +10064,10 @@ function SignalObject(objectID, param, param2, param3) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - read back through GetAutoPilotTarget, before, after and after StopAutoPilot
+-- Probed: 8.00, 9.00 - read back through GetAutoPilotTarget, before, after and after
+-- StopAutoPilot. On 9.00 the engaged autopilot was also left standing between two clicks rather
+-- than cancelled in the same frame, which is the only way the order and the route are visible at
+-- all: the read-back alone cannot see them
 ---@param targetID any The object to fly to.
 function StartAutoPilot(targetID) end
 
@@ -10070,7 +10133,9 @@ function StartSubConversationFromMenu(conversationName, actorID, conversationPar
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00 - read back through GetAutoPilotTarget
+-- Probed: 8.00, 9.00 - read back through GetAutoPilotTarget; on 9.00 also against an autopilot
+-- that had been running for a while rather than one started in the same frame, and it cancelled
+-- that one the same way
 function StopAutoPilot() end
 
 
