@@ -134,6 +134,13 @@ const CONVENTIONAL = /^(\w+)(?:\(([^)]*)\))?!?:\s*/;
 const typeOf = (subject) => (CONVENTIONAL.exec(subject) || [])[1] || '';
 const textOf = (subject) => subject.replace(CONVENTIONAL, '').trim();
 
+// The log's own commits. Its files map to no page already, so this matters only when
+// one of them touches the log and a real page together - but the workflow that writes
+// this file pushes exactly that kind of commit, and a log reporting its own updates
+// says nothing. Skipped for content too: the day belongs to the work, not the logging.
+const scopeOf = (subject) => (CONVENTIONAL.exec(subject) || [])[2] || '';
+const isOwn = (subject) => typeOf(subject) === 'docs' && scopeOf(subject) === 'changes';
+
 /* ---------------------------------------------------------------- draft */
 
 // A commit contributes a line to every page it touched, and nothing at all when it
@@ -158,6 +165,7 @@ function draft(since, slugs) {
   let through = since || null;
   for (const c of commits(since)) {
     through = c.hash;
+    if (isOwn(c.subject)) continue;   // advance past it, write nothing
     const text = textOf(c.subject);
     for (const e of entriesFor(c, slugs)) {
       if (!days.has(c.date)) days.set(c.date, new Map());
