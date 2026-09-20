@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-08-31",
+  "fetched": "2026-09-20",
   "root": "X4 Foundations Wiki",
   "branch": "Modding Support",
   "pages": [
@@ -164,6 +164,13 @@
         "Breaking Changes"
       ],
       "title": "Breaking Changes"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Multi-version extensions"
+      ],
+      "title": "Multi-version extensions"
     },
     {
       "segs": [
