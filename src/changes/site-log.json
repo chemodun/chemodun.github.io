@@ -25,9 +25,9 @@
           "title": "Lua Globals Reference",
           "kind": "",
           "lines": [
-            "publish the in-game probe readings and the 9.00 pass",
-            "add in-game probe results for AddMoney and others",
-            "finish the 9.00 probe pass, 36 rows promoted"
+            "publish the in-game probe readings and the 9.00 pass - 54 globals gained a reading, 44 of them moving from unverified to confirmed, and 3 more recorded as deprecated",
+            "add in-game probe results for AddMoney and others - 21 further globals read in-game, 15 of them moving to confirmed",
+            "finish the 9.00 probe pass, 36 rows promoted - all 75 readings now cover both 8.00 and 9.00"
           ]
         },
         {
