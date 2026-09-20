@@ -1,0 +1,220 @@
+{
+  "through": "781dabcb5679e19471165132e48ff063f21fd893",
+  "days": [
+    {
+      "date": "2026-09-20",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/c-functions-and-structures/",
+          "title": "C functions and structures",
+          "kind": "",
+          "lines": [
+            "document unit storage function quirks"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/uix-callbacks/",
+          "title": "UIX callbacks",
+          "kind": "",
+          "lines": [
+            "expand LuaDoc for callback hooks"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/lua-globals/",
+          "title": "Lua Globals Reference",
+          "kind": "",
+          "lines": [
+            "publish the in-game probe readings and the 9.00 pass",
+            "add in-game probe results for AddMoney and others",
+            "finish the 9.00 probe pass, 36 rows promoted"
+          ]
+        },
+        {
+          "path": "/x4/changes/",
+          "title": "Changes",
+          "kind": "new",
+          "lines": [
+            "add generated Changes page to build"
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-09-01",
+      "pages": [
+        {
+          "path": "/x4/modding-support/multi-version-extensions/",
+          "title": "Multi-version extensions",
+          "kind": "new",
+          "lines": [
+            "add multi game version extensions article"
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-08-31",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/talking-with-md-and-ai-scripts/",
+          "title": "Talking with MD and AI scripts",
+          "kind": "",
+          "lines": [
+            "added the UIX callbacks reference"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/uix-callbacks/",
+          "title": "UIX callbacks",
+          "kind": "new",
+          "lines": [
+            "added the UIX callbacks reference"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/x-catalog-tool/",
+          "title": "X Catalog Tool",
+          "kind": "new",
+          "lines": [
+            "x tool description added",
+            "add info about X4 Cat Suite"
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-08-30",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/c-functions-and-structures/",
+          "title": "C functions and structures",
+          "kind": "new",
+          "lines": [
+            "add C functions and structures reference",
+            "use a lua file as main source"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/talking-with-md-and-ai-scripts/",
+          "title": "Talking with MD and AI scripts",
+          "kind": "",
+          "lines": [
+            "add C functions and structures reference"
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-08-29",
+      "pages": [
+        {
+          "path": "/x4/modding-support/scripting-md-libraries-map/script-commands/",
+          "title": "Script commands",
+          "kind": "new",
+          "lines": [
+            "add script command reference",
+            "add column headers line"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/scripting-md-libraries-map/",
+          "title": "Scripting/MD/Libraries/Map",
+          "kind": "new",
+          "lines": [
+            "add script command reference"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/",
+          "title": "UI Modding support",
+          "kind": "",
+          "lines": [
+            "add script command reference"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/lua-globals/",
+          "title": "Lua Globals Reference",
+          "kind": "",
+          "lines": [
+            "add column headers line"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/talking-with-md-and-ai-scripts/",
+          "title": "Talking with MD and AI scripts",
+          "kind": "",
+          "lines": [
+            "update canonical copy note"
+          ]
+        },
+        {
+          "path": "/x4/",
+          "title": "X4: Foundations",
+          "kind": "",
+          "lines": [
+            "some words fix"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/",
+          "title": "Modding Support",
+          "kind": "",
+          "lines": [
+            "some words fix"
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-08-28",
+      "pages": [
+        {
+          "path": "/x4/",
+          "title": "X4: Foundations",
+          "kind": "new",
+          "lines": [
+            "first public version",
+            "add references on Egosoft's Wiki"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/",
+          "title": "Modding Support",
+          "kind": "new",
+          "lines": [
+            "first public version",
+            "add references on Egosoft's Wiki"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/",
+          "title": "UI Modding support",
+          "kind": "new",
+          "lines": [
+            "first public version",
+            "add references on Egosoft's Wiki"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/lua-globals/",
+          "title": "Lua Globals Reference",
+          "kind": "new",
+          "lines": [
+            "first public version",
+            "add references on Egosoft's Wiki"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/talking-with-md-and-ai-scripts/",
+          "title": "Talking with MD and AI scripts",
+          "kind": "new",
+          "lines": [
+            "first public version"
+          ]
+        }
+      ]
+    }
+  ]
+}

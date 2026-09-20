@@ -1,23 +1,27 @@
 'use strict';
 
-// Builds the Changes page.
+// Builds the Game Changes page.
 //
-//   node build-html.js                 -> _site/x4/changes/
-//   OUT=path/to/index.html node build-html.js
+//   node build-game.js                 -> _site/x4/modding-support/game-changes/
+//   OUT=path/to/index.html node build-game.js
 //
-// Two clocks could fill this page. This is the first: the game's own, what changed for
-// a mod author between the last two game versions the references cover. It is a pure
-// function of committed data, so it is generated rather than written and cannot fall
-// behind the references it summarises. sources.js does the reading; this renders it.
+// One clock: what changed for a mod author between the last two game versions the
+// references cover. It is a pure function of committed data, so it is generated rather
+// than written and cannot fall behind the references it summarises. sources.js does the
+// reading. Only the game references feed it - UIX is a mod on its own release clock and
+// gets its own account elsewhere.
+//
+// The site's own clock is a different question with a different audience, and lives on
+// /x4/changes/, built by build-site.js.
 //
 // Order is deliberate. Removals first, because that is the half that breaks a mod that
 // already works; then names that stayed and changed shape; then additions. A reader
 // arriving after a game update wants them in exactly that order.
 //
 // Every name on the page is a deep link into the reference that owns it, and an anchor
-// that does not exist over there is a silent dead link. So this runs last in the build
-// and checks each href against the built page, which is how the child-element chips
-// that had no anchor at all were caught.
+// that does not exist over there is a silent dead link. So this runs after the
+// references and checks each href against the built page, which is how the child-element
+// chips that had no anchor at all were caught.
 
 const fs = require('fs');
 const path = require('path');
@@ -25,7 +29,8 @@ const path = require('path');
 const { shell, esc, wikiUrl } = require('../layout.js');
 const { references } = require('./sources.js');
 
-const URL = '/x4/changes/';
+const URL = '/x4/modding-support/game-changes/';
+const SITE_LOG_URL = '/x4/changes/';
 const OUT = process.env.OUT ||
   path.join(__dirname, '..', '..', '_site', ...URL.split('/').filter(Boolean), 'index.html');
 const SITE_ROOT = path.join(__dirname, '..', '..', '_site');
@@ -74,9 +79,9 @@ const prose = (s) => esc(s).replace(/`([^`]+)`/g, (_, t) => `<code>${t}</code>`)
 const chip = (i) => `<a href="${esc(i.href)}"${i.title ? ` title="${esc(i.title)}"` : ''}>${esc(i.name)}</a>`;
 const chips = (items) => `<div class="chips">${items.map(chip).join('')}</div>`;
 
-// The version pair a reference's delta is taken between. UIX ships on its own releases,
-// so its pair is not the game's and the page says so wherever it shows one.
-const span = (r) => `${r.from} to ${r.to}` + (r.clock === 'mod' ? ', the mod’s own releases' : '');
+// The version pair a reference's delta is taken between. They are all game versions,
+// but a reference need not cover the same two, so each one states its own.
+const span = (r) => `${r.from} to ${r.to}`;
 
 const delta = (n, tone) => (n ? `<b class="t-${tone}">${tone === 'gone' ? '−' : '+'}${n}</b>` : '<span class="z">0</span>');
 
@@ -101,7 +106,7 @@ function summaryTable() {
 }
 
 // One reference's contribution to a section, or nothing at all when it has none. The
-// heading carries the version pair because the four references do not share one.
+// heading carries the version pair because the references need not share one.
 function section(pick, label) {
   const out = [];
   for (const r of references) {
@@ -137,8 +142,7 @@ const gone = count((g) => g.removed);
 const added = count((g) => g.added);
 const changed = references.reduce((n, r) => n + r.changes.length, 0);
 
-const GAME = references.filter((r) => r.clock !== 'mod');
-const FROM = GAME[0].from, TO = GAME[0].to;
+const FROM = references[0].from, TO = references[0].to;
 const builds = references.find((r) => r.builds) || { builds: {} };
 
 const CSS = `
@@ -159,9 +163,10 @@ ul.note{color:var(--dim);font-size:.92rem}
 ul.note li{margin:.4em 0}
 `;
 
-const body = `<h1>Changes</h1>
+const body = `<h1>Game Changes</h1>
 <p class="lede">What changed for a mod author between X4 ${esc(FROM)} and ${esc(TO)}, gathered from the
-references on this site. Every name here links to its own row in the reference that carries it.</p>
+references on this site. Every name here links to its own row in the reference that carries it.
+What changed on the site itself is a separate clock, logged on <a href="${SITE_LOG_URL}">Changes</a>.</p>
 
 <p class="wikiref">Egosoft's <a href="${esc(BREAKING)}">Breaking Changes</a> on the wiki describes in prose
 what a game version changed and why. This page answers the narrower half of that question: which names
@@ -192,36 +197,38 @@ ${esc(FROM)}.</p>
 ${section((g) => g.added, 'new')}
 
 <h2 id="method">How this page is built</h2>
-<p>Nothing on this page is written by hand. Each reference records, per row, which of the versions
-it covers has that row; this page is the difference between the last two of them, taken from the
-same committed data the references themselves are built from, through the same parsers. It is
-rebuilt whenever the site is, so it cannot fall behind a reference, and every link is checked
-against the built reference page before the build is allowed to finish.</p>
+<p>Nothing on this page is written by hand. Each reference records, per row, which of the versions it
+covers has that row; this page is the difference between the last two of them, taken from the same
+committed data the references themselves are built from, through the same parsers. It is rebuilt
+whenever the site is, so it cannot fall behind a reference, and every link is checked against the
+built reference page before the build is allowed to finish.</p>
 <ul class="note">
 ${builds.builds && builds.builds[FROM] && builds.builds[TO]
     ? `<li>The game versions measured are build ${esc(builds.builds[FROM])} for ${esc(FROM)} and build ${esc(builds.builds[TO])} for ${esc(TO)}.</li>`
     : ''}
 ${references.filter((r) => r.footnote).map((r) =>
       `<li><a href="${esc(r.url)}">${esc(r.title)}</a>: ${r.footnote}</li>`).join('\n')}
-<li>What is on this page is what the game changed. It is not a log of edits to this site.</li>
+<li>UIX callbacks are not counted here: that reference tracks a mod, which ships on its own releases
+rather than the game's, so its changes belong on its own clock.</li>
 </ul>
 `;
 
 const problems = checkAnchors();
 if (problems.length) {
-  console.error('Changes page: ' + problems.length + ' dead deep link(s)');
+  console.error('Game Changes page: ' + problems.length + ' dead link(s)');
   for (const p of problems) console.error('  ' + p);
   process.exit(1);
 }
 
 const html = shell({
-  title: 'Changes',
-  description: `What changed for a mod author between X4: Foundations ${FROM} and ${TO}: ` +
-    'every name the game dropped, added or reshaped, gathered from the references on this site.',
+  title: 'Game Changes',
+  description: `What changed for a mod author between X4: Foundations ${FROM} and ${TO} - ` +
+    'every name the game dropped, added or reshaped.',
   trail: [
     { label: 'Home', href: '/' },
     { label: 'For X4: Foundations', href: '/x4/' },
-    { label: 'Changes', href: URL },
+    { label: 'Modding Support', href: '/x4/modding-support/' },
+    { label: 'Game Changes', href: URL },
   ],
   body,
   css: CSS,

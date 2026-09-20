@@ -1,6 +1,6 @@
 'use strict';
 
-// The game delta, read out of the four references rather than written down.
+// The game delta, read out of the references rather than written down.
 //
 //   node sources.js              prints what the Changes page will say
 //   require('./sources')         returns { references }
@@ -275,9 +275,11 @@ function uixCallbacks() {
 
 /* ------------------------------------------------------------- assembly */
 
-const references = [globals(), cFunctions(), commands(), uixCallbacks()];
+// UIX is a mod on its own release clock, not the game's, so it is no part of this
+// delta and gets its own account of what it changed. Built on demand, not here.
+const references = [globals(), cFunctions(), commands()];
 
-module.exports = { references };
+module.exports = { references, uixCallbacks };
 
 if (require.main === module) {
   const strip = (s) => String(s).replace(/<[^>]*>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>');

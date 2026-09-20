@@ -35,7 +35,7 @@ src/globals/         the Lua Globals Reference pipeline (see below)
 src/commands/        the Script Commands reference (see below)
 src/c-functions-and-structures/  the C functions and structures reference (see below)
 src/uix-callbacks/    the UIX callbacks reference (see below)
-src/changes/         the Changes page, built from all four of the above (see below)
+src/changes/         two pages: the game delta and the site's own log (see below)
 ```
 
 `src/build.js` also writes the root-level files: `favicon.ico` (built from the two PNGs in `src/assets/`, so nothing derived is committed), `404.html`, `sitemap.xml` and `robots.txt`.
@@ -191,20 +191,27 @@ The layout follows the C functions page - a filter bar over a flat list, with ea
 
 The extraction half lives outside this repo, in a working copy of the UIX sources; it writes `uix-callbacks.lua`, `meta.js` and `data/meta.json` here and nothing else.
 
-### The Changes page
+### The two changes pages
 
-`src/changes/build-html.js` builds `/x4/changes/` from the four references above and nothing else.
+Two clocks run at different speeds and answer different questions, so they are two pages. `build-game.js` writes **Game Changes** at `/x4/modding-support/game-changes/`: what the game changed for a mod author, aggregated out of the references. `build-site.js` writes **Changes** at `/x4/changes/`: what changed on the site itself. The game's belongs under Modding Support because it is a modding fact like everything else there; the site's sits a level up, because its scope is every page under `/x4/`.
 
 ```text
-sources.js      reads each reference through its own parser, returns the delta
-build-html.js   renders it, and checks every link against the built reference pages
+sources.js      reads each game reference through its own parser, returns the delta
+build-game.js   renders the game delta, and checks every name against the built references
+site-log.js     drafts the site's own log out of git history, and reads it back
+site-log.json   that log, committed, because the build has no history to read
+build-site.js   renders the log, and checks that every page it names still exists
 ```
 
-Two clocks could fill a page like this: the game's, and the site's own edits. This is the first of them. Every reference already records, per row, which of the versions it covers has that row, and nothing aggregated it, so the question a reader actually arrives with after a game update had no page. The delta is always between the last two versions a reference covers, so nothing here names 8.00 or 9.00 except the data.
+The game's is the longer page. Every reference already records, per row, which of the versions it covers has that row, and nothing aggregated it, so the question a reader actually arrives with after a game update had no page. The delta is always between the last two versions a reference covers, so nothing here names 8.00 or 9.00 except the data. Only the game references feed it: the UIX callbacks reference tracks a mod, which ships on its own releases rather than the game's, so it is no part of a game delta.
 
 It is generated for the same reason the references are: a hand-written changelog is one edit away from disagreeing with the page it summarises. Reading the same committed data through the same parsers means it cannot, and rebuilding it on every build means it cannot go stale.
 
 The page is ordered removals, then names that stayed and changed shape, then additions, because that is the order a reader wants them in after an update. What "changed shape" means is per reference and is whatever the data actually records: for globals, an availability change or a `Deprecated:` tag naming the newer version; for script commands, an attribute or child element the command gained or lost.
 
-It runs **last** in `npm run build`, because it verifies itself against the other pages' output. Every name on it is a deep link into the reference that owns it, and an anchor that does not exist over there is a dead link nothing else on the site would notice; `checkAnchors()` reads the built pages and fails the build on one. It caught a real case on the first run: child elements are rendered inside their parent command's card and have no anchor at all, which is why they are counted inside the command that accepts them rather than listed on their own.
+Both run **last** in `npm run build`, the game's first, because each verifies itself against output the rest of the build produced. Every name on the game page is a deep link into the reference that owns it, and an anchor that does not exist over there is a dead link nothing else on the site would notice; `checkAnchors()` reads the built pages and fails the build on one. It caught a real case on the first run: child elements are rendered inside their parent command's card and have no anchor at all, which is why they are counted inside the command that accepts them rather than listed on their own. `checkLogged()` is the same idea for the site page, against the pages the log names.
+
+The site's clock is one entry per day and per page. It cannot be computed at build time: Pages checks the repository out at `fetch-depth: 1`, so there is no history there to read, and reading it would tie a published page to a history that can be rewritten. So `node --run changes:log` reads history here, where it exists, drafts the days that are missing and prints them; `node --run changes:log -- --write` appends them to `site-log.json`, and `-- --rebuild` regenerates the whole file from history. It reports; it does not commit, and it never rewrites a day already logged, so a line corrected by hand stays corrected.
+
+What reaches that log is decided by a map from file to page, not by anyone remembering the rule: a file that belongs to no page under `/x4/` is invisible to it, which is how the workflow, the sitemap, the favicon and the tooling stay off the page. In a reference's own directory the `.lua` and `.json` it is built from are content and the `.js` is presentation, so a builder script counts only in a `feat` commit - a page gaining a feature is something a reader sees, the same file refactored is not. The log's own two files are on no page at all, because a log that records its own updates says nothing.
 

@@ -3,14 +3,15 @@
   "private": true,
   "description": "chemodun.github.io - X4: Foundations modding references and guides",
   "scripts": {
-    "build": "node src/build.js && node src/globals/build-html.js && node src/commands/build-html.js && node src/c-functions-and-structures/build-html.js && node src/uix-callbacks/build-html.js && node src/changes/build-html.js",
+    "build": "node src/build.js && node src/globals/build-html.js && node src/commands/build-html.js && node src/c-functions-and-structures/build-html.js && node src/uix-callbacks/build-html.js && node src/changes/build-game.js && node src/changes/build-site.js",
     "wiki:fetch": "node src/wiki/fetch-tree.js",
     "wiki:check": "node src/wiki/fetch-tree.js --check",
     "check": "node --run build && node src/check-pages.js",
     "measure": "node src/measure-layout.js",
     "clean": "node -e \"require('fs').rmSync('_site',{recursive:true,force:true})\"",
     "serve": "node --run build && node src/serve.js",
-    "start": "node src/serve.js"
+    "start": "node src/serve.js",
+    "changes:log": "node src/changes/site-log.js"
   },
   "dependencies": {
     "markdown-it": "^14.1.0"
