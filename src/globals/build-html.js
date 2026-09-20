@@ -46,9 +46,14 @@ const SCOPE = {
   all: ['ok', 'all', 'all (addons + core)'], addons: ['addon', 'addons', 'addons only'],
   core: ['new', 'core', 'core only'], none: ['gone', 'absent', 'does not exist'],
 };
+// A verdict inferred from call sites only makes sense for a name no .lua file defines,
+// so every non-engine global gets a fourth value of its own - without it the three
+// verdicts cover 711 of the 805 cards and the filter counts do not add up.
 const USAGE = {
   confirmed: ['ok', 'confirmed'], disputed: ['gone', 'disputed'], unverified: ['warn', 'unverified'],
+  source: ['new', 'from source'],
 };
+const sigKey = (n) => (DATA[n].origin === 'engine' && verdicts[n]) ? verdicts[n].verdict : 'source';
 
 // A row is a fixed-width column, so it carries the short label and the long one as its
 // tooltip.
@@ -218,10 +223,10 @@ function signature(n) {
 // the card carries them - the filter reads every facet there and toggles the paired
 // index row by position, so repeating 436 KB of haystack on the rows buys nothing.
 function facets(n) {
-  const e = DATA[n], u = verdicts[n];
+  const e = DATA[n];
   const hay = [n, (docs[n] && docs[n].prose) || '', e.note || ''].join(' ').toLowerCase();
   return `data-o="${e.origin}" data-a="${e.scope}" data-k="${e.group}" data-v="${vtokens(n).join(' ')}"` +
-    ` data-u="${e.origin === 'engine' && u ? u.verdict : ''}" data-h="${esc(hay)}"`;
+    ` data-u="${sigKey(n)}" data-h="${esc(hay)}"`;
 }
 
 // Version is the one multi-valued facet, so it is a token list rather than one value:
@@ -247,10 +252,10 @@ function card(n) {
   const vr = rangeOf(n);
   head.push(badge(vr.tone, vr.short));
   if (savedOf(n)) head.push(badge('warn', 'saved: ' + savedOf(n)));
-  if (u && e.origin === 'engine') {
-    const [tone, label] = USAGE[u.verdict];
-    head.push(badge(tone, (e.group === 'function' ? 'signature: ' : 'usage: ') + label));
-  }
+  const sk = sigKey(n);
+  const [utone, ulabel] = USAGE[sk];
+  head.push(badge(utone, (e.group === 'function' ? 'signature: '
+    : sk === 'source' ? 'declaration: ' : 'usage: ') + ulabel));
   const dep = deprecatedOf(n);
   if (dep) head.push(badge('gone', 'deprecated: ' + dep.version));
   const pr = probedOf(n);
@@ -278,6 +283,9 @@ function card(n) {
   rows.push(['Game versions', `${badge(vr.tone, vr.long)}<br>` + versCell(n, false)]);
   if (dep) rows.push(['Deprecated', badge('gone', dep.version) + (dep.detail ? ' - ' + x(dep.detail) : '')]);
   if (e.origin === 'engine' && u) rows.push(['Vanilla usage', usageCell(n)]);
+  else rows.push([e.group === 'function' ? 'Signature' : 'Declaration',
+    badge('new', 'from source') + ' - taken from the definition the <b>Origin</b> row names, so ' +
+    'nothing has to be inferred from call sites.']);
   if (pr) rows.push(['Probed in-game', badge('engine', pr.version) + (pr.detail ? ' - ' + x(pr.detail) : '')]);
 
   const overloads = d && d.overloads.length
@@ -424,7 +432,8 @@ ${badge('gone', 'absent')} declared, but present in neither version.<br>
 The column is headed <b>Seen in</b>; a row carries the short word, and hovering it or opening the card gives the full wording.</td></tr>
 <tr><th>Signature</th><td>${badge('ok', 'confirmed')} vanilla calls it, and every argument count fits the declaration - or, where vanilla never calls it, the global was called in the running game instead and the card's <b>Probed in-game</b> row says what that call measured.<br>
 ${badge('gone', 'disputed')} vanilla passes a count the declaration cannot take - believe the call site.<br>
-${badge('warn', 'unverified')} neither: no vanilla code calls it, and no probe reading either.</td></tr>
+${badge('warn', 'unverified')} neither: no vanilla code calls it, and no probe reading either.<br>
+${badge('new', 'from source')} nothing to verify: the name is defined in a vanilla <code>.lua</code> file, so its declaration is read from that definition. The three verdicts above are for engine globals, which no file defines; these ${names.length - counts('engine')} carry this instead, which is why all four options together add up to the ${names.length}.</td></tr>
 <tr><th>Game versions</th><td>Which versions have the global <i>to be used</i>: a version that deprecated it is not counted here, in the filter, or in its count, even though the executable still exports the name.<br>
 ${badge('ok', 'all')} in every version covered here (${VERSIONS.join(', ')}).<br>
 ${badge('new', '≥ ' + VERSIONS[VERSIONS.length - 1])} from that version onwards, so new since the one before it.<br>
@@ -442,7 +451,7 @@ Every global was re-called on 9.00 in a confirmation pass, and presence, argumen
 <input id="q" type="search" placeholder="Filter by name or description…" autocomplete="off">
 ${select('o', 'Origin', [['engine', 'engine'], ['widget', 'widget_fullscreen'], ['addon', 'addon'], ['core', 'core']])}
 ${select('a', 'Availability', [['all', 'addons + core'], ['addons', 'addons only'], ['core', 'core only'], ['none', 'absent']])}
-${select('u', 'Signature', [['confirmed', 'confirmed'], ['unverified', 'unverified'], ['disputed', 'disputed']])}
+${select('u', 'Signature', [['confirmed', 'confirmed'], ['unverified', 'unverified'], ['disputed', 'disputed'], ['source', 'from source']])}
 ${select('k', 'Kind', [['function', 'functions'], ['variable', 'variables']])}
 ${select('v', 'Version', VERSION_OPTS, DEFAULT_VERSION)}
 <button id="clr" type="button">Reset</button><span class="n" id="n">${vcount(DEFAULT_VERSION)} of ${names.length}</span>
