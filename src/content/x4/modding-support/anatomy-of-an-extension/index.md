@@ -292,11 +292,25 @@ extensions/example_starter/
   content.xml
   extensions/
     ego_dlc_split/
-      libraries/
-        wares.xml
+      assets/
+        units/
+          size_xl/
+            macros/
+              ship_spl_xl_battleship_01_a_macro.xml
 ```
 
-The path reads as what it is: the file at `extensions/ego_dlc_split/libraries/wares.xml`, seen from the game root. The patch applies to that expansion's ware table, not the base game's.
+The path reads as what it is: the file at `extensions/ego_dlc_split/assets/units/size_xl/macros/ship_spl_xl_battleship_01_a_macro.xml`, seen from the game root. The patch applies to the Split expansion's copy of that ship macro, and the base game has no file at that path at all.
+
+The patch is an ordinary `<diff>`, written against the file it is aimed at:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <replace sel="/macros/macro[@name='ship_spl_xl_battleship_01_a_macro']/properties/hull/@max">260000</replace>
+</diff>
+```
+
+This works because the expansion ships that macro as a whole file, with `<macros>` as its root element. The selection walks the document the expansion itself wrote. When the target is a patch instead, none of that holds, and the section below is about what to do then.
 
 This needs a dependency to be reliable. Without one, there is no guarantee the target extension has been loaded when the patch is applied:
 
@@ -308,9 +322,18 @@ This needs a dependency to be reliable. Without one, there is no guarantee the t
 
 ### When the other extension's file is itself a patch
 
-Mirroring the path works when the file being aimed at holds data of its own. It does not work when that file is a `<diff>`, and that is not a rare case: 168 of the 573 XML files in the shipped expansions are patches.
+Mirroring the path works when the file being aimed at holds data of its own, as that ship macro does. It does not work when that file is itself a `<diff>`, and that is not a rare case: 168 of the 573 XML files in the shipped expansions are patches.
 
-The reason is that the mirrored path names a real file, and a patch applied to it patches *that document*. If the expansion's `libraries/wares.xml` is a patch, then a patch at `extensions/ego_dlc_split/libraries/wares.xml` is editing a list of operations, not the ware table. Its `sel` would have to read something like `/diff/add[@sel="..."]`, selecting one of the other author's operations by the text of its selector. That is brittle in a way nothing else here is, and it is almost never what was wanted.
+Keep the same expansion and move to its ware table, and this is what is waiting at `extensions/ego_dlc_split/libraries/wares.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <add sel="/wares/production">
+    ...
+```
+
+The mirrored path names a real file, and a patch applied to it patches *that document*. So a patch at that path is editing a list of operations, not the ware table. Its `sel` would have to read something like `/diff/add[@sel="/wares/production"]`, selecting one of the other author's operations by the text of that operation's own selector. That is brittle in a way nothing else here is, and it is almost never what was wanted.
 
 **The way through is to stop aiming at their file and aim at the original.** Patch the base game file from the extension's own root, as normal, and rely on load order to arrive after their patch has already been applied:
 
