@@ -368,12 +368,21 @@ const href = (p) => '/' + String(p).replace(/^\/+|\/+$/g, '').split('/').filter(
 const WIKI = 'https://wiki.egosoft.com/';
 const wikiUrl = (segs) => WIKI + segs.map(encodeURIComponent).join('/') + '/';
 
+// What the box says depends on what the counterpart over there is. `more` is a section
+// this site mirrors and the wiki carries further, so a reader is sent there for the rest.
+// `also` is a page written here and exported to the wiki, where promising more detail
+// would send them to the same text under another address. A page that declares neither
+// gets no box: silence is the default, so a page can never claim a depth it does not have.
+const WIKI_REF = {
+  more: (link) => `For more details and additional information, check ${link} on the Egosoft wiki.`,
+  also: (link) => `This page is also published as ${link} on the Egosoft wiki.`,
+};
+
 // The link text is the page's own wiki value - or its wikiName, where the wiki page's
 // title is not its URL segment - so what a reader clicks is the name of the page they land on.
-const wikiRef = (segs, name) => segs.length
-  ? `<p class="wikiref">For more details and additional information, check ` +
-    `<a href="${wikiUrl(segs)}">${esc(name || segs[segs.length - 1])}</a>` +
-    ` on the Egosoft wiki.</p>`
+const wikiRef = (segs, name, kind) => segs.length && WIKI_REF[kind]
+  ? `<p class="wikiref">${WIKI_REF[kind](
+      `<a href="${wikiUrl(segs)}">${esc(name || segs[segs.length - 1])}</a>`)}</p>`
   : '';
 
 // The legend over a fixed-column list: [what the column is called here, what the card

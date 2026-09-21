@@ -2,7 +2,8 @@
 title: Talking with MD and AI scripts
 description: The channels between UI Lua and the XML side - raise_lua_event, AddUITriggeredEvent, SignalObject and the blackboard - with a working pair of files for each.
 order: 4
-wikiPath: Modding Support/UI Modding support/Talking with MD and AI scripts
+wiki: Talking with MD and AI scripts
+wikiRef: also
 ---
 
 <!-- Canonical copy; the Egosoft wiki page is exported from it -->
@@ -536,4 +537,4 @@ The conversion traps are all in [What survives the crossing](#conversions). What
 
 [↑ Contents](#toc)
 
-[Back to UI Modding support](doc:WebHome) · [Lua Globals Reference](<doc:Lua Globals Reference.WebHome>) for the signatures of every function named here.
+[Back to UI Modding support](/x4/modding-support/ui-modding/) · [Lua Globals Reference](/x4/modding-support/ui-modding/lua-globals/) for the signatures of every function named here.

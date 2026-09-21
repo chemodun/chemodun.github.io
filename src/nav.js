@@ -59,7 +59,7 @@ const pages = walk(CONTENT).map((file) => {
     generated: data.generated === 'true',
     wiki: data.wiki || '',
     wikiName: data.wikiName || '',
-    wikiPath: data.wikiPath || '',
+    wikiRef: data.wikiRef || '',
   };
 });
 
@@ -69,9 +69,8 @@ const childrenOf = (p) => pages
   .filter((c) => c !== p && c.segs.length === p.segs.length + 1 && c.url.startsWith(p.url))
   .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 
-// A section names only its own segment on the Egosoft wiki; the rest is inherited from
-// its parents, so a rename over there is one edit here. Only sections carry one: the
-// wiki's own tree is what a reader follows for anything more, not a single document.
+// A page names only its own segment on the Egosoft wiki; the rest is inherited from
+// its parents, so a rename over there is one edit here.
 function wikiSegsFor(p) {
   if (!p.wiki) return [];
   const segs = [];
@@ -87,11 +86,7 @@ function wikiSegsFor(p) {
 // The key both trees are joined on: a wiki path below the wiki's own root, so
 // "Modding Support/UI Modding support". null means the page claims nothing on the
 // wiki; the empty string is the wiki's root itself, which /x4/ does claim.
-//
-// A document names its whole path in `wikiPath` where it has one, because only
-// sections inherit segments from their parents - see wikiSegsFor.
 function wikiKeyFor(p) {
-  if (p.wikiPath) return p.wikiPath.replace(/^\/+|\/+$/g, '');
   const segs = wikiSegsFor(p);
   if (!segs.length) return null;
   return (segs[0] === tree.root ? segs.slice(1) : segs).join('/');
@@ -107,6 +102,15 @@ wikiIndex.set('', { segs: [], title: tree.root });
 
 const wikiChildren = (key) => [...wikiIndex.values()]
   .filter((w) => w.segs.slice(0, -1).join('/') === key && w.segs.join('/') !== key);
+
+// Whether the wiki really carries this page's counterpart, by the snapshot rather than
+// by the page's word for it: a page declares its export before the export happens, and
+// until it has, every link to it is a link to nothing. The panel's `both` chip and the
+// strip under a page title are this same question, so the two cannot disagree.
+const onWiki = (p) => {
+  const key = wikiKeyFor(p);
+  return key !== null && wikiIndex.has(key);
+};
 
 // Order, then title - the same rule the card lists on the pages themselves use, so the
 // panel and the page body never disagree about what comes first. Only site pages
@@ -144,7 +148,7 @@ function siteNode(p) {
   return {
     title: p.title,
     href: p.url,
-    kind: key !== null && wikiIndex.has(key) ? 'both' : 'local',
+    kind: onWiki(p) ? 'both' : 'local',
     order: p.order,
     kids: inOrder(kids),
   };
@@ -211,4 +215,4 @@ function navHtml(url = '') {
     + '</nav>';
 }
 
-module.exports = { pages, byUrl, childrenOf, wikiSegsFor, wikiKeyFor, frontMatter, navHtml };
+module.exports = { pages, byUrl, childrenOf, wikiSegsFor, wikiKeyFor, onWiki, frontMatter, navHtml };

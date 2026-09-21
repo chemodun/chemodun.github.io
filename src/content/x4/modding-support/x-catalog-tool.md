@@ -1,7 +1,7 @@
 ---
 title: X Catalog Tool
 description: The tool that packs and unpacks X4's cat/dat archives - every switch of the command line version, and the GUI screen by screen.
-order: 3
+order: 4
 wiki: X Catalog Tool
 ---
 

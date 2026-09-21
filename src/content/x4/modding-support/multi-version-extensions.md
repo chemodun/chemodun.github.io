@@ -1,8 +1,9 @@
 ---
 title: Multi-version extensions
 description: One extension package that carries different content for different game versions, using version-named catalogs - the naming rule, the four loading rules, and how to build one.
-order: 4
+order: 5
 wiki: Multi-version extensions
+wikiRef: also
 ---
 
 <!-- Canonical copy; the Egosoft wiki page is exported from it -->

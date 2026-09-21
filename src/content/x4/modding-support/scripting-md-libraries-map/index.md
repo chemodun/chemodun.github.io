@@ -1,9 +1,10 @@
 ---
 title: Scripting/MD/Libraries/Map
 description: The Mission Director and the AI script engine, and the command vocabulary both of them share.
-order: 1
+order: 2
 wiki: ScriptingMD
 wikiName: Scripting/MD/Libraries/Map
+wikiRef: more
 ---
 
 # Scripting/MD/Libraries/Map

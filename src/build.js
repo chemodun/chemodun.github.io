@@ -15,7 +15,7 @@ const { shell, esc, wikiRef, SITE } = require('./layout.js');
 // What pages there are, and how they sit under one another, is nav.js's - the
 // navigation panel needs the same tree, and the generated references build in separate
 // processes that never run this file.
-const { pages, byUrl, childrenOf, wikiSegsFor } = require('./nav.js');
+const { pages, byUrl, childrenOf, wikiSegsFor, onWiki } = require('./nav.js');
 
 const ROOT = __dirname;
 const ASSETS = path.join(ROOT, 'assets');
@@ -123,6 +123,7 @@ const cardList = (kids) => kids.length
 
 let written = 0;
 const unresolvedAll = [];
+const awaitingWiki = [];
 
 for (const p of pages) {
   if (p.generated) continue;
@@ -141,9 +142,12 @@ for (const p of pages) {
   html = html.replace(/^\s*<!--(?!\s*xwiki:)[\s\S]*?-->\s*/, '');
   html = html.replace(/<!--\s*xwiki:\s*toc[^>]*-->/g, (m, at) => toc(headings, html, at));
 
-  // Under the page title, so the way out to the wiki is visible before the content.
-  const wiki = wikiRef(wikiSegsFor(p), p.wikiName || p.wiki);
+  // Under the page title, so the way out to the wiki is visible before the content -
+  // but only where the snapshot carries the counterpart, so a page that declares an
+  // export it has not had yet stays silent rather than linking to nothing.
+  const wiki = onWiki(p) ? wikiRef(wikiSegsFor(p), p.wikiName || p.wiki, p.wikiRef) : '';
   if (wiki) html = html.replace('</h1>', () => '</h1>\n' + wiki);
+  else if (p.wikiRef) awaitingWiki.push(p.url);
 
   if (env.unresolved.length) unresolvedAll.push({ page: p.url, links: env.unresolved });
 
@@ -217,6 +221,9 @@ fs.writeFileSync(path.join(OUT, 'robots.txt'),
 console.log(`${written} markdown pages -> ${path.relative(process.cwd(), OUT)}`);
 console.log(`root files: favicon.ico, 404.html, sitemap.xml (${urls.length} urls), robots.txt`);
 for (const p of pages.filter((x) => x.generated)) console.log(`  (generated elsewhere: ${p.url})`);
+// Not a failure: the page is written here first and exported afterwards, so this is the
+// list of exports still owed - and it empties itself once the wiki snapshot is refreshed.
+for (const u of awaitingWiki) console.log(`  (wikiRef declared, not on the wiki snapshot yet: ${u})`);
 if (unresolvedAll.length) {
   console.log('\nunresolved links:');
   for (const u of unresolvedAll) console.log(`  ${u.page}  ->  ${u.links.join(', ')}`);

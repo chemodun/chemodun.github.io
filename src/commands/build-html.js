@@ -373,7 +373,7 @@ const WIKI_SEGS = ['X4 Foundations Wiki', 'Modding Support', 'ScriptingMD'];
 const WIKI_NAME = 'Scripting/MD/Libraries/Map';
 
 const body = `<h1>Script commands</h1>
-${wikiRef(WIKI_SEGS, WIKI_NAME)}
+${wikiRef(WIKI_SEGS, WIKI_NAME, 'more')}
 <p class="lede">Every action and condition the Mission Director and AI script schemas accept, with its attributes,
 the attribute groups it pulls in and the child elements it can contain. Generated from the schemas that ship with
 the game, for ${VERSIONS.join(' and ')}.</p>

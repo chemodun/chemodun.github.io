@@ -53,27 +53,30 @@ A page is a Markdown file with front matter:
 title: Talking with MD and AI scripts
 description: One sentence, shown on the parent page's card and as the meta description.
 order: 2
-wikiPath: Modding Support/UI Modding support/Talking with MD and AI scripts
+wiki: Talking with MD and AI scripts
+wikiRef: also
 ---
 ```
 
-`order` sorts a page among its siblings. `wikiPath` records where the same content lives on the Egosoft wiki, so a page can still be exported there with `xwiki-md.js`; the site ignores it and uses its own slug.
+`order` sorts a page among its siblings.
 
-A **section** page can also carry `wiki`, naming its own segment of the Egosoft wiki tree and nothing more:
+`wiki` names the page's own segment of the Egosoft wiki tree, and nothing more. The build joins it with the same key on the page's parents, so the page above holds `wiki: UI Modding support`, the one above that `wiki: Modding Support` and the one above that `wiki: X4 Foundations Wiki`, and the address comes out as `https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/UI%20Modding%20support/Talking%20with%20MD%20and%20AI%20scripts/`. A rename over there is then one edit here rather than one per page. That same key is what the navigation panel merges the two trees on, so a page carries `wiki` whether or not it shows a link.
 
-```markdown
-wiki: UI Modding support
-```
+`wikiRef` decides what the page then says about that counterpart, as a strip under the title. There are two kinds of counterpart, and they are not the same claim:
 
-The build joins that with the same key on the page's parents, so the section above it holds `wiki: Modding Support` and the one above that `wiki: X4 Foundations Wiki`, and the link comes out as `https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/UI%20Modding%20support/`. A rename over there is then one edit here rather than one per page. It renders as a strip under the page title, using the value itself as the link text, and points a reader at the same section on the wiki for anything more.
+- `more` - a section this site mirrors and the wiki carries further. It renders *For more details and additional information, check X on the Egosoft wiki*, and is true only where the wiki really does hold more under that node.
+- `also` - a page written here and exported to the wiki with `xwiki-md.js`. It renders *This page is also published as X on the Egosoft wiki*. The reader still learns it is over there, which is what the panel's green **both** chip says of the same row, without being sent for detail to the same text under another address.
 
-Only sections carry it. A document links to the wiki's tree through its section, so the reader lands where every related page is, not on one of them.
+Either kind renders only where the wiki snapshot actually carries the counterpart, and that is not the same thing as declaring it. A page is written here and exported afterwards, so `wikiRef: also` is true of an intention before it is true of the wiki; until the export has happened and `npm run wiki:fetch` has seen it, the page stays silent rather than linking to nothing, and `node src/build.js` prints the exports still owed. It is the same test the panel's chip uses, so a page carries a strip exactly when its row reads **both**.
+
+A page that declares neither gets no strip, and that is the default. A page added without the key loses a pointer; it can never make a claim that is not true. `x-catalog-tool` leaves it out on purpose: the wiki's page on the subject is short enough to be quoted whole in the body, so there is nothing further over there to send a reader to.
 
 Where the wiki page's title is not its URL segment, `wikiName` supplies the link text while `wiki` stays the segment. The scripting section is the case that needs it: the page sits at `ScriptingMD` but is titled `Scripting/MD/Libraries/Map`, and slashes in `wiki` would be read as further segments.
 
 ```markdown
 wiki: ScriptingMD
 wikiName: Scripting/MD/Libraries/Map
+wikiRef: more
 ```
 
 Two markers are expanded at build time:
@@ -86,7 +89,7 @@ Links may point at a page by its title (`[Lua Globals Reference](<Lua Globals Re
 
 ### The navigation panel
 
-`src/nav.js` builds one tree out of two: this site's pages, and the Modding Support branch of the Egosoft wiki. A section that exists in both places is one row rather than two, because the merge key is already written down - the `wiki` and `wikiPath` front matter above names where the page lives over there, and matching is on that key rather than on the title, which is a third spelling again in at least one case.
+`src/nav.js` builds one tree out of two: this site's pages, and the Modding Support branch of the Egosoft wiki. A section that exists in both places is one row rather than two, because the merge key is already written down - the `wiki` front matter above names where the page lives over there, and matching is on that key rather than on the title, which is a third spelling again in at least one case.
 
 Each row says where it can be read, and the colour answers that before the word does: green for a page that is on this site, grey for one that following the row leaves the site for.
 

@@ -3,6 +3,7 @@ title: X4: Foundations
 description: References and guides for modding X4: Foundations.
 order: 1
 wiki: X4 Foundations Wiki
+wikiRef: more
 ---
 
 # X4: Foundations
