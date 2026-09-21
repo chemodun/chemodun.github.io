@@ -1,5 +1,5 @@
 {
-  "through": "0572050454bec14cc7727f9678d8b34936124ca5",
+  "through": "0be2ffd6d47bd612f3bd194725c34b0b56c29e4a",
   "days": [
     {
       "date": "2026-09-21",
@@ -17,7 +17,8 @@
           "title": "Anatomy of an extension",
           "kind": "new",
           "lines": [
-            "add a guide from an empty folder to a loading extension"
+            "add a guide from an empty folder to a loading extension",
+            "give catalogs their own page, out of the guide and the tool manual"
           ]
         },
         {
@@ -26,6 +27,22 @@
           "kind": "new",
           "lines": [
             "add the reference on XML diff patching and what `sel` accepts"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-an-extension/catalogs/",
+          "title": "Catalogs",
+          "kind": "new",
+          "lines": [
+            "give catalogs their own page, out of the guide and the tool manual"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/x-catalog-tool/",
+          "title": "X Catalog Tool",
+          "kind": "",
+          "lines": [
+            "give catalogs their own page, out of the guide and the tool manual"
           ]
         }
       ]
