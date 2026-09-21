@@ -1,6 +1,19 @@
 {
-  "through": "0be2ffd6d47bd612f3bd194725c34b0b56c29e4a",
+  "through": "f5c4e500af0cd81b67d74c0c3f667cf3269fa1f4",
   "days": [
+    {
+      "date": "2026-09-22",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/lua-globals/",
+          "title": "Lua Globals Reference",
+          "kind": "",
+          "lines": [
+            "fixed source for 27 functions"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-09-21",
       "pages": [
