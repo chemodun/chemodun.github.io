@@ -62,36 +62,9 @@ Nothing in the package needs installing, and `XRCatTool.exe` has no dependency o
 
 ## What a catalog is
 
-A `.cat` is a **plain text index**, one line per file:
+A `.cat` is a plain text index, one line per file, and the `.dat` beside it is those file bodies concatenated in index order. The two are paired by name, so `ext_01.cat` needs `ext_01.dat` next to it and renaming one without the other breaks the archive.
 
-```none
-md/enhanced_info_center.xml 6312 1787240309 d3ae7c9e5a51e0e2f5a29c4e0f9c1b2a
-t/0001-l044.xml 2238 1787300995 7c854bec9a7b06c42535d7f5f1a9e42a5
-```
-
-Four fields: the path inside the archive, the size in bytes, the modification time as a Unix timestamp, and the MD5 of the content. A path may contain spaces, so anything parsing this has to key on the **last three** whitespace separated fields, not the first.
-
-The `.dat` beside it is those file bodies concatenated in index order. No header, no padding, no compression, no per-entry marker: the index is the only thing that says where one file ends and the next begins. The two are paired by name, so `ext_01.cat` needs `ext_01.dat` next to it and renaming one without the other breaks the archive.
-
-Four properties of the index are worth knowing before writing anything that reads or produces one:
-
-- Entries are sorted by the **lowercased** path in byte order, but the **original case is stored**. `my folder/a file.xml` sorts before `UPPER.TXT`, and a naive sort on the raw paths gets that pair the wrong way round.
-- A **zero byte file** is written with 32 zeros as its hash, never the MD5 of the empty string.
-- A **deletion marker** is size 0 *and* timestamp 0. A genuinely empty file keeps its real timestamp, and that timestamp is the only thing separating the two.
-- The timestamp is the **source file's** modification time, not the time of packing. Repacking an unchanged tree produces an identical catalog.
-
-### Where the catalogs go in a mod
-
-The game loads `01.cat` to `99.cat` in its root folder and stops at the first missing number. Then, in every enabled extension, it looks for four kinds of catalog in this order:
-
-| Name | Read as | Used for |
-| --- | --- | --- |
-| `subst_01.cat`, `subst_02.cat` ... | paths relative to the **game root** | replacing base game files |
-| `subst_v###.cat` | the same, for one game version | a version specific replacement |
-| `ext_01.cat`, `ext_02.cat` ... | paths relative to the **extension** | the normal way to ship a mod |
-| `ext_v###.cat` | the same, for one game version | a version specific build |
-
-`###` is the game version with no separator, so `ext_v900.cat` is loaded by 9.00 and ignored by everything else. The usual reason to build one is a beta: keep the released build in `ext_01.cat` and put the changes the beta needs in the version catalog. Egosoft's own readme argues for the opposite assignment - version catalog for the **released** version, plain catalog for the new one - so that a later game version with no updated mod still loads something.
+The format in full, the four kinds of catalog an extension can hold, what their paths are relative to and the order the game applies them are on [Catalogs](/x4/modding-support/anatomy-of-an-extension/catalogs/). This page is the two programs that read and write that format.
 
 [↑ Contents](#toc)
 

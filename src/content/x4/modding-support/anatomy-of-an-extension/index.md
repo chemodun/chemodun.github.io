@@ -385,32 +385,17 @@ Everything past the manifest, which is to say the Lua itself, is a subject of it
 
 ## Packing it up
 
-Loose files work. An extension can be published as a folder of plain XML and it will load correctly. Packing is worth doing anyway, because a single catalog loads faster than several hundred files and is far easier to distribute intact.
+Loose files work. An extension can be published as a folder of plain XML and it will load correctly. Packing is worth doing anyway, because a single archive loads faster than several hundred files and is far easier to distribute intact.
 
-An extension's files are packed into pairs: a `.cat` holding the file list and a `.dat` holding the data. There are two kinds, and picking the wrong one is a common first mistake.
+An extension's files are packed into pairs: a `.cat` holding the index and a `.dat` holding the file bodies. There are two kinds, and picking the wrong one is a common first mistake.
 
-**`ext_01.cat` / `ext_01.dat`** hold paths relative to the **extension folder**. This is where everything discussed on this page belongs: `libraries/wares.xml` in an `ext_` catalog is the extension's own ware patch.
+**`ext_01.cat` / `ext_01.dat` hold paths relative to the extension folder.** This is where everything discussed on this page belongs. An `ext_` catalog is the extension folder in packed form and nothing more: an entry in it merges or patches exactly as the same file would loose, by the rules in [How a file joins the game](#how-a-file-joins-the-game).
 
-**`subst_01.cat` / `subst_01.dat`** hold paths relative to the **game root**, and stand in for the original file. This is for the cases in [When a whole file really does replace](#when-a-whole-file-really-does-replace): a replaced Lua file, a retextured model. It is a blunt instrument, because any other extension substituting the same file conflicts directly with it, so it is worth being certain no patch can do the job first.
+**`subst_01.cat` / `subst_01.dat` hold paths relative to the game root**, and stand in for the file that is already there. Nothing is merged and nothing is patched, so a substitute has to be a complete, valid file of its kind. This is the form for the cases in [When a whole file really does replace](#when-a-whole-file-really-does-replace), and it has no loose equivalent, because a file in an extension folder is addressed as `extensions/<id>/...` and never as a game root path.
 
-Both are numbered, and the numbers are load order within each kind: `ext_02` is applied after `ext_01`. The two kinds rank only among themselves.
+`content.xml` always stays loose beside the catalogs, never inside them. The game has to read it before it knows anything else about the extension.
 
-`content.xml` always stays loose beside the catalogs, never inside them. The game has to read it before it knows anything else about the extension. A packed expansion on disk looks like this:
-
-```none
-ego_dlc_boron/
-  content.xml
-  ext_01.cat  ext_01.dat
-  ext_02.cat  ext_02.dat
-  ext_03.cat  ext_03.dat
-  videos/
-```
-
-The loose `videos/` folder shows that packing is not all-or-nothing: a folder can stay outside the catalogs when there is no reason to pack it.
-
-For the packing itself, see [X Catalog Tool](/x4/modding-support/x-catalog-tool/).
-
-There is one further form worth knowing about before it is needed. A catalog can carry a game version in its name instead of a number, as in `ext_v900.cat`, and is then loaded only on that exact game version. That makes it possible to ship one package that carries different content for different game versions, which is the usual answer when a game update moves something an extension depends on. The rules are on [Multi-version extensions](/x4/modding-support/multi-version-extensions/).
+The format itself, the two version-named kinds, load order, and what is worth leaving loose while developing are on [Catalogs](/x4/modding-support/anatomy-of-an-extension/catalogs/). For the packing itself, see [X Catalog Tool](/x4/modding-support/x-catalog-tool/).
 
 [↑ Contents](#toc)
 
@@ -427,7 +412,7 @@ extensions/example_starter/
 
 Three files, and every mechanism on this page is in one of them. A larger extension is not a different shape, only more of the same one: more folders from [the folder map](#the-folder-map), more patches, and eventually a `ui.xml` and a catalog.
 
-The next thing to read depends on what the extension needs to do. To change what the game already defines, which is most mods, it is [XML diff patching](/x4/modding-support/anatomy-of-an-extension/xml-diff-patching/). To add an interface, it is [UI Modding support](/x4/modding-support/ui-modding/).
+The next thing to read depends on what the extension needs to do. To change what the game already defines, which is most mods, it is [XML diff patching](/x4/modding-support/anatomy-of-an-extension/xml-diff-patching/). To add an interface, it is [UI Modding support](/x4/modding-support/ui-modding/). To publish it as a package rather than a folder, it is [Catalogs](/x4/modding-support/anatomy-of-an-extension/catalogs/).
 
 [↑ Contents](#toc)
 
