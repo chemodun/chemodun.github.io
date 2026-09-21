@@ -530,7 +530,6 @@ function calculateGlobalOpacity(element) end
 --- Runs the handlers registered for a named event, with one argument. `widget_fullscreen.lua`
 --- calls it to dispatch an event to everything that registered through `RegisterEvent`.
 -- Global access to widget_fullscreen.callEventScripts
--- Mapped from: widgetSystem.callEventScripts
 -- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
@@ -542,7 +541,6 @@ function CallEventScripts(eventName, argument1) end
 --- Runs the handlers registered for a hotkey action. No vanilla code calls it: the engine is
 --- what raises hotkeys, and menu code registers into it with `SetScript("onHotkey", ...)`.
 -- Global access to widget_fullscreen.callHotkeyScripts
--- Mapped from: widgetSystem.callHotkeyScripts
 -- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
@@ -554,7 +552,6 @@ function CallHotkeyScripts(action) end
 --- calls it from its own left and right handlers, and menu code registers into it with
 --- `Helper.setTabScrollCallback`.
 -- Global access to widget_fullscreen.callTabScrollScripts
--- Mapped from: widgetSystem.callTabScrollScripts
 -- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
@@ -563,7 +560,6 @@ function CallTabScrollScripts(direction) end
 
 
 -- Global access to widget_fullscreen.callUpdateScripts
--- Mapped from: widgetSystem.callUpdateScripts
 -- Source: ui\widget\lua\widget_fullscreen.lua
 -- Calls all registered update scripts, typically on each frame.
 -- Environment: addons only
@@ -572,7 +568,6 @@ function CallUpdateScripts() end
 
 
 -- Global access to widget_fullscreen.callWidgetEventScripts
--- Mapped from: widgetSystem.callWidgetEventScripts
 -- Source: ui\widget\lua\widget_fullscreen.lua
 -- Dispatches an event to a specific widget's registered event handlers.
 -- Environment: addons only
@@ -993,8 +988,6 @@ function createAxisPropertyInfo(axisproperty) end
 
 
 -- Creates a text element within a colored box, often used for headers or distinct labels in tables.
--- Mapped from: widgetSystem.createBoxText (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
@@ -1009,8 +1002,6 @@ function CreateBoxText(text, properties) end
 --- colours, size, mouse-over text and the click handler. Menu code normally goes through
 --- `Helper.createButton`, but the help text menu builds one directly and keeps the descriptor
 --- to release later.
--- Mapped from: widgetSystem.createButton (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 18 vanilla call sites, 1 argument
@@ -1023,8 +1014,6 @@ function CreateButton(properties) end
 --- Builds a checkbox widget and returns its descriptor. `helper.lua`, the only vanilla caller,
 --- passes a single descriptor table carrying the state and the properties together; menu code
 --- reaches it through `Helper.createCheckBox`.
--- Mapped from: widgetSystem.createCheckBox (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
@@ -1051,8 +1040,6 @@ function CreateCutsceneDescriptor(cutsceneKey, refObjects) end
 --- Builds a dropdown widget and returns its descriptor. `helper.lua`, the only vanilla caller,
 --- passes a single descriptor table holding the options and the properties together; menu code
 --- goes through `Helper.createDropDown`.
--- Mapped from: widgetSystem.createDropDown (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 1 argument
@@ -1066,8 +1053,6 @@ function CreateDropDown(options, properties) end
 --- Builds an edit box widget and returns its descriptor. The single descriptor table carries
 --- the default text, whether the text is hidden, and the changed and confirmed handlers; menu
 --- code goes through `Helper.createEditBox`.
--- Mapped from: widgetSystem.createEditBox (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 1 argument
@@ -1080,8 +1065,6 @@ function CreateEditBox(properties) end
 --- Builds a flowchart widget and returns its descriptor. The single descriptor table carries
 --- everything - nodes, edges and layout; `Helper.createFlowchart` assembles it, and no menu
 --- calls this directly.
--- Mapped from: widgetSystem.createFlowchart (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
@@ -1094,8 +1077,6 @@ function CreateFlowchart(descriptor) end
 --- Builds one edge of a flowchart - the connector between two nodes - and returns its
 --- descriptor. As with the rest of the flowchart family, the single descriptor table carries
 --- everything and `helper.lua` assembles it.
--- Mapped from: widgetSystem.createFlowchartEdge (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
@@ -1107,8 +1088,6 @@ function CreateFlowchartEdge(descriptor) end
 
 --- Builds one node of a flowchart and returns its descriptor. As with the other widget
 --- constructors, the single descriptor table carries everything, and `helper.lua` assembles it.
--- Mapped from: widgetSystem.createFlowchartNode (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 1 argument
@@ -1119,8 +1098,6 @@ function CreateFlowchartNode(descriptor) end
 
 
 -- Creates a font string descriptor for use in other UI elements.
--- Mapped from: widgetSystem.createFontString (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 21 vanilla call sites, 1 argument
@@ -1133,8 +1110,6 @@ function CreateFontString(text, properties) end
 
 -- Creates a UI frame widget, which is a container for other UI elements. (Legacy version)
 -- Note: Most code uses Helper.createFrameHandle() or CreateFrame2() instead.
--- Mapped from: widgetSystem.createFrame (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 10-11 arguments
@@ -1157,8 +1132,6 @@ function CreateFrame(children, layer, background, name, parent, width, height, x
 --- Builds a frame - the box a menu's tables and widgets live in - and returns its descriptor.
 --- One table carries the children, the layer, the size and the offset.
 --- `Helper.createFrameHandle` wraps it for menu code; the help text menu builds one directly.
--- Mapped from: widgetSystem.createFrame2 (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 1 argument
@@ -1182,8 +1155,6 @@ function createFrameTexturePropertyInfo(textureproperty) end
 --- Builds a graph widget and returns its descriptor. The single descriptor table carries the
 --- data and the scaling; `Helper.createGraph` assembles it, and `SelectGraphDataPoint` selects
 --- a point on the finished widget.
--- Mapped from: widgetSystem.createGraph (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
@@ -1195,8 +1166,6 @@ function CreateGraph(properties) end
 
 --- Builds an icon widget and returns its descriptor. `helper.lua`, the only vanilla caller,
 --- passes a single descriptor table that already carries the icon and its properties together.
--- Mapped from: widgetSystem.createIcon (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
@@ -1289,8 +1258,6 @@ function createOverlayPropertyInfo(widget) end
 
 
 -- Creates a render target widget, which is an area in the UI used to display 3D objects or scenes.
--- Mapped from: widgetSystem.createRenderTarget (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 10 arguments
@@ -1312,8 +1279,6 @@ function CreateRenderTarget(width, height, x, y, alpha, mouseOverText, helpOverl
 --- Builds the combined shield and hull bar and returns its descriptor. `helper.lua`, the only
 --- vanilla caller, passes a single descriptor table with the size filled in, so the separate
 --- shield and hull parameters here are the older shape.
--- Mapped from: widgetSystem.createShieldHullBar (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
@@ -1339,8 +1304,6 @@ function CreateSink(sinkName, numElements, elements) end
 
 
 -- Creates a slider cell widget, used for selecting a numerical value within a range.
--- Mapped from: widgetSystem.createSliderCell (inferred)
--- Source: ui/widget/lua/widget_fullscreen.lua (inferred)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 1 argument
@@ -6484,9 +6447,6 @@ function initMissionBarScale() end
 
 --- Installs a DLC through Steam, by its app ID. The extensions page offers it for an entry that
 --- is not installed, and `UninstallSteamDLC` for one that is.
---- Global access to widget_fullscreen.widgetSystem.installSteamDLC
--- Mapped from: widgetSystem.installSteamDLC
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
@@ -6495,9 +6455,6 @@ function initMissionBarScale() end
 function InstallSteamDLC(appid) end
 
 
---- Global access to widget_fullscreen.widgetSystem.interruptPlayerComputer
--- Mapped from: widgetSystem.interruptPlayerComputer
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Interrupts the player's computer control, likely to regain control for the UI.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
@@ -6968,9 +6925,6 @@ function ListenForInput(actionName) end
 --- Loads a savegame by file name. The options menu does not call it inline: it queues the call
 --- as a delayed one-time update callback a tenth of a second later, so the menu that triggered
 --- it is gone before the load starts.
---- Global access to widget_fullscreen.widgetSystem.loadGame
--- Mapped from: widgetSystem.loadGame
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 1 argument
@@ -6994,9 +6948,6 @@ function LoadInputProfile(profileName, personal) end
 --- Locks the presentation so nothing redraws it. Core HUD code pairs it with
 --- `HidePresentation`: the element goes to its inactive slide, the presentation hides, and the
 --- lock keeps it that way until something unlocks it again.
---- Global access to widget_fullscreen.widgetSystem.lockPresentation
--- Mapped from: widgetSystem.lockPresentation
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 20 vanilla call sites, 0 arguments
@@ -7070,9 +7021,6 @@ Menus = {}
 
 --- Minimises a frame to a bar, optionally with a label. `RestoreFrame` brings it back, and the
 --- view helper passes `View.hasPlayerControls()` to both so the restored state matches.
---- Global access to widget_fullscreen.widgetSystem.minimizeFrame
--- Mapped from: widgetSystem.minimizeFrame
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 3 arguments
@@ -7087,9 +7035,6 @@ function MinimizeFrame(frame, text, hasPlayerControls) end
 --- call passes only the module name, so the parameter table and its count are optional; the
 --- tutorial and scenario menus store their own context in user data first, because the UI is
 --- torn down as the new game starts.
---- Global access to widget_fullscreen.widgetSystem.newGame
--- Mapped from: widgetSystem.newGame
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 13 vanilla call sites, 1 argument
@@ -8159,9 +8104,6 @@ function onUpdate() end
 --- `"MapMenu"`. The second parameter is the menu's own argument list, whose shape each menu
 --- defines: the map takes `{ x, y, ... }` and can be handed a whole submenu request in it. This
 --- is the call that opens a vanilla menu from anywhere, including from a mod.
---- Global access to widget_fullscreen.widgetSystem.openMenu
--- Mapped from: widgetSystem.openMenu
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 18 vanilla call sites, 3-4 arguments
@@ -8358,9 +8300,6 @@ function PrepareTexture(textureName) end
 function ProceedFromMenu(nextSection, choiceParam, baseParam) end
 
 
---- Global access to widget_fullscreen.widgetSystem.quitGame
--- Mapped from: widgetSystem.quitGame
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Quits the game, closing all related processes and returning to the desktop.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
@@ -8369,9 +8308,6 @@ function ProceedFromMenu(nextSection, choiceParam, baseParam) end
 function QuitGame() end
 
 
---- Global access to widget_fullscreen.widgetSystem.quitModule
--- Mapped from: widgetSystem.quitModule
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Quits the current module or menu, returning to the previous state or the desktop.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
@@ -8395,8 +8331,6 @@ function QuitModule() end
 --- never shown raises exactly the same event. A **freed** id does not: the engine answers `Error
 --- raising the interaction event. Errormessage: Cannot find notification with ID 'N'` and no cue
 --- runs. A legacy `CreateInteractionDescriptor` userdata is refused outright.
--- Mapped from: widgetSystem.raisePlayerInteractionEvent
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 1 argument
@@ -8408,9 +8342,6 @@ function RaisePlayerInteractionEvent(interactionID) end
 --- Returns the Lua the player has typed into the debug input, or nothing when there is none.
 --- `ego_debug` polls it from its own `onUpdate` and `loadstring`s whatever comes back - which
 --- is why it only works when `IsLuaDebugInputEnabled` is true.
---- Global access to widget_fullscreen.widgetSystem.readLuaDebugInput
--- Mapped from: widgetSystem.readLuaDebugInput
--- Source: ui\widget\lua\widget_fullscreen.lua
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
