@@ -1,5 +1,5 @@
 {
-  "through": "4c871b2aeeb364e2bd040a424b54952aa038aa71",
+  "through": "0572050454bec14cc7727f9678d8b34936124ca5",
   "days": [
     {
       "date": "2026-09-21",
@@ -10,6 +10,22 @@
           "kind": "",
           "lines": [
             "build the version axis from every UIX release"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-an-extension/",
+          "title": "Anatomy of an extension",
+          "kind": "new",
+          "lines": [
+            "add a guide from an empty folder to a loading extension"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-an-extension/xml-diff-patching/",
+          "title": "XML diff patching",
+          "kind": "new",
+          "lines": [
+            "add the reference on XML diff patching and what `sel` accepts"
           ]
         }
       ]
