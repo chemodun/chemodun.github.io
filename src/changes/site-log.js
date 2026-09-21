@@ -24,6 +24,9 @@
 // content - the .lua and .json it is built from - and the .js is presentation, so a
 // builder counts only in a `feat` commit: a page gaining a feature is something a
 // reader sees, the same file refactored is not.
+//
+// A `chore:` subject is the way out of that map, for the change the map cannot see: it
+// writes nothing at all, whatever it touched. See isSilent.
 
 const fs = require('fs');
 const path = require('path');
@@ -136,10 +139,18 @@ const CONVENTIONAL = /^(\w+)(?:\(([^)]*)\))?!?:\s*/;
 const typeOf = (subject) => (CONVENTIONAL.exec(subject) || [])[1] || '';
 const textOf = (subject) => subject.replace(CONVENTIONAL, '').replace(/\s*\(#\d+\)$/, '').trim();
 
-// The log's own commits. Its files map to no page already, so this matters only when
-// one of them touches the log and a real page together, and a log reporting its own
-// updates says nothing. Two independent reasons is what makes the loop safe rather than
-// lucky, and this one also covers a correction made by hand.
+// Commits that write no line at all, whatever files they touched.
+//
+// `chore` is the one the author chooses. The map reads files, and a file it calls
+// content can change without a reader seeing anything: an `order` renumbered around a
+// new page, a `wiki` key, a front matter field the build learned to read. Only the
+// author knows which, so `chore` is the word for it - and it covers the site's own
+// machinery in the same move, for the case where plumbing does reach a page's file.
+//
+// `docs(changes)` is the log's own. Its files map to no page already, so this matters
+// only when one of them touches the log and a real page together, and a log reporting
+// its own updates says nothing. Two independent reasons is what makes the loop safe
+// rather than lucky, and this one also covers a correction made by hand.
 //
 // Nothing tests the author, deliberately. CI landing a commit is not the question: what
 // a reader sees is, and pageOf() already answers it. A job that refreshes the wiki
@@ -147,7 +158,8 @@ const textOf = (subject) => subject.replace(CONVENTIONAL, '').replace(/\s*\(#\d+
 // while uix-releases.yml regenerates a reference and belongs on the log exactly as a
 // hand edit to the same file would.
 const scopeOf = (subject) => (CONVENTIONAL.exec(subject) || [])[2] || '';
-const isOwn = (subject) => typeOf(subject) === 'docs' && scopeOf(subject) === 'changes';
+const isSilent = (subject) => typeOf(subject) === 'chore'
+  || (typeOf(subject) === 'docs' && scopeOf(subject) === 'changes');
 
 /* ---------------------------------------------------------------- draft */
 
@@ -173,7 +185,7 @@ function draft(since, slugs) {
   let through = since || null;
   for (const c of commits(since)) {
     through = c.hash;
-    if (isOwn(c.subject)) continue;   // advance past it, write nothing
+    if (isSilent(c.subject)) continue;   // advance past it, write nothing
     const text = textOf(c.subject);
     for (const e of entriesFor(c, slugs)) {
       if (!days.has(c.date)) days.set(c.date, new Map());
