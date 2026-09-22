@@ -3,6 +3,7 @@ title: X Catalog Tool
 description: The tool that packs and unpacks X4's cat/dat archives - every switch of the command line version, and the GUI screen by screen.
 order: 4
 wiki: X Catalog Tool
+wikiRef: also
 ---
 
 # X Catalog Tool
@@ -11,20 +12,7 @@ Everything X4 ships is inside a `.cat` / `.dat` pair, and everything a mod ships
 
 This page is what those two programs do, checked against the binaries rather than the readme.
 
-What the Egosoft wiki has on the subject is short enough to carry here in full. The citation below is [X Catalog Tool](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/X%20Catalog%20Tool/) on the Egosoft wiki, quoted whole and unedited, links included:
-
-> The X Catalog Tool allows players to extract and compile X-Rebirth and X4:Foundations .cat and .dat files which is necessary for all forms of modding. The tool may be run as either via a terminal or via the GUI version
->
-> Prerequisites:
->
-> - Logged into an Egosoft account
-> - X:Rebirth or X4:Foundations owned and registered to the Egosoft account
->
-> Egosoft Website Download Link: <https://www.egosoft.com/download/x4/bonus_en.php>
->
-> For players using Steam it is also possible to get access to the tool via the downloadable "X tools" which includes the X4/XR steam workshop tool in addition to the GUI version of the catalogue tool. Further instructions on the Steam version is available [here](https://steamcommunity.com/sharedfiles/filedetails/?id=245117855).
-
-The Workshop tool that citation mentions is `WorkshopTool.exe`, and it is not covered here. It is described in the guide linked as *here* above: [Steam Workshop for X Rebirth and X4](https://steamcommunity.com/sharedfiles/filedetails/?id=245117855).
+The Steam package that carries the tool carries `WorkshopTool.exe` as well, which publishes an extension to the Steam Workshop. That one is not covered here; it is described in [Steam Workshop for X Rebirth and X4](https://steamcommunity.com/sharedfiles/filedetails/?id=245117855).
 
 **XRCatTool** is not the only way in and out of the format. **X4 Cat Suite** by z1ppeh(z1p) - [Nexus Mods](https://www.nexusmods.com/x4foundations/mods/2142), source on [GitHub](https://github.com/z1ppeh/X4CatSuite):
 
@@ -39,7 +27,11 @@ The Workshop tool that citation mentions is `WorkshopTool.exe`, and it is not co
 
 ## Getting the tool
 
-On Steam it is **X Tools**, in the Tools section of the library, and it installs to `steamapps\common\X Tools`. That is the package the citation above calls the larger of the two, since it carries the Workshop tool as well, and the folder is:
+The tool is free to anyone who owns the game, and both routes to it need the same two things: an **Egosoft account**, logged in, and **X Rebirth or X4: Foundations owned and registered to that account**.
+
+**From Egosoft** it comes with the bonus material, at <https://www.egosoft.com/download/x4/bonus_en.php>. That download is the catalog tool by itself.
+
+**On Steam** it is **X Tools**, in the Tools section of the library, and it installs to `steamapps\common\X Tools`. That is the larger of the two, since it carries the Workshop tool as well, and the folder is:
 
 ```none
 X Tools\
@@ -47,7 +39,6 @@ X Tools\
     XRCatTool.exe           the catalog tool, command line
     XRCatToolGUI.exe        the catalog tool, window
     Readme.txt              usage for both tools, and their version history
-    extract.bat             a sample: unpack a GOG install's 01.cat .. 09.cat
     startcmd.bat            opens a command prompt in this folder
     startreadme.bat         opens Readme.txt
     steam_api64.dll         used by WorkshopTool only
@@ -64,7 +55,7 @@ Nothing in the package needs installing, and `XRCatTool.exe` has no dependency o
 
 A `.cat` is a plain text index, one line per file, and the `.dat` beside it is those file bodies concatenated in index order. The two are paired by name, so `ext_01.cat` needs `ext_01.dat` next to it and renaming one without the other breaks the archive.
 
-The format in full, the four kinds of catalog an extension can hold, what their paths are relative to and the order the game applies them are on [Catalogs](/x4/modding-support/anatomy-of-an-extension/catalogs/). This page is the two programs that read and write that format.
+The format in full, the kinds of catalog an extension can hold, what their paths are relative to and the order the game applies them are on [Catalogs](/x4/modding-support/anatomy-of-an-extension/catalogs/). This page is the two programs that read and write that format.
 
 [↑ Contents](#toc)
 
@@ -137,7 +128,7 @@ Unpack a game catalog, into a folder that already exists:
 XRCatTool.exe -in "C:\Program Files (x86)\Steam\steamapps\common\X4 Foundations\01.cat" -out C:\x4\extracted
 ```
 
-Vanilla is spread over `01.cat` upwards with later catalogs overriding earlier ones, and each DLC has its own numbered set under `extensions\ego_dlc_*`. Extracting them into the **same** output folder in ascending order reproduces what the game sees. That is all `extract.bat` in the package does, one line per catalog.
+Vanilla is spread over `01.cat` upwards with later catalogs overriding earlier ones, and each DLC has its own numbered set under `extensions\ego_dlc_*`. Extracting them into the **same** output folder in ascending order reproduces what the game sees. A batch file with one line per catalog, written in that order, is the way to keep it repeatable.
 
 Pull one subtree out of a large catalog rather than all of it:
 
@@ -167,6 +158,8 @@ Three things about it are not obvious:
 - **The filters apply to the base as well.** Excluding a file from the input also excludes it from the base, so it is not reported as deleted - it simply is not considered. To produce a deletion marker for a file the filters remove, diff the two finished catalogs instead of the two trees.
 - **Zero byte files are compared by timestamp.** Their stored hash is 32 zeros rather than a real digest, so there is nothing to compare, and an empty file whose timestamp moved appears in the diff as an entry with size 0 and a real timestamp. Harmless, but it makes a diff that should have been empty non-empty.
 - A base entry that is itself a deletion marker stays one.
+
+From X4 9.00 there is a catalog type built for this output. `ext_NN_diff_v###.cat` is loaded as a layer over `ext_NN`, on the version in its name and on every version above it, so a `-diff` taken against the previous release packs straight into one. Its naming and loading rules are on [Multi-version extensions](/x4/modding-support/multi-version-extensions/#diff-catalogs).
 
 ### Appending
 

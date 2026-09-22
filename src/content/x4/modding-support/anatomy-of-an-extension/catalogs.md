@@ -1,6 +1,6 @@
 ---
 title: Catalogs
-description: The cat/dat archives an extension ships in - what the pair actually is, the four kinds and what their paths are relative to, why ext_ and subst_ are not the same kind of thing, and the order the game applies them.
+description: The cat/dat archives an extension ships in - what the pair actually is, the kinds of catalog and what their paths are relative to, why ext_ and subst_ are not the same kind of thing, and the order the game applies them.
 order: 2
 wiki: Catalogs
 wikiRef: also
@@ -12,7 +12,7 @@ wikiRef: also
 
 An extension can be published as a folder of plain files, and the game will load it correctly. It can also be packed, and almost every published extension is, because a single archive loads faster than several hundred files and is far easier to distribute intact.
 
-This page is what that archive is, the four kinds of it an extension can hold, and what the game does with them. It follows on from [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/), which covers what goes into an extension in the first place. The tool that packs and unpacks the format is [X Catalog Tool](/x4/modding-support/x-catalog-tool/), and an archive whose content depends on the game version is [Multi-version extensions](/x4/modding-support/multi-version-extensions/).
+This page is what that archive is, the kinds of it an extension can hold, and what the game does with them. It follows on from [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/), which covers what goes into an extension in the first place. The tool that packs and unpacks the format is [X Catalog Tool](/x4/modding-support/x-catalog-tool/), and an archive whose content depends on the game version is [Multi-version extensions](/x4/modding-support/multi-version-extensions/).
 
 <a id="toc"></a>
 
@@ -46,7 +46,7 @@ Four properties are worth knowing before writing anything that reads or produces
 
 [↑ Contents](#toc)
 
-## The four kinds
+## The kinds of catalog
 
 The game's own data sits in catalogs numbered plainly, `01.cat` upwards, in the installation folder. Inside an extension folder the name carries a prefix as well, and that prefix is the part that matters: it says what the paths inside the catalog are relative to. Picking the wrong one is a common first mistake.
 
@@ -54,10 +54,11 @@ The game's own data sits in catalogs numbered plainly, `01.cat` upwards, in the 
 | --- | --- | --- |
 | `ext_01.cat`, `ext_02.cat` ... | paths relative to the **extension folder** | the normal way to ship a mod |
 | `ext_v###.cat` | the same, for one game version | a version specific build |
+| `ext_NN_diff_v###.cat` | the same, for that game version and every later one | a layer over `ext_NN`, from 9.00 |
 | `subst_01.cat`, `subst_02.cat` ... | paths relative to the **game root** | replacing base game files |
 | `subst_v###.cat` | the same, for one game version | a version specific replacement |
 
-`###` is the game version with no separator, so `ext_v900.cat` is loaded by 9.00 and ignored by everything else. Version catalogs have rules of their own, and they are stricter than they look: see [Multi-version extensions](/x4/modding-support/multi-version-extensions/).
+`###` is the game version with no separator, so `ext_v900.cat` is loaded by 9.00 and ignored by everything else. `ext_NN_diff_v###.cat` is the exception and is new in 9.00: it names the numbered catalog it layers over, and it applies on the version in its name and on every version above it rather than on one. Both have rules of their own, and they are stricter than they look: see [Multi-version extensions](/x4/modding-support/multi-version-extensions/).
 
 An `ext_` catalog is where everything an extension normally ships belongs. `libraries/wares.xml` in an `ext_` catalog is the extension's own ware file, exactly as the loose file was. A `subst_` catalog is the exception rather than the other half of a pair, and most extensions never need one.
 
@@ -71,9 +72,9 @@ The two prefixes look like a matched pair, and they are not. The difference is w
 
 **A `subst_` catalog is not a packed folder at all.** Its entries stand in for a file that already exists: `ui/core/lua/monitors.xpl` in a `subst_` catalog is handed to the game in place of the original. Nothing is merged and nothing is patched, so a substitute has to be a complete, valid file of its kind. This is the form for the cases in [When a whole file really does replace](/x4/modding-support/anatomy-of-an-extension/#when-a-whole-file-really-does-replace): an interface Lua file, a texture, a model.
 
-The asymmetry follows from the paths. A loose file in an extension is addressed as `extensions/<id>/...`, never as a game root path, so the paths a `subst_` catalog holds are ones the extension folder cannot express. Packing is what makes the substitution sayable in the first place, which is why there is no loose equivalent of it, and why unpacking one into the extension folder does not reproduce the extension.
+The asymmetry follows from the paths. A loose file in an extension is addressed as `extensions/<folder>/...`, never as a game root path, so the paths a `subst_` catalog holds are ones the extension folder cannot express. Packing is what makes the substitution sayable in the first place, which is why there is no loose equivalent of it, and why unpacking one into the extension folder does not reproduce the extension.
 
-Because an extension's own folder also lives under the game root, a `subst_` catalog can address a file belonging to *another* extension, as `extensions/<other-id>/<path>`. That is the heavy-handed counterpart of [Patching a DLC or another extension](/x4/modding-support/anatomy-of-an-extension/#patching-a-dlc-or-another-extension): the patch edits what is there, the substitution takes the file over entirely.
+Because an extension's own folder also lives under the game root, a `subst_` catalog can address a file belonging to *another* extension, as `extensions/<their-folder>/<path>` - the other extension's **folder name**, which for a Workshop mod is not its `content.xml` id. That is the heavy-handed counterpart of [Patching a DLC or another extension](/x4/modding-support/anatomy-of-an-extension/#patching-a-dlc-or-another-extension): the patch edits what is there, the substitution takes the file over entirely.
 
 Substitution is a blunt instrument either way. Two extensions substituting the same file cannot both take effect, and neither one can tell that the other tried. It is worth being certain no patch can do the job first.
 
@@ -83,10 +84,11 @@ Substitution is a blunt instrument either way. Two extensions substituting the s
 
 The game reads `01.cat` upwards in its own root folder and stops at the first missing number, so a gap in the numbering hides everything after it. Then it reads the catalogs of every enabled extension.
 
-Within an extension, three rules decide what beats what:
+Within an extension, four rules decide what beats what:
 
 - **The number is load order within the kind.** `ext_02` is applied after `ext_01`, and the same for `subst_`.
 - **A version catalog is applied after every numbered catalog of its kind.** `ext_v900` beats both `ext_01` and `ext_02` on 9.00.
+- **A diff catalog is applied after the numbered catalog it names**, on the version in its name and on every version above it. `ext_01_diff_v900` follows `ext_01` from 9.00 onward.
 - **The two kinds rank only among themselves.** A `subst_` catalog is never in competition with an `ext_` one, because the two are not addressing the same paths.
 
 Neither kind is required, and neither requires the other. An extension can ship a single `subst_` pair and leave the rest of its files loose, or a single version catalog with no numbered catalog at all.

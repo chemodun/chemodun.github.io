@@ -1,6 +1,6 @@
 ---
 title: Multi-version extensions
-description: One extension package that carries different content for different game versions, using version-named catalogs - the naming rule, the four loading rules, and how to build one.
+description: One extension package that carries different content for different game versions, using version-named catalogs - the naming rule, the four loading rules, the diff catalogs added in 9.00, and how to build one.
 order: 5
 wiki: Multi-version extensions
 wikiRef: also
@@ -14,7 +14,7 @@ A game update can move exactly the piece an extension depends on: a vanilla Lua 
 
 There is a third. **One package can carry different content for different game versions**, in the same folder, selected by the engine at load time. The mechanism is a catalog whose name carries a version number, and it has been in the engine since X Rebirth. It is described for X Rebirth in the Steam guide [Steam Workshop for X Rebirth and X4](https://steamcommunity.com/sharedfiles/filedetails/?id=245117855), under the `-buildvcat` switch of the Workshop tool, and it works in X4 - though not on quite the terms that guide implies.
 
-Everything below was established by running a probe extension on 8.00 and 9.00 and reading which catalog actually answered for each file. That package is [available to download](#the-test-package) so the results can be reproduced.
+The naming rule and the four rules below were established by running a probe extension on 8.00 and 9.00 and reading which catalog actually answered for each file. That package is [available to download](#the-test-package) so the results can be reproduced. [Diff catalogs](#diff-catalogs), added in 9.00, are documented from Egosoft's own description of them rather than measured.
 
 <a id="toc"></a>
 
@@ -35,6 +35,8 @@ subst_v900.cat  subst_v900.dat      vanilla replacements for 9.00
 
 The number is the game version written as three digits, without the dot: **major, then minor as two digits**. 7.60 is `760`, 8.00 is `800`, 9.00 is `900`. The build number the game reports in brackets after the version plays no part.
 
+X4 9.00 adds a second name shape, `ext_NN_diff_v###.cat`, which carries a version the same way but is selected on different terms. It has a section of its own: [Diff catalogs](#diff-catalogs). Everything from here to the end of the four rules is about `ext_v###` and `subst_v###`.
+
 Paths inside a version catalog are the same virtual paths as anywhere else - relative to the extension folder for `ext_`, relative to the game root for `subst_`. A version catalog is not a sub-folder at runtime; it is an alternative source for the very same paths.
 
 [↑ Contents](#toc)
@@ -47,7 +49,7 @@ Paths inside a version catalog are the same virtual paths as anywhere else - rel
 
 This is the rule that most needs stating, because it is not what the X Rebirth guide leads one to expect. A version catalog is not "this version and older", and not "this version and newer". Running on 8.00 with all three of `ext_v760`, `ext_v800` and `ext_v900` present, only `ext_v800` answered; both of the others were as good as not shipped. On 9.00, only `ext_v900`.
 
-The practical consequence is the whole shape of the technique: **a version catalog is needed for every game version that requires different content**, and any version without one falls back to the numbered catalogs alone.
+The practical consequence is the whole shape of the technique: **a version catalog is needed for every game version that requires different content**, and any version without one falls back to the numbered catalogs alone. From 9.00 there is a way out of that, and it is the only exception to this rule: see [Diff catalogs](#diff-catalogs).
 
 ### 2. A version catalog is applied after every numbered catalog of its kind
 
@@ -67,6 +69,27 @@ That makes both models available:
 
 - **Differential** - the numbered catalogs carry everything common, and each version catalog carries only the handful of files that differ. This is the smaller package and the one to reach for by default.
 - **Complete** - each version catalog carries the whole extension, and there are no numbered catalogs at all. Worth it only when the versions diverge so much that "what is common" is nearly empty.
+
+[↑ Contents](#toc)
+
+<a id="diff-catalogs"></a>
+
+## Diff catalogs, from 9.00
+
+X4 9.00 added a second version-named catalog, and it is the one that does not obey rule 1:
+
+```none
+ext_01_diff_v900.cat   ext_01_diff_v900.dat
+```
+
+The name is the numbered catalog it belongs to, then `_diff_v`, then the version in the same three-digit form. It is a **layer over that numbered catalog**: `ext_01_diff_v900` is applied after `ext_01`, so wherever the two hold the same path, the diff catalog is the one that answers.
+
+Two things separate it from `ext_v###`:
+
+- **It applies on its own version and on every version above it.** `ext_01_diff_v900` answers on 9.00, on 9.10 and on anything later, where `ext_v900` answers on 9.00 and nowhere else. That is what removes the failure mode rule 1 creates, in which a version nobody built a catalog for quietly gets the numbered catalogs alone.
+- **Several apply at once.** Every diff catalog whose version is at or below the running version is loaded, so a package can gain one small layer for each game version that has needed a change, with the bulk of it still sitting in `ext_01`.
+
+No version before 9.00 has this catalog type. A package that also supports 8.00 keeps `ext_v800` or plain numbered catalogs for that version and uses diff catalogs only from 9.00 up.
 
 [↑ Contents](#toc)
 
@@ -104,6 +127,14 @@ copy content.xml "dist\my_extension\"
 
 The Workshop tool's `-buildvcat` does the equivalent from `v800`-style sub-folders of a single tree, for anyone publishing through it. Packing each folder by hand is the same result and needs no convention about where the version folders sit.
 
+A [diff catalog](#diff-catalogs) is built the same way, from a folder holding only what changes from its version onward:
+
+```bat
+XRCatTool.exe -dump -in "src\diff_v900" -out "dist\my_extension\ext_01_diff_v900.cat"
+```
+
+That folder does not have to be maintained by hand. `-diff` takes a base tree or catalog and writes only what differs from it, deletions included, which is exactly the content a diff catalog wants: see [Diffs, and version catalogs](/x4/modding-support/x-catalog-tool/#diffs-and-version-catalogs).
+
 **`content.xml` is never packed.** The engine reads it before it mounts any catalog, so it has to stay loose in the extension folder. Its `<dependency version="...">` is the *lowest* game version the package supports - the one below which the extension should not load at all, not the version any particular catalog serves:
 
 ```xml
@@ -135,7 +166,7 @@ The addon still loads and its other files still run, so this is survivable, but 
 
 **`ui.xml` itself is a normal file and can be overridden too.** If two versions genuinely need different file lists, ship a different `ui.xml` in each version catalog rather than one union list that is wrong everywhere.
 
-**Nothing warns about a version that has no catalog.** Ship `ext_v800` and `ext_v900`, and a player on 8.10 silently gets the numbered catalogs only. If that combination is not viable, the `<dependency version>` floor and a runtime version check are the only things standing between the player and a confusing failure.
+**Nothing warns about a version that has no catalog.** Ship `ext_v800` and `ext_v900`, and a player on 8.10 silently gets the numbered catalogs only. If that combination is not viable, the `<dependency version>` floor and a runtime version check are the only things standing between the player and a confusing failure. A [diff catalog](#diff-catalogs) has no such gap above its own version, which is the main reason to prefer one from 9.00 onward.
 
 **Vanilla UI Lua is stored as `.xpl`.** A `subst_` catalog replacing one must use that path and extension - `ui/addons/ego_movie/movie.xpl`, not `.lua`. Plain Lua source is accepted as the content; it does not have to be compiled the way the shipped file is.
 
