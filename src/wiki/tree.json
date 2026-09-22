@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-09-20",
+  "fetched": "2026-09-22",
   "root": "X4 Foundations Wiki",
   "branch": "Modding Support",
   "pages": [
@@ -8,6 +8,29 @@
         "Modding Support"
       ],
       "title": "Modding Support"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Anatomy of an extension"
+      ],
+      "title": "Anatomy of an extension"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Anatomy of an extension",
+        "Catalogs"
+      ],
+      "title": "Catalogs"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Anatomy of an extension",
+        "XML diff patching"
+      ],
+      "title": "XML diff patching"
     },
     {
       "segs": [
