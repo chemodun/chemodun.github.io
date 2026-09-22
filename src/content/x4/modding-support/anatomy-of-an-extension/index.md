@@ -34,7 +34,9 @@ X4 Foundations/
 
 Three facts follow from that layout, and most of the rest of this page is a consequence of them.
 
-**The folder name is the extension's id.** It is how dependencies, savegames and other extensions refer to it. Rename the folder and the game treats it as a different extension.
+**The folder name and the extension's id are two different names, used for two different things.** The **folder name is what every path uses**: a file in this extension is addressed as `extensions/example_starter/...`, and that is the form taken by an `index/macros.xml` entry, a `subst_` catalog path and a file-not-found message alike. The **`id` attribute in `content.xml` is what dependencies use**: one extension requires another by id, never by folder name.
+
+The two may differ, and on anything published through the Steam Workshop they do. The Workshop rewrites `id` to `ws_<item id>` and leaves the folder alone, which is why SirNukes Mod Support APIs sits in a folder called `sn_mod_support_apis` while its `content.xml` reads `id="ws_2042901274"` - and why everything depending on it does so under that number. Where the id is still the author's to choose, matching it to the folder is worth doing, since two names for one thing is a reliable source of confusion; but a published extension cannot count on them matching, and nothing should be written that assumes they do.
 
 **The contents are laid out as if the folder were the game root.** An extension's `libraries/wares.xml` lines up with the game's own `libraries/wares.xml`. There is no manifest listing files, and no registration step: position in the tree is what connects a file to the thing it affects.
 
@@ -65,7 +67,7 @@ extensions/example_starter/
 </content>
 ```
 
-Start the game and open the Extensions menu from the main menu. `Example Starter` is listed there, with its version and description, and it can be enabled and disabled. It does nothing at all yet, which is the point: the entry in that list is confirmation that the folder name, the file name and the XML are all right, before any content exists to be blamed for a problem.
+Start the game and open the Extensions menu from the main menu. `Example Starter` is listed there, with its version and description, and it can be enabled and disabled. It does nothing at all yet, which is the point: the entry in that list is confirmation that the folder's placement, the file name and the XML are all right, before any content exists to be blamed for a problem.
 
 If it is not listed, the cause is almost always one of three things: the folder is not directly under `extensions`, the file is not named `content.xml` exactly, or the XML is malformed. Enabling the game's debug log will name the last of those.
 
@@ -79,7 +81,7 @@ If it is not listed, the cause is almost always one of three things: the folder 
 
 | Attribute | Meaning |
 |---|---|
-| `id` | The extension's id. Matches the folder name. |
+| `id` | The name other extensions use to declare a dependency on this one. Not the same thing as the folder name, which is what paths use, and the Steam Workshop overwrites it with `ws_<item id>` on publication. |
 | `name` | The display name in the Extensions menu. |
 | `description` | The blurb shown below it. Plain text, in English. |
 | `author` | Shown beside the name. |
@@ -117,6 +119,8 @@ A dependency does two jobs: it refuses to load when a requirement is missing, an
 **With no `id`, it is the minimum game version**, in the same three-digit form as `version`. The example above requires 7.60 or newer.
 
 **With an `id`, it names another extension.** The game loads dependencies before the extension that declares them, so declaring one is how an extension guarantees it sees another's files already in place.
+
+**That id is the target's `content.xml` id, not the folder it installs into**, and for anything published on the Steam Workshop those are different. A dependency on SirNukes Mod Support APIs reads `id="ws_2042901274"` even though the folder is `sn_mod_support_apis`. Open the target's own `content.xml` and copy what is there; a dependency naming the folder does not resolve.
 
 `optional="true"` keeps the ordering guarantee while dropping the requirement. Egosoft documents this in a comment in `ego_dlc_boron/content.xml`, beside the dependencies that expansion declares on the others:
 
@@ -391,7 +395,7 @@ An extension's files are packed into pairs: a `.cat` holding the index and a `.d
 
 **`ext_01.cat` / `ext_01.dat` hold paths relative to the extension folder.** This is where everything discussed on this page belongs. An `ext_` catalog is the extension folder in packed form and nothing more: an entry in it merges or patches exactly as the same file would loose, by the rules in [How a file joins the game](#how-a-file-joins-the-game).
 
-**`subst_01.cat` / `subst_01.dat` hold paths relative to the game root**, and stand in for the file that is already there. Nothing is merged and nothing is patched, so a substitute has to be a complete, valid file of its kind. This is the form for the cases in [When a whole file really does replace](#when-a-whole-file-really-does-replace), and it has no loose equivalent, because a file in an extension folder is addressed as `extensions/<id>/...` and never as a game root path.
+**`subst_01.cat` / `subst_01.dat` hold paths relative to the game root**, and stand in for the file that is already there. Nothing is merged and nothing is patched, so a substitute has to be a complete, valid file of its kind. This is the form for the cases in [When a whole file really does replace](#when-a-whole-file-really-does-replace), and it has no loose equivalent, because a file in an extension folder is addressed as `extensions/<folder>/...` and never as a game root path.
 
 `content.xml` always stays loose beside the catalogs, never inside them. The game has to read it before it knows anything else about the extension.
 
