@@ -1,5 +1,5 @@
 {
-  "through": "f5c4e500af0cd81b67d74c0c3f667cf3269fa1f4",
+  "through": "8f3c0606ba001693b9fa1844e805b60f39c1fb6e",
   "days": [
     {
       "date": "2026-09-22",
@@ -10,6 +10,38 @@
           "kind": "",
           "lines": [
             "fixed source for 27 functions"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-an-extension/",
+          "title": "Anatomy of an extension",
+          "kind": "",
+          "lines": [
+            "small updates in Anatomy of an extension related to the extension id"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-an-extension/catalogs/",
+          "title": "Catalogs",
+          "kind": "",
+          "lines": [
+            "small updates in articles related to the catalogs and catalog tool"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/multi-version-extensions/",
+          "title": "Multi-version extensions",
+          "kind": "",
+          "lines": [
+            "small updates in articles related to the catalogs and catalog tool"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/x-catalog-tool/",
+          "title": "X Catalog Tool",
+          "kind": "",
+          "lines": [
+            "small updates in articles related to the catalogs and catalog tool"
           ]
         }
       ]
