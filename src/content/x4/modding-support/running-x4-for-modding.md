@@ -42,17 +42,32 @@ Unknown options are ignored in silence. There is no usage text, no error, and no
 
 ### Steam
 
-Library, right-click **X4: Foundations**, **Properties**, **General**, and the **Launch Options** box. Everything typed there is appended to the command line:
+Library, right-click **X4: Foundations**, **Properties**, **General**, and the **Launch Options** box at the bottom. Everything typed there is appended to the command line.
 
-```none
--skipintro -nosoundthrottle
-```
+<figure>
+  <img src="/running-x4-for-modding/steam-launch-options.png" alt="The Steam properties window for X4: Foundations, General page, with the Launch Options box at the bottom holding -skipintro -nosoundthrottle">
+  <figcaption>Steam, Properties, General. The box is the last thing on the page, under Steam Cloud.</figcaption>
+</figure>
 
-The box is per account and syncs with the Steam profile, so it follows to another machine. It is also the only route that survives a game update without being re-done.
+The box is per account and travels with the Steam profile, so it follows to another machine and survives a reinstall of the game. Of all the routes on this page it is the one that needs setting up once.
 
 ### GOG Galaxy
 
-The per-game arguments field is behind the settings button beside **Play**, under **Manage installation**. A GOG install also has a plain `X4.exe` in its folder that runs without Galaxy at all, which is the easier target for a shortcut or a script.
+Galaxy does not have a plain arguments box. It has a **list of executables**, and the arguments belong to a row in that list: the game's page, the settings button beside **Play**, **Manage installation**, **Configure**, and then the **Features** tab.
+
+<figure>
+  <img src="/running-x4-for-modding/gog-launch-parameters.png" alt="The GOG Galaxy Configuring X4: Foundations dialog, Features tab, with the Launch parameters checkbox Custom executables / arguments ticked, and below it File 1 with an empty Arguments field and a My label field">
+  <figcaption>Nothing is editable until **Launch parameters: Custom executables / arguments** is ticked. Each File row then gets its own Arguments and label.</figcaption>
+</figure>
+
+The rows that come with the game are its stock entries - the game itself, the manual - and they are the wrong place to type. **Duplicate** one, put the arguments on the copy, give it a label, and mark the copy **Default executable** so the **Play** button uses it.
+
+<figure>
+  <img src="/running-x4-for-modding/gog-arguments.png" alt="The same dialog scrolled down to File 3, whose Arguments field holds -skipintro -nosoundthrottle, labelled X4: Foundations and with the Default executable radio button selected">
+  <figcaption>A duplicated row carrying the arguments, labelled, and selected as the default. Only this one is reached by **Play**.</figcaption>
+</figure>
+
+A GOG install also has a plain `X4.exe` in its folder that runs without Galaxy at all, which is the easier target for a shortcut or a batch file.
 
 ### Any other launcher
 
@@ -60,13 +75,27 @@ Some have a per-game arguments field and some do not. Either way the install fol
 
 ### A shortcut
 
-Right-click the shortcut, **Properties**, and put the options after the quoted path in **Target**:
+Right-click the shortcut, **Properties**, **Shortcut**, and put the options after the quoted path in **Target**:
 
 ```none
 "C:\Program Files (x86)\GOG Galaxy\Games\X4 Foundations\X4.exe" -skipintro -debug scripts -logfile logs\x4.log
 ```
 
 **Start in** must be the game folder. X4 resolves its own data relative to the working directory, and a wrong one produces `Missing game files detected; possibly using incorrect working directory.`
+
+**A shortcut the store made is not a shortcut to the game.** The one GOG puts in the Start menu points at the launcher and names the game as a parameter:
+
+<figure>
+  <img src="/running-x4-for-modding/gog-shortcut-properties.png" alt="The properties of the Start menu shortcut GOG installs: Target location reads GOG Galaxy, the Target ends in Files (x86)\GOG Galaxy\Games\X4 Foundations, and Start in is C:\Program Files (x86)\GOG Galaxy">
+  <figcaption>**Target location: GOG Galaxy**, and **Start in** is the launcher's folder, not the game's. This shortcut runs `GalaxyClient.exe`.</figcaption>
+</figure>
+
+```none
+Target:   "C:\Program Files (x86)\GOG Galaxy\GalaxyClient.exe" /command=runGame /gameId=1588366064 /path="C:\Program Files (x86)\GOG Galaxy\Games\X4 Foundations"
+Start in: "C:\Program Files (x86)\GOG Galaxy"
+```
+
+Anything appended to that **Target** is an argument to `GalaxyClient.exe` and never reaches X4. Steam's Start menu entries have the same shape, as a `steam://rungameid/` link. Either make a shortcut of your own that points straight at `X4.exe`, or use the launcher's own arguments field above.
 
 ### Linux, Proton and the Steam Deck
 
