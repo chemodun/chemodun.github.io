@@ -151,7 +151,13 @@ Logfile started, time Wed Sep 23 17:20:29 2026
 
 The bracket holds the **filter** the line came from, padded to seven characters and not truncated, so `[Economy_Verbose]` is wider than the rest. Errors are not a filter but a flag on the line, and print as `[=ERROR=]`.
 
-The number is the **engine's own clock, and it does not start until the game loop does**. Everything logged while the game loads is stamped `0.00`, however long that takes: on a heavily modded 9.00 install the start menu was reached after 134 to 141 real seconds, at a clock reading of 9.97. Timestamps are useful for ordering events inside a session and for nothing else.
+The number is **game time in seconds, the same value a script reads as `player.age`**, and it does not start until the game loop does. Everything logged while the game loads is stamped `0.00`, however long that takes. Loading a save sets it back to `0.00` while the files are read, and then to the saved game's own time:
+
+```none
+[Init   ] 0.00 Loading saved game 'save_007', first pass
+[Init   ] 0.00 - Saved in 7.60 (562021), game time = 20d 06h 01m, gamestart 'x4ep1_gamestart_intro' started in 7.10 (538965)
+[Init   ] 1749666.70 Loading saved game 'save_007', second pass
+```
 
 ### `-debug <filter>`: choosing what goes in
 
