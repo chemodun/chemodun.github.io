@@ -1,6 +1,6 @@
 ---
 title: Running X4 for modding
-description: The game's command line - where the options go on each store, the two switches that produce a debug log, the filters that decide what goes into it, and the complete list of what the parser accepts.
+description: The game's command line - where the options go on each store, the two switches that produce a debug log, the filters that decide what goes into it, the complete list of what the parser accepts, and a section a mod author can send players to for a bug report.
 order: 7
 wiki: Running X4 for modding
 wikiRef: also
@@ -15,6 +15,8 @@ wikiRef: also
 That is one command-line switch, and the difference between guessing at a bug and reading it. A second switch decides how much goes in. Everything else on this page is either a way to pass those two, or a way to make the twenty launches that follow them less painful.
 
 The game's own documentation of this is a wiki page titled [Launch Options](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Manual%20and%20Guides/Launch%20Options/) which has been a work in progress since it was created: fourteen half-filled rows and seventeen that read `Example | Example`. This page is what the game actually accepts, read out of `X4.exe` and then run.
+
+**Sent here by a mod author for a log?** [The last section](#bug-report) is written for exactly that, and nothing before it is needed.
 
 <a id="toc"></a>
 
@@ -119,12 +121,20 @@ There is a `-nodefaultlog` switch in the parser, which reads like the opposite c
 
 ### `-logfile <file>`: where the file lands
 
-The argument is a **path relative to the personal folder** - `Documents\Egosoft\X4\<id>\`, the folder that already holds `config.xml` and `save\`. Both of these were measured:
+The argument is a **path relative to the personal folder**, the folder that already holds `config.xml` and `save\`. Where that folder is depends on how the game was started:
+
+| Install | Personal folder |
+| --- | --- |
+| Steam | `Documents\Egosoft\X4\<Steam account id>\` |
+| GOG, and any other install not run through Steam | `Documents\Egosoft\X4\` itself, with no id in the path |
+| any install started with [`-personalfolderid <id>`](#keeping-installs-apart--personalfolderid) | `Documents\Egosoft\X4\<id>\` |
+
+Both of these were measured, with that folder written as `<personal folder>`:
 
 | Argument | File written |
 | --- | --- |
-| `-logfile x4.log` | `Documents\Egosoft\X4\<id>\x4.log` |
-| `-logfile logs\x4.log` | `Documents\Egosoft\X4\<id>\logs\x4.log` |
+| `-logfile x4.log` | `<personal folder>\x4.log` |
+| `-logfile logs\x4.log` | `<personal folder>\logs\x4.log` |
 
 `logs\` is the better habit: it is where `-scriptlogfiles` writes too, and it keeps the profile folder readable. The file is **overwritten** on every launch, so a log worth keeping is one to name per session - which is what the timestamped names in the batch file [further down](#a-batch-file-that-does-all-of-it) are for.
 
@@ -197,13 +207,29 @@ A `_Verbose` name is a second, louder level of the filter beside it, and turning
 | `Scripts` | `<debug_text>` from the Mission Director and AI scripts, and script errors with their context |
 | `Scripts_Verbose` | the same, louder |
 | `Savegame` | the filter vanilla itself uses most for long-running AI complaints |
-| `Economy_Verbose` | the economy's own running commentary, and the noisiest thing on the list |
+| `Economy_Verbose` | vanilla's faction logic narrating its goals, and the noisiest thing on the list |
 | `FileIO` | every file the loader could not verify, open or find |
-| `XML` | the XML parser, and where `-enablexmlvalidation` reports |
+| `XML` | the XML parser |
 | `TextDB` | text page and text id lookups |
 | `God` | universe and station generation |
 
-For a mod being debugged, `-debug scripts` is the one that matters. `-debug all` is for a bug whose source is not known yet, and costs both disk and frame time.
+For a mod being debugged, `-debug scripts` is the one that matters.
+
+### What `all` adds in practice
+
+Most of the 64 names never produce a line in a released build. Three real play sessions started with `-debug all` - about eight hours on GOG 9.00, eleven on GOG 8.00 and a shorter one on Steam 9.00 - wrote seven prefixes between them, and four of those are there with `-debug scripts` as well:
+
+| Prefix | With `-debug scripts` too | Share of the 8-hour 9.00 log | What it held |
+| --- | --- | --- | --- |
+| `[Scripts]` | yes | 31% | `<debug_text>` from vanilla and every mod |
+| `[General]`, `[=ERROR=]`, `[Init   ]` | yes | 41% | the lines that are always written, Lua `DebugError` among them |
+| `[Economy_Verbose]` | no | 26% | vanilla's faction logic narrating its goals, as `FL:ECO` and `#FLS#` lines |
+| `[FileIO ]` | no | 1.5% | a signature failure for every unsigned file |
+| `[Savegame]` | no | under 0.1% | script lines filed under `savegame`, savegame `PATCH:` reports among them |
+
+The `[Savegame]` share swings with the save: the Steam session wrote more of those lines than `[Scripts]` ones.
+
+So in practice `-debug all` is `-debug scripts` plus three filters, and the price is size rather than anything exotic. The 9.00 session came to 36 MB, of which a `-debug scripts` launch would have written about 26, and the whole file zipped down to 2 MB. What it buys is every filter a mod can name: a `<debug_text>` filed under `economy_verbose`, `savegame` or `combat` is invisible under `-debug scripts`, and the person sending the log rarely knows which one a mod uses.
 
 [↑ Contents](#toc)
 
@@ -231,7 +257,7 @@ grep -a "MyMod" logs/x4.log
 
 > Output debug text to logfile in game\logs folder under My Documents\Egosoft. Text will only be logged to a file if the game has been started with parameter `-scriptlogfiles`!
 
-The file lands at `Documents\Egosoft\X4\<id>\logs\<directory>\<name>`, where both come from the action's attributes, and the extension must be `.txt`, `.csv`, `.log` or `.xml` or `.txt` is appended. Vanilla uses it for station generation, which is why a profile that has ever run with the switch has a `logs\god\` folder full of per-station files.
+The file lands at `<personal folder>\logs\<directory>\<name>`, where both come from the action's attributes, and the extension must be `.txt`, `.csv`, `.log` or `.xml` or `.txt` is appended. Vanilla uses it for station generation, which is why a profile that has ever run with the switch has a `logs\god\` folder full of per-station files.
 
 ```xml
 <debug_to_file name="'mymod.txt'" directory="'mymod'" text="$line" />
@@ -256,13 +282,28 @@ A UI script has no `-debug` gate to pass. `DebugError("text")` writes an error l
 
 That is the whole of the Lua side: there is no per-filter Lua logging, so a UI mod that wants quiet tracing has to gate it itself.
 
+### Asking a player for a log
+
+The [last section of this page](#bug-report) is written for players and stands on its own: where the launch options go, the one line to paste, where the file ends up and what to send with it. Its anchor is fixed, so a mod description or a reply to a bug report can link straight to it:
+
+```none
+https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/Running%20X4%20for%20modding/#bug-report
+https://chemodun.github.io/x4/modding-support/running-x4-for-modding/#bug-report
+```
+
+Nexus and the Steam Workshop both take BBCode in a description:
+
+```none
+[url=https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/Running%20X4%20for%20modding/#bug-report]How to send a log[/url]
+```
+
 [↑ Contents](#toc)
 
 ## A setup that works
 
 ### Keeping installs apart: `-personalfolderid <id>`
 
-X4 picks the folder under `Documents\Egosoft\X4\` by itself, and what it picks is not the game version: a Steam install writes to a folder named after the **Steam account id**, so two installs of different versions can collide or, worse, silently differ. `-personalfolderid 900` forces the name:
+Left to itself, X4 never picks the personal folder by game version: a Steam install writes to a folder named after the **Steam account id**, and any other install writes straight into `Documents\Egosoft\X4\` with no folder of its own. Two installs of different versions from the same store therefore share one profile, config, saves and logs alike. `-personalfolderid 900` gives an install a folder of its own:
 
 ```none
 X4.exe -personalfolderid 900 ...
@@ -318,21 +359,6 @@ Nothing in that name is a game convention: **X4 has no default log name at all**
 
 [↑ Contents](#toc)
 
-## Checking XML at load: `-enablexmlvalidation`
-
-The parser accepts `-enablexmlvalidation`, and the engine carries an `XML` filter for the parser's own messages. What it costs was measured on a heavily modded 9.00 install, against the same launch without it:
-
-| | Start menu reached after | Peak memory |
-| --- | --- | --- |
-| ordinary launch | 134 to 141 seconds | normal |
-| with `-enablexmlvalidation` | **337 seconds** | **about 20 GB**, and a `PANIC: SMem::Allocate() failed allocating 128 bytes` line in the log |
-
-The session survived that panic and carried on, but the shape of it is clear enough: validation holds every schema and every document it checks, and on an install with several dozen extensions that is more memory than the process can keep. It is a switch for one deliberate run over one mod under development, on an otherwise empty extensions folder, and not for a session that is going to be played.
-
-On the run above nothing was invalid, and **no `[XML]` line appeared at all** even with `-debug all`. So a clean run says nothing; what a failing one prints has not been measured here.
-
-[↑ Contents](#toc)
-
 ## Cutting the noise
 
 Two kinds of line dominate a modded log and neither is a problem:
@@ -361,7 +387,7 @@ All 80 names the 9.00 parser accepts. `<value>` marks an option that reads the n
 | `-scriptlogfiles` | **measured** - enable `<debug_to_file>` output from MD and AI scripts. Takes no argument. |
 | `-nodefaultlog` | Suppresses a default log. Nothing appears in the personal or game folder without `-logfile` in any case. |
 | `-godlog` | Logging from the God module, which generates the universe and its stations. |
-| `-enablexmlvalidation` | **measured** - validate XML while loading. Very slow. |
+| `-enablexmlvalidation` | **measured** - validate XML while loading. On a heavily modded install: start menu after 337 s instead of about 140, about 20 GB peak memory, and not one `[XML]` line on a run where nothing was invalid. |
 | `-disableassertions` | Do not stop on an internal assertion. |
 | `-notestassets` | Skip test assets. |
 | `-pauseonload` | 9.00 and later. Not present in 8.00. |
@@ -387,7 +413,7 @@ All 80 names the 9.00 parser accepts. `<value>` marks an option that reads the n
 
 | Option | What it does |
 | --- | --- |
-| `-personalfolderid <id>` | **measured** - name the folder under `Documents\Egosoft\X4\`. |
+| `-personalfolderid <id>` | **measured** - use `Documents\Egosoft\X4\<id>\` as the personal folder. Without it: the Steam account id on Steam, and no subfolder at all elsewhere. |
 | `-config <file>` | Read a config file other than `config.xml`. |
 | `-usedefaultconfig` | Ignore the stored config and start from defaults. |
 | `-dontsaveconfig` | **measured** - do not write `config.xml` on exit. |
@@ -476,8 +502,55 @@ All 80 names the 9.00 parser accepts. `<value>` marks an option that reads the n
 
 **`<debug_text>` defaults to the `scripts` filter**, so a mod whose messages are invisible is usually a game started without `-debug scripts`, not a script that failed to run. `filter="error"` is the way to make a message survive a user's default launch.
 
-**The personal folder is not named after the game version.** A Steam install writes to a folder named after the Steam account id, and a tool pointed at `Documents\Egosoft\X4\900\` may be reading another install's output entirely. `-personalfolderid` is the fix.
+**The personal folder is not named after the game version.** A Steam install writes to a folder named after the Steam account id and every other install into `Documents\Egosoft\X4\` itself, so a folder such as `Documents\Egosoft\X4\900\` only ever holds what a launch with `-personalfolderid 900` wrote, and two installs without the switch can share one folder. `-personalfolderid` is the fix.
 
 **A test launch rewrites `config.xml` on exit.** Anything set on the command line that has a config entry of the same name is still set the next time the game starts from the library, unless `-dontsaveconfig` was passed.
+
+[↑ Contents](#toc)
+
+<a id="bug-report"></a>
+
+## Sending a log to a mod author
+
+This section is for a player whose mod author asked for a log, and nothing above it is needed. The game writes no log unless it is told to, so the problem has to happen once more with the log switched on.
+
+### 1. Add one line to the launch options
+
+```none
+-logfile x4.log -debug all
+```
+
+Exactly as written, spaces included. Where it goes depends on the store:
+
+- **Steam**: Library, right-click **X4: Foundations**, **Properties**, **General**, and the **Launch Options** box at the bottom, [shown in a screenshot above](#steam). Anything already in the box stays, and the line goes after it.
+- **GOG Galaxy**: the arguments belong to a copy of the game's entry in its list of executables, [shown step by step above](#gog-galaxy).
+- **A shortcut or another launcher**: [a shortcut to `X4.exe` itself](#a-shortcut), with the line after the quoted path.
+
+### 2. Make the problem happen, then quit
+
+Start the game, do whatever brings the problem up, and quit the game. If it crashes instead, send the log anyway.
+
+### 3. Copy the log before the next start
+
+**Every launch overwrites the log**, so it has to be copied somewhere else before the game is started again. It is called `x4.log` and sits in the game's profile folder, beside the `save` folder. On Steam that folder is named with a number, the Steam account's id; on GOG and every other store there is no number in the path:
+
+```none
+Steam:            Documents\Egosoft\X4\<Steam account id>\x4.log
+GOG and others:   Documents\Egosoft\X4\x4.log
+```
+
+On Steam, with more than one numbered folder, the right one holds an `x4.log` with today's date. Where Documents has been moved into OneDrive or carries a translated name, Win+R and `shell:Personal` opens the real one. Under Proton on Linux, the same folders are inside the game's Proton prefix.
+
+### 4. Send it with what the log cannot say
+
+- **The list of mods, with their versions.** The game does not write it into the log.
+- **What was done** when the problem appeared, and what was expected instead.
+- **A savegame, only if the author asks for one.** Saves are in the `save` folder beside the log.
+
+The log is plain text and zips to a small fraction of its size: an eight-hour session came to 36 MB and zipped down to 2 MB. The game version is already in it, on a line like `[Init   ] 0.00 Entering startmenu in 9.00 (611726)`.
+
+### 5. Leave the line in, or take it out
+
+The log does not pile up: each launch replaces it, so it never holds more than one session. Leaving the line in means the next report is already written; removing it puts the game back the way it was.
 
 [↑ Contents](#toc)
