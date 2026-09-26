@@ -28,17 +28,19 @@ The game's own documentation of this is a wiki page titled [Launch Options](http
 
 The option names are the ones the parser in `X4.exe` compares an argument against, read from the executable itself: **80 of them in 9.00, 79 in 8.00**, and the single addition is `-pauseonload`. The debug filter names come from the table the engine looks a `-debug` argument up in: **64 in 9.00, 63 in 8.00**, the addition being `Materials`. Neither list is guessed at and neither is a community collection; they are what the two builds hold.
 
-What each option *does* is a separate question, and the executable answers it only in part. Where this page says an option was **measured**, it was passed to a real 9.00 install and its effect read out of the log or the file system. Everywhere else the description is read from the option's name and from the `config.xml` entry that shares it, which is as far as the binary takes it - useful, and not the same as proven.
+What each option *does* is a separate question. Where this page says an option was **measured**, it was passed to a real 9.00 install and its effect read out of the log or the file system. Everywhere else the description is read from the code in the 9.00 executable that handles the option: what the parser stores, and what reads it later. That settles what an option touches and when, which is not the same as having watched it happen. For about thirty options, mostly render, sound and interface toggles, the code that reads the value was found but not followed further, and their rows give no more than the name says. The same code was compared in the 8.00 and the Steam 9.00 executables, and the rows name the few places where they differ.
 
 [↑ Contents](#toc)
 
 ## Where the options go
 
-An option is a word starting with `-`, and one that takes a value is followed by that value as a **separate argument**, not joined with `=` or `:`:
+An option is a word starting with `-`, and one that takes a value is followed by that value as a **separate argument**, not joined with `=`:
 
 ```none
 X4.exe -skipintro -debug scripts -logfile logs\x4.log
 ```
+
+Five options are the exception and take their value joined with a colon, as one word: `-width:1920`, `-height:1080`, `-adapter:1`, `-gpu:1` and `-seed:42`. Written with a space, `-width 1920` is ignored. [Every option](#every-option) has the details.
 
 Unknown options are ignored in silence. There is no usage text, no error, and no exit code that says a switch was misspelled - a typo simply does nothing, which is worth remembering when an option appears to have no effect.
 
@@ -115,9 +117,9 @@ Paths inside a `-logfile` argument are the game's own, so they land under the Pr
 
 ### Nothing is written unless it is asked for
 
-Measured on 9.00: a session started with no `-logfile` leaves nothing behind. Not in the personal folder, not in `logs/`, not in the game folder. `-debug` on its own changes nothing either, because there is nowhere for the output to go.
+Measured on 9.00: a session started with no `-logfile` leaves nothing behind. Not in the personal folder, not in `logs/`, not in the game folder. `-debug` on its own changes nothing either, because there is nowhere for the output to go. The only other way to a log is a `<logfile>` key added to `config.xml` by hand, one of [the keys that act like switches](#configxml-keys-that-act-like-switches).
 
-There is a `-nodefaultlog` switch in the parser, which reads like the opposite claim. Whatever it suppresses, it is not a file that appears in either of those places, and this page does not claim to know what it is.
+There is a `-nodefaultlog` switch in the parser, which reads like the opposite claim. It turns off the copy of every log line that the game sends to an attached debugger, or to its standard error stream when none is attached. It has nothing to do with `-logfile`.
 
 ### `-logfile <file>`: where the file lands
 
@@ -319,13 +321,13 @@ Measured on 9.00: the whole profile moves, logs included. With one of these per 
 
 ### Not losing settings to a test run: `-dontsaveconfig`
 
-X4 rewrites `config.xml` when it exits, so a launch with `-windowed -width 800 -height 600` normally leaves the game windowed at 800x600 the next time it is started from the library. `-dontsaveconfig` stops the write.
+X4 saves `config.xml` the moment a setting changes: in the Settings menu, or with Alt+Enter, which switches between fullscreen and windowed and saves the new mode. Options on the command line never reach the file by themselves, so `-windowed -width:800 -height:600` leaves no trace, but an Alt+Enter during a test run does. `-dontsaveconfig` blocks every `config.xml` write for the session, including the one `-usedefaultconfig` makes at startup. `userdata.xml` and the other files in the personal folder still save.
 
-Measured on 9.00: repeated launches with `-dontsaveconfig -windowed -width 800 -height 600` left `config.xml` byte-for-byte and timestamp unchanged, while `userdata.xml` was rewritten as usual. It belongs in every test shortcut that touches display settings.
+Measured on 9.00: with `-dontsaveconfig`, `userdata.xml` was still rewritten as usual. It belongs in any test shortcut where settings may be changed in the game, and always next to `-usedefaultconfig`.
 
 ### Alt-tabbing: `-nocputhrottle` and `-nosoundthrottle`
 
-X4 throttles itself when its window loses focus, which is exactly what a modder's session does every time an editor comes to the front. These two stop it. They are also what makes a log grow at a usable rate while the game sits in the background.
+When its window loses focus, X4 sleeps 75 ms every frame, about 13 frames a second at most, and mutes its sound; minimizing the window mutes it too. That is exactly what a modder's session does every time an editor comes to the front. `-nocputhrottle` keeps the game running at full speed, which is also what makes a log grow at a usable rate while the game sits in the background; `-nosoundthrottle` keeps the sound on.
 
 ### Skipping what does not need watching
 
@@ -335,7 +337,13 @@ X4 throttles itself when its window loses focus, which is exactly what a modder'
 [Init   ] 9.97 Game initialisation time until start menu fade-in (because of skipped intro video): 141 seconds
 ```
 
-`-load <savegame>` names a save to load instead of stopping at the start menu, which turns a reload-and-retry cycle into one double click. It is read from the parser rather than measured here.
+Loading a save straight from the command line would turn a reload-and-retry cycle into one double click, but **`-load <savegame>` on its own does nothing**: it is a parameter for the module the game starts, and the start menu never looks at it. The module has to be a game start, named with `-module`:
+
+```none
+X4.exe -module x4ep1_gamestart_intro -load save_005
+```
+
+The save is named as its file is, without `.xml.gz`: `save_015`, `quicksave`, `autosave_01`. The game start is the one the save was started from, which the save names near its top (`<game ... start="x4ep1_gamestart_intro" ...>`) and the log repeats on every load (`gamestart 'x4ep1_gamestart_intro' started in ...`). Measured on 9.00: the line above goes straight into the save, and the log shows `Loading saved game 'save_005', first pass`.
 
 <a id="a-batch-file-that-does-all-of-it"></a>
 
@@ -382,7 +390,9 @@ The in-game **Debug Manager** is a separate thing entirely, reached with a diffe
 
 ## Every option
 
-All 80 names the 9.00 parser accepts. `<value>` marks an option that reads the next argument; **measured** marks one whose effect was confirmed on a running 9.00 install rather than read from the executable.
+All 80 names the 9.00 parser accepts. `<value>` marks an option that reads the next argument, `:<value>` one that takes its value joined to the name with a colon. **measured** marks an option whose effect was confirmed on a running 9.00 install; every other row is read from the code that handles it.
+
+An argument that contains a colon is split at it and goes down a separate path in the parser, which never consults the rest of the list. `-adapter`, `-width`, `-height`, `-gpu` and `-seed` exist only on that path, so **without the colon they do nothing**: `-width:800` sets the width, `-width 800` is ignored along with the `800`. Four more accept a colon as well as the plain form: `-verifycatalogsigs:<prefix>`, and `-usefallbacktext`, `-warnonfallbacktext` and `-highlightfallbacktext`, where `:1` or `:true` switches the option on and any other value switches it off. Every other option written with a colon is dropped in silence, so `-logfile:x4.log` writes no log.
 
 ### Logging and diagnostics
 
@@ -391,76 +401,76 @@ All 80 names the 9.00 parser accepts. `<value>` marks an option that reads the n
 | `-logfile <file>` | **measured** - write the log to `<file>`, relative to the personal folder. Without it, nothing is written. |
 | `-debug <filter>` | **measured** - enable one debug filter. Repeat per filter; `all` enables everything. |
 | `-scriptlogfiles` | **measured** - enable `<debug_to_file>` output from MD and AI scripts. Takes no argument. |
-| `-nodefaultlog` | Suppresses a default log. Nothing appears in the personal or game folder without `-logfile` in any case. |
-| `-godlog` | Logging from the God module, which generates the universe and its stations. |
+| `-nodefaultlog` | Stop copying log lines to an attached debugger (or to standard error without one). Does not affect `-logfile`. |
+| `-godlog` | Write `godlog.xml` into the personal folder when stations are generated: on a new game and on every save load, replacing the previous one. |
 | `-enablexmlvalidation` | **measured** - validate XML while loading. On a heavily modded install: start menu after 337 s instead of about 140, about 20 GB peak memory, and not one `[XML]` line on a run where nothing was invalid. |
-| `-disableassertions` | Do not stop on an internal assertion. |
-| `-notestassets` | Skip test assets. |
-| `-pauseonload` | 9.00 and later. Not present in 8.00. |
+| `-disableassertions` | Accepted and ignored: nothing in 9.00 reads it. |
+| `-notestassets` | Skip `assets\test\` and `assets\system\test\`. |
+| `-pauseonload` | 9.00 and later. Start the game paused once a save or a new game is running; the start menu is not paused. |
 
 ### What the game loads
 
 | Option | What it does |
 | --- | --- |
-| `-nomods` | Start with no extensions. |
-| `-nodlc` | Start with no DLC. |
-| `-enablealldlc` | Enable every DLC. |
-| `-noworkshopsync` | Do not sync Steam Workshop subscriptions at startup. |
-| `-disableventures` | Turn the Ventures online feature off. |
-| `-disableventureupdate` | Do not update the Ventures DLC. |
-| `-prefersinglefiles` | Prefer a loose file over the same path inside a catalog. |
-| `-verifycatalogsigs` | Verify catalog signatures. |
-| `-load <savegame>` | Load a savegame instead of stopping at the start menu. |
-| `-module <name>` | Start a client module other than `startmenu`. |
-| `-seed <value>` | Fix the universe generation seed. |
+| `-nomods` | Start with no extensions, for this run; the Extensions menu settings are untouched. |
+| `-nodlc` | Start with no DLC, for this run. Wins over `-enablealldlc`. |
+| `-enablealldlc` | Enable every DLC, for this run. |
+| `-noworkshopsync` | Steam only: do not sync Workshop subscriptions at startup. The GOG build never reads it. |
+| `-disableventures` | Skip the Ventures validation, which leaves the online features off. |
+| `-disableventureupdate` | Validate Ventures without updating. Shares a setting with `-disableventures`; the one given last wins. |
+| `-prefersinglefiles` | Prefer a loose file over the same path inside a catalog. Without it the catalog copy wins; with it the catalog copy is read only when the loose file is missing. |
+| `-verifycatalogsigs` or `-verifycatalogsigs:<prefix>` | Check the signatures of the files inside the catalogs, then quit instead of reaching the start menu. For the run it forces every DLC on, extensions off and `-prefersinglefiles` off. The log gets `Starting catalog signature verification` and `Catalog signature verification finished: <n> successful, <n> failed`; with a prefix, only files whose path starts with it are checked. |
+| `-module <name>` | Start the module `<name>` instead of `startmenu`. A game start id is a module: `-module x4ep1_gamestart_intro` starts that game start. An unknown name logs `The specified module "<name>" is not registered. Defaulting to startmenu.` |
+| `-load <savegame>` | A parameter for the module: a game start given by `-module` loads this save instead of starting a new game. Alone it does nothing. [Details](#skipping-what-does-not-need-watching). |
+| `-mpar <value>` | Another module parameter, stored beside `-load`'s. Nothing in 9.00 reads it. |
+| `-seed:<value>` | Fix the universe generation seed. A number is used as it is, any other text is turned into one. |
 | `-skipintro` | **measured** - skip the intro movie. |
 
 ### Profile, config and language
 
 | Option | What it does |
 | --- | --- |
-| `-personalfolderid <id>` | **measured** - use `Documents\Egosoft\X4\<id>\` as the personal folder. Without it: the Steam account id on Steam, and no subfolder at all elsewhere. |
+| `-personalfolderid <id>` | **measured** - use `Documents\Egosoft\X4\<id>\` as the personal folder. The id is a number. Without it: the Steam account id on Steam, and no subfolder at all elsewhere. |
 | `-config <file>` | Read a config file other than `config.xml`. |
-| `-usedefaultconfig` | Ignore the stored config and start from defaults. |
-| `-dontsaveconfig` | **measured** - do not write `config.xml` on exit. |
-| `-clearstats` | Clear statistics. |
-| `-clearstatsandachievements` | Clear statistics and achievements. |
-| `-language <id>` | Force the text language. |
-| `-voicelanguage <id>` | Force the voice language. |
-| `-usefallbacktext` | Fall back to the default language where a text id is missing. |
-| `-warnonfallbacktext` | Report where that fallback happens. |
-| `-highlightfallbacktext` | Mark fallen-back text where it is shown. |
+| `-usedefaultconfig` | Load the defaults shipped with the game (`libraries/config.xml`) and save them over your `config.xml` at startup, unless `-dontsaveconfig` is also given. |
+| `-dontsaveconfig` | Do not write `config.xml` during this session: settings changes, Alt+Enter and `-usedefaultconfig` are not saved. |
+| `-clearstats` | Steam: reset the Steam statistics. GOG: does nothing on its own. |
+| `-clearstatsandachievements` | Reset statistics and achievements, on either store. |
+| `-language <id>` | Force the text language, by number: `44` is English. Without it the game reads `lang.dat`. |
+| `-voicelanguage <id>` | Force the voice language, by the same numbers. Without it the voices follow the text language. |
+| `-usefallbacktext`, `-usefallbacktext:<value>` | Fall back to the default language where a text id is missing. `:1` or `:true` on, any other value off. |
+| `-warnonfallbacktext`, `-warnonfallbacktext:<value>` | Report where that fallback happens. Same values. |
+| `-highlightfallbacktext`, `-highlightfallbacktext:<value>` | Mark fallen-back text where it is shown. Same values. |
 | `-nocompress` | Do not compress saves. |
 | `-saveindentation` | Write savegame XML indented. |
 | `-nosaveindentation` | Do not. |
-| `-nosavemultithreading` | Save on one thread. |
+| `-nosavemultithreading` | Load and save on one thread. |
 
 ### Window, GPU and performance
 
 | Option | What it does |
 | --- | --- |
-| `-windowed` | **measured** - run in a window. |
+| `-windowed` | **measured** - run in a window. The one of this and `-borderless` given last wins. |
 | `-borderless` | Borderless window. |
-| `-width <n>` | **measured** - window width. |
-| `-height <n>` | **measured** - window height. |
-| `-adapter <n>` | Pick the display adapter. |
-| `-gpu <n>` | Pick the GPU. |
+| `-width:<n>` | Window width. Ignored without the colon. |
+| `-height:<n>` | Window height. Ignored without the colon. |
+| `-adapter:<n>` | Pick the display adapter. |
+| `-gpu:<n>` | Pick the GPU: `1` is the first, `0` lets the game choose. |
 | `-skipgpucheck` | Do not check the GPU against the supported list. |
-| `-gpumemorybudget <n>` | Cap GPU memory use. |
-| `-mpar <value>` | Pixel aspect ratio. |
-| `-exposure <value>` | Exposure. |
+| `-gpumemorybudget <n>` | Cap GPU memory use, in MiB. |
+| `-exposure <value>` | Scene exposure, handed to the renderer every frame. Default 6.5. |
 | `-noantialiasing` | Anti-aliasing off. |
 | `-noglow` | Glow off. |
 | `-noshadows` | Shadows off. |
 | `-nossao` | Screen-space ambient occlusion off. |
 | `-disableshadercache` | Do not use the shader cache. |
-| `-disableui` | Do not render the interface. |
+| `-disableui` | The interface is never set up: the step that initializes it and loads the menus is skipped, so no menu appears, the start menu included. |
 | `-disablecockpit` | Do not render the cockpit. |
 | `-disableplayershipgeometry` | Do not render the player ship's geometry. |
-| `-disableallplayershiprendering` | Do not render the player ship at all. |
-| `-nocputhrottle` | **in use** - keep running at full speed when the window is not focused. |
-| `-nosoundthrottle` | **in use** - the same for sound. |
-| `-forcehmd` | Force a head-mounted display. |
+| `-disableallplayershiprendering` | Both of the two above. |
+| `-nocputhrottle` | **in use** - while the window is inactive the game sleeps 75 ms every frame; this switch turns that off. |
+| `-nosoundthrottle` | **in use** - keep the sound on when the window loses focus or is minimized. |
+| `-forcehmd <mode>` | Force a head-tracking mode: `NONE`, `DUMMYVR`, `DUMMY_NOVR`, `TRACKIR`, `FREETRACK`, `OPENTRACK`, `TOBII` or `DISABLE`, with or without a `HEADTRACK_` prefix. 8.00 also accepts `OPENVR` and `OCULUS`. An unknown mode changes nothing. |
 | `-showfps` | Show the frame counter. |
 | `-showvisitornames` | Show visitor names. |
 | `-confinemouse` | Keep the mouse inside the window. |
@@ -475,14 +485,14 @@ All 80 names the 9.00 parser accepts. `<value>` marks an option that reads the n
 | `-disableuisounds` | Interface sounds off. |
 | `-disablevoicesounds` | Voices off. |
 | `-disableambientsounds` | Ambience off. |
-| `-soundsystem <name>` | Pick the sound system. |
-| `-volumetotal <value>` | Master volume. |
-| `-volumemusic <value>` | Music volume. |
-| `-volumevoice <value>` | Voice volume. |
-| `-volumeambient <value>` | Ambient volume. |
-| `-volumeeffects <value>` | Effects volume. |
-| `-volumeui <value>` | Interface volume. |
-| `-rumbleintensity <value>` | Controller rumble. |
+| `-soundsystem <name>` | Takes a value and ignores it: nothing in 9.00 reads it. |
+| `-volumetotal <value>` | Master volume, `0` to `1`. Overwritten by `config.xml`, see below. |
+| `-volumemusic <value>` | Music volume. The same. |
+| `-volumevoice <value>` | Voice volume. The same. |
+| `-volumeambient <value>` | Ambient volume. The same. |
+| `-volumeeffects <value>` | Effects volume. The same. |
+| `-volumeui <value>` | Interface volume. The same. |
+| `-rumbleintensity <value>` | Controller rumble, `0` to `1`. The same. |
 
 ### Capture and the start menu
 
@@ -494,11 +504,40 @@ All 80 names the 9.00 parser accepts. `<value>` marks an option that reads the n
 | `-startmenubackgroundextension <id>` | The extension the background comes from. |
 | `-startmenubackgroundpersonal` | Use the personal background. Takes no argument. |
 
+### When `config.xml` wins
+
+The game reads the command line, then `config.xml`, then parts of the command line again. For some options the key read in the middle overwrites what the switch set, and the game writes those keys into every `config.xml` it saves, so the switch only acts on a profile whose config lacks the key:
+
+- all six `-volume` options, and `-rumbleintensity`
+- `-confinemouse`
+- `-noantialiasing`: the `antialiasing` key writes the same setting
+
+`-nocompress`, `-saveindentation` and `-nosaveindentation` can be overwritten the same way, by `compresssaves` and `saveindentation` keys, and `-seed:` by a `seed` key. The game writes none of those, so in practice these switches hold.
+
+The other way round, `-adapter`, `-width` and `-height` win: `config.xml` is only consulted for them when the command line left them unset. `-windowed`, `-borderless`, `-gpu`, `-noglow`, `-noshadows`, `-nossao` and `-skipgpucheck` are read in the second pass, after `config.xml`, and so always win. `-showfps`, `-showvisitornames` and `-skipintro` hold too: `config.xml` can switch them on, never off.
+
+### `config.xml` keys that act like switches
+
+A few keys in `config.xml` do what a switch does, and a log can show their effect with no switch on the command line. Each is an element of the same name under `<root>`, and none is written by the game itself:
+
+- `<logfile>` - a log file, used only when the command line names none
+- `<debug>`, `<godlog>`, `<scriptlogfiles>`
+- `<skipintro>`, `<pauseonload>`, `<notestassets>`
+- `<startmenubackground>`, `<startmenubackgroundextension>`, `<startmenubackgroundpersonal>`
+- `<module>`, `<load>`, `<mpar>`, each used only when the command line did not set it
+- `<seed>`, used even when the command line set one
+
+Read from the executable, not tried.
+
 [↑ Contents](#toc)
 
 ## Traps
 
 **A misspelled option is silent.** Nothing is printed, nothing fails, and the switch simply does not apply. The same is true of a filter name: `-debug scripts,fileio` enables neither and says nothing about it.
+
+**`-width 1920` is ignored.** `-width`, `-height`, `-adapter`, `-gpu` and `-seed` only work with the value joined by a colon, `-width:1920`, and the colon breaks almost every other option: `-logfile:x4.log` writes no log.
+
+**`-load` alone does nothing.** It needs a game start named with `-module` beside it.
 
 **`-debug` without `-logfile` does nothing.** The filters are enabled and their output goes nowhere.
 
@@ -510,7 +549,7 @@ All 80 names the 9.00 parser accepts. `<value>` marks an option that reads the n
 
 **The personal folder is not named after the game version.** A Steam install writes to a folder named after the Steam account id and every other install into `Documents\Egosoft\X4\` itself, so a folder such as `Documents\Egosoft\X4\900\` only ever holds what a launch with `-personalfolderid 900` wrote, and two installs without the switch can share one folder. `-personalfolderid` is the fix.
 
-**A test launch rewrites `config.xml` on exit.** Anything set on the command line that has a config entry of the same name is still set the next time the game starts from the library, unless `-dontsaveconfig` was passed.
+**A setting changed during a test run is saved at once.** Command-line options never reach `config.xml`, but a change in the Settings menu or an Alt+Enter is written the moment it happens and is still there the next time the game starts from the library, unless `-dontsaveconfig` was passed.
 
 [↑ Contents](#toc)
 
