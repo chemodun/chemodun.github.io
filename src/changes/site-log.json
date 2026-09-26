@@ -1,6 +1,19 @@
 {
-  "through": "39219761fa2093b594f2cb21dd48c0c83bfa5505",
+  "through": "e2aff5c3744fe8c2f7985789773882a911163eb4",
   "days": [
+    {
+      "date": "2026-09-27",
+      "pages": [
+        {
+          "path": "/x4/modding-support/running-x4-for-modding/",
+          "title": "Running X4 for modding",
+          "kind": "",
+          "lines": [
+            "fix/enhance multiple options info after additional investigation"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-09-24",
       "pages": [
