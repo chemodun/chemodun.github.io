@@ -246,7 +246,7 @@ So in practice `-debug all` is `-debug scripts` plus three filters, and the pric
 `<debug_text>` writes one line, and its `filter` attribute picks which filter that line belongs to. The schema allows eight values - `error`, `general`, `scripts`, `scripts_verbose`, `economy_verbose`, `combat`, `savegame`, `none` - and **the default is `scripts`**, so a `<debug_text>` with no `filter` needs the game started with `-debug scripts` before it is visible.
 
 ```xml
-<debug_text text="'MyMod: station ' + $station.debugname + ' has ' + $count + ' modules'" filter="scripts" />
+<debug_text text="'MyMod: station %s has %s modules'.[$station.debugname, $count]" filter="scripts" />
 ```
 
 `filter="error"` is the exception, and the reason a mod's important messages usually carry it: an error line is written whatever `-debug` says, so a user who sends back a log started with `-logfile` alone still sends back the mod's errors.
