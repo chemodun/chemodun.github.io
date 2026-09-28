@@ -10,13 +10,13 @@ wikiRef: also
 
 # Running X4 for modding
 
-**X4 writes no log file.** Not a short one, not an empty one: started the way a player starts it, the game produces nothing to read afterwards. Every error a mod causes, every line a script prints, every complaint the engine has about a malformed file is composed, formatted and then thrown away, because no output file was ever opened.
+**X4 does not write a log file by default.** Started the way a player starts it, the game leaves nothing to read afterwards: errors caused by mods, lines printed by scripts and engine warnings about malformed files are all discarded, because no output file is open.
 
-That is one command-line switch, and the difference between guessing at a bug and reading it. A second switch decides how much goes in. Everything else on this page is either a way to pass those two, or a way to make the twenty launches that follow them less painful.
+One command-line switch turns the log on, and it is the difference between guessing at a bug and reading about it. A second switch decides how much goes in. The rest of this page covers how to pass those two, and how to make the repeated launches of a test session quicker.
 
-The game's own documentation of this is a wiki page titled [Launch Options](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Manual%20and%20Guides/Launch%20Options/) which has been a work in progress since it was created: fourteen half-filled rows and seventeen that read `Example | Example`. This page is what the game actually accepts, read out of `X4.exe` and then run.
+The wiki also has a [Launch Options](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Manual%20and%20Guides/Launch%20Options/) page, which is still a work in progress. This page lists the options the game accepts, read from `X4.exe` and, where marked, tested on a running game.
 
-**Sent here by a mod author for a log?** [The last section](#bug-report) is written for exactly that, and nothing before it is needed.
+**Asked by a mod author for a log?** [The last section](#bug-report) covers exactly that and can be read on its own.
 
 <a id="toc"></a>
 
@@ -26,7 +26,7 @@ The game's own documentation of this is a wiki page titled [Launch Options](http
 
 ## How this page was checked
 
-The option names are the ones the parser in `X4.exe` compares an argument against, read from the executable itself: **80 of them in 9.00, 79 in 8.00**, and the single addition is `-pauseonload`. The debug filter names come from the table the engine looks a `-debug` argument up in: **64 in 9.00, 63 in 8.00**, the addition being `Materials`. Neither list is guessed at and neither is a community collection; they are what the two builds hold.
+The option names are the ones the parser in `X4.exe` compares an argument against, read from the executable itself: **80 of them in 9.00, 79 in 8.00**, and the single addition is `-pauseonload`. The debug filter names come from the table the engine looks a `-debug` argument up in: **64 in 9.00, 63 in 8.00**, the addition being `Materials`. Both lists are taken from the builds themselves.
 
 What each option *does* is a separate question. Where this page says an option was **measured**, it was passed to a real 9.00 install and its effect read out of the log or the file system. Everywhere else the description is read from the code in the 9.00 executable that handles the option: what the parser stores, and what reads it later. That settles what an option touches and when, which is not the same as having watched it happen. For about thirty options, mostly render, sound and interface toggles, the code that reads the value was found but not followed further, and their rows give no more than the name says. The same code was compared in the 8.00 and the Steam 9.00 executables, and the rows name the few places where they differ.
 
@@ -42,7 +42,7 @@ X4.exe -skipintro -debug scripts -logfile logs\x4.log
 
 Five options are the exception and take their value joined with a colon, as one word: `-width:1920`, `-height:1080`, `-adapter:1`, `-gpu:1` and `-seed:42`. Written with a space, `-width 1920` is ignored. [Every option](#every-option) has the details.
 
-Unknown options are ignored in silence. There is no usage text, no error, and no exit code that says a switch was misspelled - a typo simply does nothing, which is worth remembering when an option appears to have no effect.
+Unknown options are ignored silently: there is no usage text, no error message and no exit code for a misspelled switch. When an option appears to have no effect, a typo is the first thing to check.
 
 ### Steam
 
@@ -53,7 +53,7 @@ Library, right-click **X4: Foundations**, **Properties**, **General**, and the *
   <figcaption>Steam, Properties, General. The box is the last thing on the page, under Steam Cloud.</figcaption>
 </figure>
 
-The box is per account and travels with the Steam profile, so it follows to another machine and survives a reinstall of the game. Of all the routes on this page it is the one that needs setting up once.
+The box is per account and travels with the Steam profile, so it follows to another machine and survives a reinstall of the game. It only needs to be set up once.
 
 ### GOG Galaxy
 
@@ -64,7 +64,7 @@ Galaxy does not have a plain arguments box. It has a **list of executables**, an
   <figcaption>Nothing is editable until **Launch parameters: Custom executables / arguments** is ticked. Each File row then gets its own Arguments and label.</figcaption>
 </figure>
 
-The rows that come with the game are its stock entries - the game itself, the manual - and they are the wrong place to type. **Duplicate** one, put the arguments on the copy, give it a label, and mark the copy **Default executable** so the **Play** button uses it.
+The rows that come with the game are its stock entries - the game itself, the manual - and are best left as they are. Instead, **Duplicate** one, put the arguments on the copy, give it a label, and mark the copy **Default executable** so the **Play** button uses it.
 
 <figure>
   <img src="/running-x4-for-modding/gog-arguments.png" alt="The same dialog scrolled down to File 3, whose Arguments field holds -skipintro -nosoundthrottle, labelled X4: Foundations and with the Default executable radio button selected">
@@ -87,7 +87,7 @@ Right-click the shortcut, **Properties**, **Shortcut**, and put the options afte
 
 **Start in** must be the game folder. X4 resolves its own data relative to the working directory, and a wrong one produces `Missing game files detected; possibly using incorrect working directory.`
 
-**A shortcut the store made is not a shortcut to the game.** The one GOG puts in the Start menu points at the launcher and names the game as a parameter:
+**A shortcut created by the store starts the launcher, not the game.** The one GOG puts in the Start menu runs GOG Galaxy and passes the game as a parameter:
 
 <figure>
   <img src="/running-x4-for-modding/gog-shortcut-properties.png" alt="The properties of the Start menu shortcut GOG installs: Target location reads GOG Galaxy, the Target ends in Files (x86)\GOG Galaxy\Games\X4 Foundations, and Start in is C:\Program Files (x86)\GOG Galaxy">
@@ -172,12 +172,12 @@ One filter per switch, and **the switch repeats**:
 Measured on 9.00, all three of these:
 
 - **Repeating accumulates.** `-debug general -debug fileio` produced both `[General]` and `[FileIO ]` lines.
-- **A comma-separated list does not work.** `-debug scripts,fileio` produced neither `[Scripts]` nor `[FileIO ]` - the whole word failed to match any filter and was dropped without a complaint.
+- **A comma-separated list does not work.** `-debug scripts,fileio` produced neither `[Scripts]` nor `[FileIO ]` - the whole word failed to match any filter and was dropped without a warning.
 - **`all` works**, although it is not one of the 64 names in the table. `-debug all` and `-debug general -debug fileio` produced the same set of prefixes on the same start-menu run.
 
 Matching is case-insensitive: `-debug fileio` enables the filter the table spells `FileIO`.
 
-### What is logged whatever you do
+### What is always logged
 
 A run with no working filter at all still produced `[General]`, `[=ERROR=]` and `[Init   ]` lines. Those three need nothing turned on, which is why a log is worth having even without `-debug`: **an error from a mod is in it either way**.
 
@@ -237,7 +237,7 @@ Most of the 64 names never produce a line in a released build. Three real play s
 
 The `[Savegame]` share swings with the save: the Steam session wrote more of those lines than `[Scripts]` ones.
 
-So in practice `-debug all` is `-debug scripts` plus three filters, and the price is size rather than anything exotic. The 9.00 session came to 36 MB, of which a `-debug scripts` launch would have written about 26, and the whole file zipped down to 2 MB. What it buys is every filter a mod can name: a `<debug_text>` filed under `economy_verbose`, `savegame` or `combat` is invisible under `-debug scripts`, and the person sending the log rarely knows which one a mod uses.
+So in practice `-debug all` is `-debug scripts` plus three filters, and the main cost is file size. The 9.00 session came to 36 MB, of which a `-debug scripts` launch would have written about 26, and the whole file zipped down to 2 MB. What it buys is every filter a mod can name: a `<debug_text>` filed under `economy_verbose`, `savegame` or `combat` is invisible under `-debug scripts`, and the person sending the log rarely knows which one a mod uses.
 
 [↑ Contents](#toc)
 
@@ -261,7 +261,7 @@ grep -a "MyMod" logs/x4.log
 
 ### One file per script: `-scriptlogfiles`
 
-`<debug_to_file>` writes to a file of its own instead of the log, and **it is silent unless the game is started with `-scriptlogfiles`**. That is the game's own schema talking, in `libraries/common.xsd`:
+`<debug_to_file>` writes to a file of its own instead of the log, and **it is silent unless the game is started with `-scriptlogfiles`**. The game's own schema, `libraries/common.xsd`, says so:
 
 > Output debug text to logfile in game\logs folder under My Documents\Egosoft. Text will only be logged to a file if the game has been started with parameter `-scriptlogfiles`!
 
@@ -271,14 +271,14 @@ The file lands at `<personal folder>\logs\<directory>\<name>`, where both come f
 <debug_to_file name="'mymod.txt'" directory="'mymod'" text="$line" />
 ```
 
-**`-scriptlogfiles` is a flag and takes no argument.** This is worth stating plainly because the batch file that has circulated in the community since 2018 passes it one:
+**`-scriptlogfiles` is a flag and takes no argument.** A community batch file shared since 2018 passes it a file name, and that line is often copied:
 
 ```none
-rem what the old template does - the file name is a stray word the game ignores
+rem from the 2018 template: the game ignores the word after -scriptlogfiles
 start "" "%X4_EXE_PATH%" -debug all -logfile logs\%LOG_FILE_NAME% -scriptlogfiles %SCRIPT_LOG_FILE_NAME%
 ```
 
-Measured on 9.00: `-scriptlogfiles -logfile logs\probe.log` wrote `probe.log`, so the switch did not swallow the argument that followed it. The stray word is harmless, and it has misled a lot of people into thinking `-scriptlogfiles` names a file.
+Measured on 9.00: `-scriptlogfiles -logfile logs\probe.log` wrote `probe.log`, so the switch does not consume the argument after it. The extra word is harmless, but it does not name a file: each `<debug_to_file>` action names its own.
 
 ### Lua
 
@@ -311,7 +311,7 @@ Nexus and the Steam Workshop both take BBCode in a description:
 
 ### Keeping installs apart: `-personalfolderid <id>`
 
-Left to itself, X4 never picks the personal folder by game version: a Steam install writes to a folder named after the **Steam account id**, and any other install writes straight into `Documents\Egosoft\X4\` with no folder of its own. Two installs of different versions from the same store therefore share one profile, config, saves and logs alike. `-personalfolderid 900` gives an install a folder of its own:
+By default, X4 does not pick the personal folder by game version: a Steam install writes to a folder named after the **Steam account id**, and any other install writes straight into `Documents\Egosoft\X4\` with no folder of its own. Two installs of different versions from the same store therefore share one profile, config, saves and logs alike. `-personalfolderid 900` gives an install a folder of its own:
 
 ```none
 X4.exe -personalfolderid 900 ...
@@ -349,7 +349,7 @@ The save is named as its file is, without `.xml.gz`: `save_015`, `quicksave`, `a
 
 ### A batch file that does all of it
 
-A log that is overwritten on every launch is a log that is lost the moment the bug is reproduced twice. Naming it after the clock fixes that, and a batch file is the shortest way there:
+Since the log is overwritten on every launch, reproducing a bug a second time loses the first log. Naming the file after the current time avoids that, and a batch file is the simplest way to do it:
 
 ```bat
 @echo off
@@ -369,7 +369,7 @@ start "" "%X4_FOLDER%\X4.exe" ^
 
 The log then lands at `Documents\Egosoft\X4\900\logs\x4-2026-09-23__17-20-29.log`, one per launch, and the old ones stay. Swap `-debug scripts` for `-debug all` when the source of a problem is not known yet, and add a second copy of the file per install, changing only `X4_FOLDER` and `PROFILE`.
 
-Nothing in that name is a game convention: **X4 has no default log name at all**, so a timestamped file is a habit the launcher imposes rather than something to look for in a folder the game filled by itself.
+The name is not a game convention: **X4 has no default log name**, so the timestamp comes from the batch file, not from the game.
 
 [↑ Contents](#toc)
 
@@ -380,11 +380,11 @@ Two kinds of line dominate a modded log and neither is a problem:
 - **`Could not find signature file '...sig'`**, once, as an error, followed by nothing more on the subject. Every unsigned file - which is every file of every unpublished mod - would otherwise produce one, so the engine says it once and stops. Turning `-debug fileio` on is what asks for the rest, and on a modded install that is over a hundred lines before the game has done anything.
 - **`Failed to verify the file signature for file '...' (error: 14)`**, the `[FileIO ]` version of the same thing.
 
-The wiki carries a community guide, [Reducing the x4.log to more relevant informations](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/ScriptingMD/Community%20Guides/Reducing%20the%20x4.log%20to%20more%20relevant%20informations/), which filters a finished log with a batch file. Not asking for the noise in the first place is cheaper: leave `-debug fileio` off, and `-debug scripts` alone gives a log that is almost all mod output.
+The wiki carries a community guide, [Reducing the x4.log to more relevant informations](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/ScriptingMD/Community%20Guides/Reducing%20the%20x4.log%20to%20more%20relevant%20informations/), which filters a finished log with a batch file. Another approach is to leave the noisy filters off from the start: without `-debug fileio`, a `-debug scripts` log is almost all mod output.
 
 For reading a log while the game runs, anything that tails a file will do; the log is written as it goes and is safe to read from another process.
 
-The in-game **Debug Manager** is a separate thing entirely, reached with a different executable and driven by hotkeys rather than the command line; it is described on the wiki under [Debug Manager Usage](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/ScriptingMD/Guides/Debug%20Manager%20Usage%20(Work%20in%20Progress)/).
+The in-game **Debug Manager** is a separate tool, started with a different executable and driven by hotkeys rather than the command line; it is described on the wiki under [Debug Manager Usage](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/ScriptingMD/Guides/Debug%20Manager%20Usage%20(Work%20in%20Progress)/).
 
 [↑ Contents](#toc)
 
@@ -527,13 +527,13 @@ A few keys in `config.xml` do what a switch does, and a log can show their effec
 - `<module>`, `<load>`, `<mpar>`, each used only when the command line did not set it
 - `<seed>`, used even when the command line set one
 
-Read from the executable, not tried.
+These keys were read from the executable and have not been tested.
 
 [↑ Contents](#toc)
 
 ## Traps
 
-**A misspelled option is silent.** Nothing is printed, nothing fails, and the switch simply does not apply. The same is true of a filter name: `-debug scripts,fileio` enables neither and says nothing about it.
+**A misspelled option is silent.** Nothing is printed, nothing fails, and the switch does not apply. The same is true of a filter name: `-debug scripts,fileio` enables neither, without a warning.
 
 **`-width 1920` is ignored.** `-width`, `-height`, `-adapter`, `-gpu` and `-seed` only work with the value joined by a colon, `-width:1920`, and the colon breaks almost every other option: `-logfile:x4.log` writes no log.
 
@@ -543,11 +543,11 @@ Read from the executable, not tried.
 
 **The log is overwritten every launch.** Two attempts at the same bug leave one log unless the name changes between them.
 
-**`-scriptlogfiles` takes no file name**, whatever the batch file that has been copied around since 2018 suggests.
+**`-scriptlogfiles` takes no file name.** A word after it is ignored, even though the widely shared 2018 batch file passes one.
 
-**`<debug_text>` defaults to the `scripts` filter**, so a mod whose messages are invisible is usually a game started without `-debug scripts`, not a script that failed to run. `filter="error"` is the way to make a message survive a user's default launch.
+**`<debug_text>` defaults to the `scripts` filter**, so when a mod's messages are missing, the usual cause is a game started without `-debug scripts`, not a script that failed to run. `filter="error"` makes a message appear in a log started without any `-debug`.
 
-**The personal folder is not named after the game version.** A Steam install writes to a folder named after the Steam account id and every other install into `Documents\Egosoft\X4\` itself, so a folder such as `Documents\Egosoft\X4\900\` only ever holds what a launch with `-personalfolderid 900` wrote, and two installs without the switch can share one folder. `-personalfolderid` is the fix.
+**The personal folder is not named after the game version.** A Steam install writes to a folder named after the Steam account id and every other install into `Documents\Egosoft\X4\` itself, so a folder such as `Documents\Egosoft\X4\900\` only ever holds what a launch with `-personalfolderid 900` wrote, and two installs without the switch can share one folder. `-personalfolderid` keeps them apart.
 
 **A setting changed during a test run is saved at once.** Command-line options never reach `config.xml`, but a change in the Settings menu or an Alt+Enter is written the moment it happens and is still there the next time the game starts from the library, unless `-dontsaveconfig` was passed.
 
@@ -557,7 +557,7 @@ Read from the executable, not tried.
 
 ## Sending a log to a mod author
 
-This section is for a player whose mod author asked for a log, and nothing above it is needed. The game writes no log unless it is told to, so the problem has to happen once more with the log switched on.
+This section is for players who have been asked for a log by a mod author; nothing above it is needed. The game only writes a log when told to, so the problem needs to be reproduced once more with logging switched on.
 
 ### 1. Add one line to the launch options
 
@@ -565,7 +565,7 @@ This section is for a player whose mod author asked for a log, and nothing above
 -logfile x4.log -debug all
 ```
 
-Exactly as written, spaces included. Where it goes depends on the store:
+Copy it exactly as written, including the spaces. Where it goes depends on the store:
 
 - **Steam**: Library, right-click **X4: Foundations**, **Properties**, **General**, and the **Launch Options** box at the bottom, [shown in a screenshot above](#steam). Anything already in the box stays, and the line goes after it.
 - **GOG Galaxy**: the arguments belong to a copy of the game's entry in its list of executables, [shown step by step above](#gog-galaxy).
@@ -573,7 +573,7 @@ Exactly as written, spaces included. Where it goes depends on the store:
 
 ### 2. Make the problem happen, then quit
 
-Start the game, do whatever brings the problem up, and quit the game. If it crashes instead, send the log anyway.
+Start the game, do whatever brings the problem up, and quit the game. If the game crashes instead, the log is still useful: send it.
 
 ### 3. Copy the log before the next start
 
