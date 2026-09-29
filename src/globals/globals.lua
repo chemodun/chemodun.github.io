@@ -308,14 +308,14 @@ function AddLicence(factionID, licenceID, otherFactionID) end
 ---@param category string -- The logbook category (e.g., "general", "upkeep").
 ---@param text string The main content of the entry.
 ---@param interaction? string Named by X4.exe.
----@param interactioncomponent? any A component ID, named by X4.exe.
+---@param interactionComponent? any A component ID, named by X4.exe.
 ---@param title? string The title of the entry.
----@param entityname? string Named by X4.exe.
----@param factionname? string Named by X4.exe.
+---@param entityName? string Named by X4.exe.
+---@param factionName? string Named by X4.exe.
 ---@param money? number Named by X4.exe.
 ---@param bonus? number Named by X4.exe.
 ---@param arg10? any Unidentified; X4.exe accepts it.
-function AddLogbookEntry(category, text, interaction, interactioncomponent, title, entityname, factionname, money, bonus, arg10) end
+function AddLogbookEntry(category, text, interaction, interactionComponent, title, entityName, factionName, money, bonus, arg10) end
 
 
 --- Credits or debits a **container's** account by `amount`, and returns the amount moved. A
@@ -714,8 +714,8 @@ function CheckSuitableTransportType(componentID, wareID) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param transactionid string Named by X4.exe.
-function ClaimVentureRewards(transactionid) end
+---@param transactionID string Named by X4.exe.
+function ClaimVentureRewards(transactionID) end
 
 
 -- Clears a previously set stock limit override for a specific ware in a container.
@@ -758,9 +758,9 @@ function ClearErrors() end
 -- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_playerinfo.lua:847
 -- Arity: 0-2 (more are logged, then ignored) - X4.exe 8.00, 9.00
----@param keepnumentries? number -- The number of entries to keep; vanilla passes 0.
+---@param keepNumEntries? number -- The number of entries to keep; vanilla passes 0.
 ---@param category? string|nil -- The category to clear, or nil for all categories.
-function ClearLogbook(keepnumentries, category) end
+function ClearLogbook(keepNumEntries, category) end
 
 
 --- Clears a ship's queued trades: every entry of the queue `GetTradeShipData` reports, which is
@@ -867,12 +867,12 @@ function CloseMenusUponMouseClick() end
 -- Arity: 4 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - a ten-case truth table over literal numbers, both orders of every pair,
 -- every case answering the same either side
----@param numgates number Gate transitions of the first route.
----@param numjumps number Jumps of the first route.
----@param othernumgates number Gate transitions of the second route.
----@param othernumjumps number Jumps of the second route.
+---@param numGates number Gate transitions of the first route.
+---@param numJumps number Jumps of the first route.
+---@param otherNumGates number Gate transitions of the second route.
+---@param otherNumJumps number Jumps of the second route.
 ---@return boolean shorter True when the first route is strictly shorter than the second.
-function CompareJumpRoute(numgates, numjumps, othernumgates, othernumjumps) end
+function CompareJumpRoute(numGates, numJumps, otherNumGates, otherNumJumps) end
 
 
 --- The widget system's configuration table.
@@ -1448,9 +1448,9 @@ function CreateStatusBar(properties) end
 ---@param offsetY? number
 ---@param maxHeight? number
 ---@param initialSelection? InitialSelection|table
----@param wraparound? boolean
+---@param wrapAround? boolean
 ---@param highlightMode? any
----@param multiselect? boolean
+---@param multiSelect? boolean
 ---@param backgroundID? any
 ---@param backgroundColor? any
 ---@param helpOverlay? any
@@ -1458,7 +1458,7 @@ function CreateStatusBar(properties) end
 ---@param rowGroups? table
 ---@param borderID? any
 ---@return any
-function CreateTable(header, tableContent, columnWidths, columnWidthPercent, borderEnabled, tabOrder, skipTabChange, defaultInteractiveObject, numFixedRows, offsetX, offsetY, maxHeight, initialSelection, wraparound, highlightMode, multiselect, backgroundID, backgroundColor, helpOverlay, backgroundPadding, rowGroups, borderID) end
+function CreateTable(header, tableContent, columnWidths, columnWidthPercent, borderEnabled, tabOrder, skipTabChange, defaultInteractiveObject, numFixedRows, offsetX, offsetY, maxHeight, initialSelection, wrapAround, highlightMode, multiSelect, backgroundID, backgroundColor, helpOverlay, backgroundPadding, rowGroups, borderID) end
 
 
 --- Builds a view - the container every menu frame lives in - and returns its descriptor, which
@@ -2591,9 +2591,9 @@ function getColumnNames(tableName) end
 -- Usage: confirmed - X4.exe count check, 19 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:7890, ui/addons/ego_detailmonitor/menu_ship_configuration.lua:1674
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param controllableid any
+---@param controllableID any
 ---@return any
-function GetCommander(controllableid) end
+function GetCommander(controllableID) end
 
 
 --- Returns the **pilot character of the direct commander**, class `npc` - not the commanding
@@ -2607,9 +2607,9 @@ function GetCommander(controllableid) end
 -- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - one three-ship fleet, every returned handle's class resolved; four 9.00
 -- ships, two answering with an npc handle and two with nil
----@param controllableid any The controllable whose commander to ask about.
+---@param controllableID any The controllable whose commander to ask about.
 ---@return any commanderNPC The direct commander's pilot, class `npc`; nothing at the top of the chain.
-function GetCommanderEntity(controllableid) end
+function GetCommanderEntity(controllableID) end
 
 
 --- Reads named properties off a component, and is the workhorse of the whole UI. Every argument
@@ -2678,14 +2678,14 @@ function GetComponentData(component, ...) end
 -- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 6 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_station_overview.lua:3243, ui/addons/ego_targetmonitor/targetmonitor.lua:358
 -- Arity: 4-6 - X4.exe 8.00, 9.00
----@param componentid any
+---@param componentID any
 ---@param font string Font used to measure the name for truncation.
----@param fontsize number Font size used to measure the name.
----@param maxwidth number Width the name is truncated to.
+---@param fontSize number Font size used to measure the name.
+---@param maxWidth number Width the name is truncated to.
 ---@param arg5? any Unidentified in 9.00 vanilla usage; a boolean or nil.
 ---@param arg6? any Unidentified in 9.00 vanilla usage; a boolean.
 ---@return string
-function GetComponentName(componentid, font, fontsize, maxwidth, arg5, arg6) end
+function GetComponentName(componentID, font, fontSize, maxWidth, arg5, arg6) end
 
 
 --- Returns whether the mouse is confined to the window, and pairs with `SetConfineMouseOption`.
@@ -2846,11 +2846,11 @@ function GetContainerWarePrice(container, ware, isBuy, useBuildPrice) end
 -- Usage: confirmed - X4.exe count check, 21 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:4151, ui/addons/ego_detailmonitor/menu_map.lua:14895
 -- Arity: 2-3 - X4.exe 8.00, 9.00
----@param componentid any
----@param classname string
+---@param componentID any
+---@param className string
 ---@param includeSelf? boolean
 ---@return any
-function GetContextByClass(componentid, classname, includeSelf) end
+function GetContextByClass(componentID, className, includeSelf) end
 
 
 --- Returns the control entity of a component - the NPC actually flying or running it - or
@@ -3392,11 +3392,11 @@ function GetFlowchartNodeExpandedFrameData(flowchartNodeID) end
 -- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:2920, ui/widget/lua/widget_fullscreen.lua:12953
 -- Arity: 3 - X4.exe 8.00, 9.00
----@param flowChartID number The ID of the flowchart widget.
+---@param flowchartID number The ID of the flowchart widget.
 ---@param row number The row of the node.
 ---@param col number The column of the node.
 ---@return any nodeID The ID of the specified node.
-function GetFlowchartNodeID(flowChartID, row, col) end
+function GetFlowchartNodeID(flowchartID, row, col) end
 
 
 --- Returns the row and column of the selected cell of a flowchart. Vanilla reads it together
@@ -4469,11 +4469,11 @@ function GetMappedJoysticks() end
 -- Probed: 8.00, 9.00 - one working call with synthesised arguments, arity stated by the engine
 -- in words; both rungs answered the same either side
 ---@param text string The string to measure.
----@param fontname string The font to measure it in, e.g. `"Zekton"`.
----@param fontsize number The font size.
+---@param fontName string The font to measure it in, e.g. `"Zekton"`.
+---@param fontSize number The font size.
 ---@param width number The available width in pixels.
 ---@return number maxLength How many characters of `text` fit into `width`.
-function GetMaxTextLength(text, fontname, fontsize, width) end
+function GetMaxTextLength(text, fontName, fontSize, width) end
 
 
 --- Gets the parameters of the current menu. (No usage found in provided files)
@@ -5497,9 +5497,9 @@ function GetRumbleOption() end
 -- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:24909, ui/addons/ego_gameoptions/gameoptions.lua:11608
 -- Arity: 0-1 - X4.exe 8.00, 9.00
----@param allowedfilenames? table<string, boolean> File names to list, without extension. Named by X4.exe.
+---@param allowedFileNames? table<string, boolean> File names to list, without extension. Named by X4.exe.
 ---@return SaveGameEntry[] savegames
-function GetSaveList(allowedfilenames) end
+function GetSaveList(allowedFileNames) end
 
 
 --- Returns the sectors of a cluster as a list. Walking the galaxy means `GetClusters` and then
@@ -5977,10 +5977,10 @@ function GetText(fontStringID) end
 -- Arity: 4 - X4.exe 8.00, 9.00
 ---@param text string The text to wrap.
 ---@param font string Font name.
----@param fontsize number Font size, already scaled.
+---@param fontSize number Font size, already scaled.
 ---@param width number Available width in pixels.
 ---@return table lines One string per line.
-function GetTextLines(text, font, fontsize, width) end
+function GetTextLines(text, font, fontSize, width) end
 
 
 --- Returns how many lines a string wraps to, and the width it needs.
@@ -6350,11 +6350,11 @@ function GetVentures() end
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 2-4 - X4.exe 8.00, 9.00
 ---@param arg1 any Unidentified; X4.exe accepts it.
----@param ventureplatformid any A component ID, named by X4.exe.
----@param successfactorwares? table Named by X4.exe.
+---@param venturePlatformID any A component ID, named by X4.exe.
+---@param successFactorWares? table Named by X4.exe.
 ---@param arg4? any Unidentified; X4.exe accepts it.
 ---@return any chance
-function GetVentureSuccessChance(arg1, ventureplatformid, successfactorwares, arg4) end
+function GetVentureSuccessChance(arg1, venturePlatformID, successFactorWares, arg4) end
 
 
 --- Returns the game version as a string. The options menu shows it followed by
@@ -6438,9 +6438,9 @@ function GetWareData(wareID, ...) end
 -- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param tradingShipID any The ship doing the exchange.
 ---@param tradedContainerID any The container it is exchanging with.
----@param sortby? string Sort order. Documented; no vanilla call site passes one.
+---@param sortBy? string Sort order. Documented; no vanilla call site passes one.
 ---@return TradeData[] tradeList
-function GetWareExchangeTradeList(tradingShipID, tradedContainerID, sortby) end
+function GetWareExchangeTradeList(tradingShipID, tradedContainerID, sortBy) end
 
 
 --- Returns the production limit set for a ware at a container - the amount the station is meant
@@ -6776,7 +6776,7 @@ function HideTriangle(triangleID) end
 function HideView() end
 
 
---- Adds to a statistic. **`addvalue` is optional and defaults to 1**: measured, the
+--- Adds to a statistic. **`addValue` is optional and defaults to 1**: measured, the
 --- two-argument call moved the statistic by exactly the value given, and the one-argument
 --- call moved it by 1 with no engine complaint. The engine reports this one as
 --- `expected >= 1`, unlike `SetStatValue`'s hard `expected 2`.
@@ -6795,8 +6795,8 @@ function HideView() end
 -- Probed: 8.00, 9.00 - +7 and the bare +1 default, both read back and witnessed from MD, on both
 -- versions
 ---@param statID string The ID of the statistic to increment.
----@param addvalue? number The value to add. Defaults to 1.
-function IncStatValue(statID, addvalue) end
+---@param addValue? number The value to add. Defaults to 1.
+function IncStatValue(statID, addValue) end
 
 
 --- Runs a module's one-off setup.
@@ -6822,8 +6822,8 @@ function initMissionBarScale() end
 -- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:13537
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param appid number -- The AppID of the DLC to install.
-function InstallSteamDLC(appid) end
+---@param appID number -- The AppID of the DLC to install.
+function InstallSteamDLC(appID) end
 
 
 -- Interrupts the player's computer control, likely to regain control for the UI.
@@ -7023,10 +7023,10 @@ function isIconPropertyFunctionCell(cell, iconproperty) end
 -- Usage: confirmed - X4.exe count check, 21 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:5476, ui/addons/ego_detailmonitorhelper/helper.lua:13032
 -- Arity: 2 - X4.exe 8.00, 9.00
----@param componentid any The component the information belongs to.
+---@param componentID any The component the information belongs to.
 ---@param infoString string The information key, e.g. "name", "storage_amounts".
 ---@return boolean isUnlocked True if the information is unlocked.
-function IsInfoUnlockedForPlayer(componentid, infoString) end
+function IsInfoUnlockedForPlayer(componentID, infoString) end
 
 
 --- Reports whether a widget takes input at all. `widget_fullscreen.lua` checks the table before
@@ -7337,8 +7337,8 @@ function ListenForInput(actionName) end
 -- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2963
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param filename string -- The name of the save file to load.
-function LoadGame(filename) end
+---@param fileName string -- The name of the save file to load.
+function LoadGame(fileName) end
 
 
 --- Loads an input profile - a set of key bindings. `personal` says whether it is one of the
@@ -7812,8 +7812,8 @@ function onGameUnpaused() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param ventureplatformid any A component ID, named by X4.exe.
-function OnlineAbortVenture(ventureplatformid) end
+---@param venturePlatformID any A component ID, named by X4.exe.
+function OnlineAbortVenture(venturePlatformID) end
 
 
 --- Accepts a pending online team invite. No vanilla code calls it.
@@ -7821,9 +7821,9 @@ function OnlineAbortVenture(ventureplatformid) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 2 - X4.exe 8.00, 9.00
----@param senderid number Named by X4.exe.
----@param teamid number Named by X4.exe.
-function OnlineAcceptTeamInvite(senderid, teamid) end
+---@param senderID number Named by X4.exe.
+---@param teamID number Named by X4.exe.
+function OnlineAcceptTeamInvite(senderID, teamID) end
 
 
 --- Activates an online user item. No vanilla code calls it.
@@ -7831,8 +7831,8 @@ function OnlineAcceptTeamInvite(senderid, teamid) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param wareid string Named by X4.exe.
-function OnlineActivateUserItem(wareid) end
+---@param wareID string Named by X4.exe.
+function OnlineActivateUserItem(wareID) end
 
 
 --- Adds a user to the contact list, or to the blocked list when the second argument is true.
@@ -7864,9 +7864,9 @@ function OnlineCanChangeTeamName() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param userid number Named by X4.exe.
+---@param userID number Named by X4.exe.
 ---@return boolean # `true` if a user can be invited, otherwise `false`.
-function OnlineCanInviteUser(userid) end
+function OnlineCanInviteUser(userID) end
 
 
 --- Reports whether venture asset access can be unlocked. No vanilla code calls it, though
@@ -7896,8 +7896,8 @@ function OnlineChangeTeamName(newName) end
 -- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13390
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param username string The username to check.
-function OnlineCheckUsername(username) end
+---@param userName string The username to check.
+function OnlineCheckUsername(userName) end
 
 
 --- Clears the online logbook. No vanilla code calls it, and X4.exe's count check takes no
@@ -7943,9 +7943,9 @@ function OnlineCreateTeam() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 2 - X4.exe 8.00, 9.00
----@param senderid number Named by X4.exe.
----@param teamid number Named by X4.exe.
-function OnlineDeclineTeamInvite(senderid, teamid) end
+---@param senderID number Named by X4.exe.
+---@param teamID number Named by X4.exe.
+function OnlineDeclineTeamInvite(senderID, teamID) end
 
 
 --- Looks a contact up by user ID and returns it, or nothing when the player has no such contact
@@ -8092,9 +8092,9 @@ function OnlineGetLogbookRewards() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param onlinemissionid string Named by X4.exe.
+---@param onlineMissionID string Named by X4.exe.
 ---@return table # A table representing the mission order.
-function OnlineGetMissionUIOrder(onlinemissionid) end
+function OnlineGetMissionUIOrder(onlineMissionID) end
 
 
 --- Returns the patron information of a multiverse object - the team behind a ship that belongs
@@ -8162,9 +8162,9 @@ function OnlineGetPlatformFriendList() end
 -- Versions: 9.00 only - new in 9.00, absent from 8.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 9.00
----@param teamid number Named by X4.exe.
+---@param teamID number Named by X4.exe.
 ---@return any teaminfo
-function OnlineGetPublicTeamInfo(teamid) end
+function OnlineGetPublicTeamInfo(teamID) end
 
 
 --- Returns the ladder rankings of a scenario. It reads what is already there:
@@ -8185,11 +8185,11 @@ function OnlineGetScenarioRankings(scenarioID) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 2-3 - X4.exe 8.00, 9.00
----@param ventureid number Named by X4.exe.
----@param wareid string Named by X4.exe.
+---@param ventureID number Named by X4.exe.
+---@param wareID string Named by X4.exe.
 ---@param amount? number Named by X4.exe.
 ---@return any # The success impact data.
-function OnlineGetSuccessImpact(ventureid, wareid, amount) end
+function OnlineGetSuccessImpact(ventureID, wareID, amount) end
 
 
 --- Returns the online team's inventory. No vanilla code calls it.
@@ -8244,9 +8244,9 @@ function OnlineGetUserInbox() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param ventureid number Named by X4.exe.
+---@param ventureID number Named by X4.exe.
 ---@return any chance
-function OnlineGetVentureBaseSuccessChance(ventureid) end
+function OnlineGetVentureBaseSuccessChance(ventureID) end
 
 
 --- Returns the bonuses that modify a venture's outcome.
@@ -8255,11 +8255,11 @@ function OnlineGetVentureBaseSuccessChance(ventureid) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 3 - X4.exe 8.00, 9.00
----@param ventureid number Named by X4.exe.
----@param bonustype string Named by X4.exe.
----@param ventureships table Named by X4.exe.
+---@param ventureID number Named by X4.exe.
+---@param bonusType string Named by X4.exe.
+---@param ventureShips table Named by X4.exe.
 ---@return any bonuses
-function OnlineGetVentureBonusValues(ventureid, bonustype, ventureships) end
+function OnlineGetVentureBonusValues(ventureID, bonusType, ventureShips) end
 
 
 --- Returns how long a venture takes.
@@ -8268,11 +8268,11 @@ function OnlineGetVentureBonusValues(ventureid, bonustype, ventureships) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1-3 - X4.exe 8.00, 9.00
----@param ventureid number Named by X4.exe.
----@param branefuelamount? number Named by X4.exe.
+---@param ventureID number Named by X4.exe.
+---@param braneFuelAmount? number Named by X4.exe.
 ---@param arg3? any Unidentified; X4.exe accepts it.
 ---@return any duration
-function OnlineGetVentureDuration(ventureid, branefuelamount, arg3) end
+function OnlineGetVentureDuration(ventureID, braneFuelAmount, arg3) end
 
 
 --- Returns the venture logbook entries.
@@ -8293,10 +8293,10 @@ function OnlineGetVentureLogbook() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 2 - X4.exe 8.00, 9.00
----@param wareid string Named by X4.exe.
+---@param wareID string Named by X4.exe.
 ---@param amount number Named by X4.exe.
 ---@return any amount
-function OnlineGetVentureRewardAmount(wareid, amount) end
+function OnlineGetVentureRewardAmount(wareID, amount) end
 
 
 --- Returns a venture's risk rating.
@@ -8305,9 +8305,9 @@ function OnlineGetVentureRewardAmount(wareid, amount) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param ventureid number Named by X4.exe.
+---@param ventureID number Named by X4.exe.
 ---@return any risk
-function OnlineGetVentureRisk(ventureid) end
+function OnlineGetVentureRisk(ventureID) end
 
 
 --- Returns the display order of the ventures.
@@ -8317,9 +8317,9 @@ function OnlineGetVentureRisk(ventureid) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param ventureid number Named by X4.exe.
+---@param ventureID number Named by X4.exe.
 ---@return any order
-function OnlineGetVentureUIOrder(ventureid) end
+function OnlineGetVentureUIOrder(ventureID) end
 
 
 --- Returns the ware information attached to a venture.
@@ -8328,9 +8328,9 @@ function OnlineGetVentureUIOrder(ventureid) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param wareid string Named by X4.exe.
+---@param wareID string Named by X4.exe.
 ---@return any wareinfo
-function OnlineGetVentureWareInfo(wareid) end
+function OnlineGetVentureWareInfo(wareID) end
 
 
 --- Invites a user to the player's team.
@@ -8340,9 +8340,9 @@ function OnlineGetVentureWareInfo(wareid) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1-2 - X4.exe 8.00, 9.00
----@param userid number Named by X4.exe.
+---@param userID number Named by X4.exe.
 ---@param arg2? any Unidentified; X4.exe accepts it.
-function OnlineInviteUser(userid, arg2) end
+function OnlineInviteUser(userID, arg2) end
 
 
 --- Reports whether venture asset access has been unlocked.
@@ -8382,8 +8382,8 @@ function OnlineJoinRandomTeam() end
 -- Versions: 9.00 only - new in 9.00, absent from 8.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 1 - X4.exe 9.00
----@param teamid number Named by X4.exe.
-function OnlineJoinTeam(teamid) end
+---@param teamID number Named by X4.exe.
+function OnlineJoinTeam(teamID) end
 
 
 --- Leaves the player's current team.
@@ -8413,9 +8413,9 @@ function OnlineReportChat(timestamp, reason) end
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 3 - X4.exe 8.00, 9.00
 ---@param context string Named by X4.exe.
----@param transactionid string Named by X4.exe.
+---@param transactionID string Named by X4.exe.
 ---@param reason string Named by X4.exe.
-function OnlineReportShip(context, transactionid, reason) end
+function OnlineReportShip(context, transactionID, reason) end
 
 
 --- Reports a user for moderation.
@@ -8424,9 +8424,9 @@ function OnlineReportShip(context, transactionid, reason) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 2 - X4.exe 8.00, 9.00
----@param userid number Named by X4.exe.
+---@param userID number Named by X4.exe.
 ---@param reason string Named by X4.exe.
-function OnlineReportUser(userid, reason) end
+function OnlineReportUser(userID, reason) end
 
 
 --- Starts fetching the platform friend list. It returns nothing: the result is read afterwards
@@ -8529,14 +8529,14 @@ function OnlineSetVentureConfig(configName, value) end
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 8 - X4.exe 8.00, 9.00
 ---@param ships table Named by X4.exe.
----@param ventureplatformid any A component ID, named by X4.exe.
----@param ventureid string Named by X4.exe.
----@param fuelamount number Named by X4.exe.
----@param successfactors table Named by X4.exe.
+---@param venturePlatformID any A component ID, named by X4.exe.
+---@param ventureID string Named by X4.exe.
+---@param fuelAmount number Named by X4.exe.
+---@param successFactors table Named by X4.exe.
 ---@param npcs table Named by X4.exe.
----@param transferwares table Named by X4.exe.
----@param targetuserid number Named by X4.exe.
-function OnlineStartVenture(ships, ventureplatformid, ventureid, fuelamount, successfactors, npcs, transferwares, targetuserid) end
+---@param transferWares table Named by X4.exe.
+---@param targetUserID number Named by X4.exe.
+function OnlineStartVenture(ships, venturePlatformID, ventureID, fuelAmount, successFactors, npcs, transferWares, targetUserID) end
 
 
 --- Starts fetching the team's open invitations, to be read with `OnlineGetTeamOpenInvitations`.
@@ -8562,8 +8562,8 @@ function OnlineUnlockVentureAssetAccess() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, no vanilla call site
 -- Arity: 0-1 - X4.exe 8.00, 9.00
----@param wareamounts? table Named by X4.exe.
-function OnlineUploadPlayerInventoryItems(wareamounts) end
+---@param wareAmounts? table Named by X4.exe.
+function OnlineUploadPlayerInventoryItems(wareAmounts) end
 
 
 --- Uploads the statistics of a finished scenario and returns a **string** result, not a
@@ -8959,7 +8959,7 @@ function ReadText(pageID, textID) end
 --- two, and it makes this the read to use while developing a mod: a missing `t/` entry shows up
 --- in the Debug Log instead of as a placeholder in the UI.
 ---
---- **`fallbacktext` is required and never reaches the return.** Measured over five values on both
+--- **`fallbackText` is required and never reaches the return.** Measured over five values on both
 --- the hit and the miss path - a sentinel string, the entry's own text, a number and an empty
 --- string - and the result was the text on a hit and the placeholder on a miss every time. The
 --- parameter is named for a behaviour the 8.00 return path does not have. Omitting it is refused
@@ -8984,9 +8984,9 @@ function ReadText(pageID, textID) end
 -- fourteen rungs answered the same either side
 ---@param pageID integer The ID of the text page.
 ---@param textID integer The ID of the text entry within that page.
----@param fallbacktext string Required, and never returned in 8.00. A number is coerced; a table or a boolean is refused.
+---@param fallbackText string Required, and never returned in 8.00. A number is coerced; a table or a boolean is refused.
 ---@return string # The text, or `"=ReadText<page>-<line>="` when it is missing. Nothing at all if the call is refused.
-function ReadTextTest(pageID, textID, fallbacktext) end
+function ReadTextTest(pageID, textID, fallbackText) end
 
 
 --- Registers an init function to run when the game is loaded or the UI is reloaded.
@@ -9426,7 +9426,7 @@ function RoundTotalTradePrice(price) end
 function SaveFullscreenOption() end
 
 
---- Writes a savegame. `filename` is the file to write, `name` the label the load menu shows for
+--- Writes a savegame. `fileName` is the file to write, `name` the label the load menu shows for
 --- it; the options menu builds the filename as `"save_" .. slot`. An online game is saved with
 --- `SaveOnlineGame` instead.
 -- Environment: addons only
@@ -9434,9 +9434,9 @@ function SaveFullscreenOption() end
 -- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9296
 -- Arity: 2 - X4.exe 8.00, 9.00
----@param filename string
+---@param fileName string
 ---@param name string
-function SaveGame(filename, name) end
+function SaveGame(fileName, name) end
 
 
 --- Writes an input profile - a set of key bindings - to disk. Vanilla passes three arguments
@@ -9446,11 +9446,11 @@ function SaveGame(filename, name) end
 -- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 3-4 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3404, ui/addons/ego_gameoptions/gameoptions.lua:9153
 -- Arity: 3-4 - X4.exe 8.00, 9.00
----@param filename string
+---@param fileName string
 ---@param id number
 ---@param customName string
 ---@param isNew? boolean
-function SaveInputProfile(filename, id, customName, isNew) end
+function SaveInputProfile(fileName, id, customName, isNew) end
 
 
 --- Persists the input mapping. The three tables are the three kinds of binding the options menu
@@ -10051,9 +10051,9 @@ function SetLuaDebugOutput(message) end
 -- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - one bare call on each version, both printing the same real name and
 -- syntax, `SetPriorityMissionTargetMessage(posid, messageid)`; parked there
----@param posid any Position id. Named by the engine, type unmeasured.
----@param messageid any Message id. Named by the engine, type unmeasured.
-function SetMainMissiontargetMessage(posid, messageid) end
+---@param posID any Position id. Named by the engine, type unmeasured.
+---@param messageID any Message id. Named by the engine, type unmeasured.
+function SetMainMissiontargetMessage(posID, messageID) end
 
 
 --- Sets a station's maximum budget. It is always set together with `SetMinBudget`, and vanilla
@@ -10413,11 +10413,11 @@ function SetSoftShadowsOption() end
 -- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 3 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:1316
 -- Arity: 3 - X4.exe 8.00, 9.00
----@param messageid any The message ID of the target element.
+---@param messageID any The message ID of the target element.
 ---@param instantInteract boolean Whether to interact with the target at once.
----@param locktarget boolean Whether to lock the target; vanilla passes true on a mouse click.
+---@param lockTarget boolean Whether to lock the target; vanilla passes true on a mouse click.
 ---@return boolean, boolean
-function SetSofttarget(messageid, instantInteract, locktarget) end
+function SetSofttarget(messageID, instantInteract, lockTarget) end
 
 
 --- Toggles sound output as a whole. Argument-less, like the other option toggles; the options
@@ -10991,12 +10991,12 @@ function TransferPlayerMoneyTo(amount, destinationComponent, arg3) end
 -- Arity: 4 or more - X4.exe 8.00, 9.00
 ---@param text string The text to truncate.
 ---@param font string The font name to use for width calculation.
----@param fontsize number The font size to use for width calculation.
+---@param fontSize number The font size to use for width calculation.
 ---@param width number The maximum width the text should occupy.
 ---@param arg5? any Unidentified in 9.00 vanilla usage; a boolean.
 ---@param arg6? any Unidentified in 9.00 vanilla usage; a height.
 ---@return string # The truncated text.
-function TruncateText(text, font, fontsize, width, arg5, arg6) end
+function TruncateText(text, font, fontSize, width, arg5, arg6) end
 
 
 --- Uninstalls a DLC through Steam, by its app ID. The extensions page calls it on an entry that
@@ -11006,8 +11006,8 @@ function TruncateText(text, font, fontsize, width, arg5, arg6) end
 -- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:13535
 -- Arity: 1 - X4.exe 8.00, 9.00
----@param appid number The Steam AppID of the DLC to uninstall.
-function UninstallSteamDLC(appid) end
+---@param appID number The Steam AppID of the DLC to uninstall.
+function UninstallSteamDLC(appID) end
 
 
 --- Unpauses the game. Every vanilla caller passes nothing and guards the call with its own
@@ -11442,11 +11442,11 @@ function SetWidth(widgetID, width) end
 ---@param plannedDefault? boolean Whether the order becomes the planned default order.
 ---@param priority? boolean Whether the order is queued as a priority order.
 ---@param arg7? any Unidentified in 9.00 vanilla usage; passed the same value as the caller's "immediate", or nil.
----@param errorprefix? string Named by X4.exe; always nil in 9.00 vanilla usage.
+---@param errorPrefix? string Named by X4.exe; always nil in 9.00 vanilla usage.
 ---@param arg9? any Unidentified in 9.00 vanilla usage; passed "immediate" or nil.
 ---@param arg10? any Unidentified in 9.00 vanilla usage; always true.
 ---@return integer orderIndex
-function CreateOrder(controllable, orderDefinition, params, default, plannedDefault, priority, arg7, errorprefix, arg9, arg10) end
+function CreateOrder(controllable, orderDefinition, params, default, plannedDefault, priority, arg7, errorPrefix, arg9, arg10) end
 
 
 ---@meta
@@ -11467,8 +11467,8 @@ function CreateOrder(controllable, orderDefinition, params, default, plannedDefa
 --- units themselves sit in the array part, with the totals as named fields alongside them, so
 --- walk it with `ipairs` and read `capacity` and `stored` off the table itself.
 ---
---- `virtualammo` only means anything after `SetVirtualCargoMode` has been called. Neither it
---- nor `excluderestricted` is passed by any vanilla call site, which never uses more than two
+--- `virtualAmmo` only means anything after `SetVirtualCargoMode` has been called. Neither it
+--- nor `excludeRestricted` is passed by any vanilla call site, which never uses more than two
 --- arguments, so neither is confirmed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
@@ -11477,10 +11477,10 @@ function CreateOrder(controllable, orderDefinition, params, default, plannedDefa
 -- Arity: 1-4 - X4.exe 8.00, 9.00
 ---@param objectID any The defensible to query.
 ---@param unitType? string Unit category filter, e.g. `"transport"`.
----@param virtualammo? boolean Include virtual ammo; requires `SetVirtualCargoMode` first.
----@param excluderestricted? boolean Leave restricted units out.
+---@param virtualAmmo? boolean Include virtual ammo; requires `SetVirtualCargoMode` first.
+---@param excludeRestricted? boolean Leave restricted units out.
 ---@return UnitStorageData data
-function GetUnitStorageData(objectID, unitType, virtualammo, excluderestricted) end
+function GetUnitStorageData(objectID, unitType, virtualAmmo, excludeRestricted) end
 
 
 --- Returns the transport unit macros a ship macro can carry. The map uses only the length - a
@@ -11778,9 +11778,9 @@ function OnlineGetUserItemAmount(ware) end
 -- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3296
 -- Arity: 2 - X4.exe 8.00, 9.00
----@param username string The user name.
+---@param userName string The user name.
 ---@param remember boolean Whether to store the session token.
-function OnlineLogIn(username, remember) end
+function OnlineLogIn(userName, remember) end
 
 
 --- Logs out of the online service. The options menu clears the privacy policy flag and its own
