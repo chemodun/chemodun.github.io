@@ -199,6 +199,15 @@ function deprecatedOf(n) {
   return m ? { version: m[1], detail: m[2] } : { version: p, detail: '' };
 }
 
+// Written by write-meta.js from arity.json: "<range> - X4.exe <versions>", or, where the
+// versions differ, "<range> on 8.00, <range> on 9.00 - X4.exe".
+function arityCell(n) {
+  const a = docs[n] && docs[n].arity;
+  if (!a) return null;
+  const m = a.match(/^([\s\S]+?)\s+-\s+X4\.exe\s*(.*)$/);
+  return m ? badge('engine', 'X4.exe' + (m[2] ? ' ' + m[2] : '')) + ' - ' + x(m[1]) : x(a);
+}
+
 function usageCell(n) {
   const u = verdicts[n], [tone, label] = USAGE[u.verdict];
   const seen = [...new Set(u.sites.map((s) => s.rel + ':' + s.line))];
@@ -282,10 +291,11 @@ function card(n) {
   rows.push(['Availability', availCell(n)]);
   rows.push(['Game versions', `${badge(vr.tone, vr.long)}<br>` + versCell(n, false)]);
   if (dep) rows.push(['Deprecated', badge('gone', dep.version) + (dep.detail ? ' - ' + x(dep.detail) : '')]);
-  if (e.origin === 'engine' && u) rows.push(['Vanilla usage', usageCell(n)]);
+  if (e.origin === 'engine' && u) rows.push([e.group === 'function' ? 'Signature' : 'Vanilla usage', usageCell(n)]);
   else rows.push([e.group === 'function' ? 'Signature' : 'Declaration',
     badge('new', 'from source') + ' - taken from the definition the <b>Origin</b> row names, so ' +
     'nothing has to be inferred from call sites.']);
+  if (arityCell(n)) rows.push(['Arity', arityCell(n)]);
   if (pr) rows.push(['Probed in-game', badge('engine', pr.version) + (pr.detail ? ' - ' + x(pr.detail) : '')]);
 
   const overloads = d && d.overloads.length
@@ -430,9 +440,9 @@ ${badge('addon', 'addons')} only where <code>ui/addons/*</code> menus run.<br>
 ${badge('new', 'core')} only in the HUD environment - addon code cannot reach these.<br>
 ${badge('gone', 'absent')} declared, but present in neither version.<br>
 The column is headed <b>Seen in</b>; a row carries the short word, and hovering it or opening the card gives the full wording.</td></tr>
-<tr><th>Signature</th><td>${badge('ok', 'confirmed')} vanilla calls it, and every argument count fits the declaration - or, where vanilla never calls it, the global was called in the running game instead and the card's <b>Probed in-game</b> row says what that call measured.<br>
-${badge('gone', 'disputed')} vanilla passes a count the declaration cannot take - believe the call site.<br>
-${badge('warn', 'unverified')} neither: no vanilla code calls it, and no probe reading either.<br>
+<tr><th>Signature</th><td>${badge('ok', 'confirmed')} the executable's own argument check accepts exactly the range the declaration takes. Where the executable counts nothing, vanilla calls it and every argument count fits the declaration - or, where vanilla never calls it either, the global was called in the running game and the card's <b>Probed in-game</b> row says what that call measured.<br>
+${badge('gone', 'disputed')} the executable accepts a different range, or vanilla passes a count the declaration cannot take - believe the executable, then the call site.<br>
+${badge('warn', 'unverified')} none of these: no count check in the executable, no vanilla call site, and no probe reading.<br>
 ${badge('new', 'from source')} nothing to verify: the name is defined in a vanilla <code>.lua</code> file, so its declaration is read from that definition. The three verdicts above are for engine globals, which no file defines; these ${names.length - counts('engine')} carry this instead, which is why all four options together add up to the ${names.length}.</td></tr>
 <tr><th>Game versions</th><td>Which versions have the global <i>to be used</i>: a version that deprecated it is not counted here, in the filter, or in its count, even though the executable still exports the name.<br>
 ${badge('ok', 'all')} in every version covered here (${VERSIONS.join(', ')}).<br>
@@ -440,7 +450,8 @@ ${badge('new', '≥ ' + VERSIONS[VERSIONS.length - 1])} from that version onward
 ${badge('gone', '≤ ' + VERSIONS[0])} up to that version, and gone in the next.<br>
 The card still names every version, because which Lua environment holds it can differ between them.</td></tr>
 <tr><th>Deprecated</th><td>${badge('gone', 'deprecated: 9.00')} - the game version that deprecated the name; the card says what the engine answers when it is called anyway. Independent of the signature badge: a deprecated name can still have a measured signature, and a live one can have none. A deprecated version does not list the name: the card's <b>Game versions</b> row says <i>deprecated</i> there, and the <b>Version</b> filter has a <b>deprecated</b> option for the names no covered version can still use.</td></tr>
-<tr><th>Probed</th><td>${badge('engine', 'probed: 8.00')} / ${badge('engine', 'probed: 8.00, 9.00')} - the card's reading was taken by <i>calling</i> the global in the running game, on the versions listed; every other card was read from vanilla's own call sites.<br>
+<tr><th>Arity</th><td>${badge('engine', 'X4.exe 8.00, 9.00')} - the argument counts the executable's own check accepts, read statically from each version's <code>X4.exe</code> without running the game. <b>N or more</b>: the check sets no upper bound. <b>more are logged, then ignored</b>: extra arguments draw an error line and the call runs anyway. <b>fewer raise a Lua error</b>: the executable has no count check, but Lua's own <code>luaL_check*</code> rejects a missing argument with "bad argument #N", as in the lowercase Anark family; a check behind a branch is not seen, so N is a floor. <b>fewer return silently, doing nothing</b>: a short call is dropped without an error line. <b>not checked</b>: the executable counts nothing, as in <code>GetDate</code>. Where the two versions differ the card gives each. A card lists only the versions whose executable registers the name, so a name new in 9.00 shows <code>9.00</code> alone.</td></tr>
+<tr><th>Probed</th><td>${badge('engine', 'probed: 8.00')} / ${badge('engine', 'probed: 8.00, 9.00')} - the card's reading was taken by <i>calling</i> the global in the running game, on the versions listed.<br>
 Every global was re-called on 9.00 in a confirmation pass, and presence, argument counts, return shapes and the engine's own complaints all reproduce 8.00 with <b>one exception</b>, <code>GetRadarModuleName</code>, which 9.00 deprecates. A card lists <code>9.00</code> only where a run on that version produced the reading it states, so a card badged <code>8.00</code> alone is still one 9.00 agrees with.</td></tr>
 <tr><th>Copying</th><td>An open card carries <b>Copy name</b>, <b>Copy signature</b> and <b>Copy link</b>; the last gives a URL that reopens that card.</td></tr>
 <tr><th>Saved</th><td>${badge('warn', 'saved')} - a <code>&lt;savedvariable&gt;</code> in the addon’s <code>ui.xml</code>. The engine restores the previous value <i>before</i> that file runs, which is why vanilla creates every one of them with <code>X = X or { }</code>. The card names the store: ${badge('warn', 'saved: userdata')} is per player profile, ${badge('warn', 'saved: savegame')} travels with the save.</td></tr>

@@ -29,6 +29,8 @@ const META = [
   [/^Versions:\s*(.+)$/, 'versions'],
   [/^Usage:\s*(.+)$/, 'usage'],
   [/^Seen at:\s*(.+)$/, 'seenAt'],
+  // Also written by write-meta.js, from arity.json: what X4.exe's own count check accepts.
+  [/^Arity:\s*(.+)$/, 'arity'],
   // Hand-written, unlike the four above: what was measured by calling the global
   // in the running game. Evidence a static sweep of vanilla cannot produce, so it
   // is deliberately outside write-meta.js's OWNED set.
@@ -142,6 +144,7 @@ function parse() {
         versions: b.meta.versions || null,
         usage: b.meta.usage || null,
         seenAt: b.meta.seenAt ? b.meta.seenAt.split(/,\s*/) : [],
+        arity: b.meta.arity || null,
         probed: b.meta.probed || null,
         deprecated: b.meta.deprecated || null,
       };

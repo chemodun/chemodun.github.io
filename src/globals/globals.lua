@@ -222,8 +222,9 @@ function ActivateSliderCellInput(sliderCell) end
 -- Adds a specified amount of an ammo ware to a component (e.g., a ship or station).
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 8 vanilla call sites, 4-5 arguments
+-- Usage: confirmed - X4.exe count check, 8 vanilla call sites, 4-5 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:106, ui/addons/ego_detailmonitor/menu_map.lua:4636
+-- Arity: 3-5 - X4.exe 8.00, 9.00
 ---@param componentID any -- The ID of the component to add ammo to.
 ---@param wareID string -- The ID of the ammo ware.
 ---@param amount number -- The integer amount of ammo to add.
@@ -235,8 +236,9 @@ function AddAmmo(componentID, wareID, amount, checkOnly, arg5) end
 -- Adds a specified amount of a ware to a component's cargo bay.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 4 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 4 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:4606
+-- Arity: 3-4 - X4.exe 8.00, 9.00
 ---@param componentID any -- The ID of the component to add cargo to.
 ---@param wareID string -- The ID of the ware.
 ---@param amount number -- The integer amount of the ware to add; may be negative to remove.
@@ -260,10 +262,11 @@ function AddGlobalAccess(name, func) end
 --- call sites.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 3-4 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 3-4 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:115, ui/addons/ego_detailmonitor/menu_map.lua:19163
+-- Arity: 3-4 - X4.exe 8.00, 9.00
 ---@param componentID any -- The ID of the component receiving the items; nil for the player.
----@param wareID any -- The ID of the ware to add.
+---@param wareID string -- The ID of the ware to add.
 ---@param amount number -- The amount to add.
 ---@param arg4? any -- Unidentified in 9.00 vanilla usage; always true.
 function AddInventory(componentID, wareID, amount, arg4) end
@@ -272,8 +275,9 @@ function AddInventory(componentID, wareID, amount, arg4) end
 -- Unlocks a specific encyclopedia entry or other knowledge item for the player.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 70 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 70 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:300, ui/addons/ego_detailmonitor/menu_diplomacy.lua:1856
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param category string -- The category of the item (e.g., "wares", "factions").
 ---@param itemID string -- The ID of the item to unlock.
 function AddKnownItem(category, itemID) end
@@ -283,27 +287,35 @@ function AddKnownItem(category, itemID) end
 --- `"player"` in the only vanilla call - the licence type, and the faction the licence is with.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_trader_blueprintsorlicences.lua:600
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param factionID string -- The ID of the faction receiving the licence.
 ---@param licenceID string -- The ID of the licence to grant.
----@param otherFactionID? string -- The faction the licence applies to.
+---@param otherFactionID string -- The faction the licence applies to.
 function AddLicence(factionID, licenceID, otherFactionID) end
 
 
---- Writes an entry into the player's logbook under a category. Vanilla passes five arguments
---- where the declaration names three plus a vararg tail, so the entry carries more than a title
---- and a text - the help text menu logs a tip with `nil` for the text and a string in the fifth
---- position.
+--- Writes an entry into the player's logbook under a category. X4.exe's argument errors name
+--- nine of the ten arguments it accepts: the text comes second and the title fifth, which is
+--- how the help text menu logs a tip - `AddLogbookEntry("tips", text, nil, nil, ReadText(1001,
+--- 5713))`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 5 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 5 arguments
 -- Seen at: ui/addons/ego_helptext/helptext.lua:152
+-- Arity: 2-10 - X4.exe 8.00, 9.00
 ---@param category string -- The logbook category (e.g., "general", "upkeep").
----@param title string -- The title of the log entry.
----@param text string -- The main content of the log entry.
----@param ... any -- Optional additional parameters for formatting or context.
-function AddLogbookEntry(category, title, text, ...) end
+---@param text string The main content of the entry.
+---@param interaction? string Named by X4.exe.
+---@param interactioncomponent? any A component ID, named by X4.exe.
+---@param title? string The title of the entry.
+---@param entityname? string Named by X4.exe.
+---@param factionname? string Named by X4.exe.
+---@param money? number Named by X4.exe.
+---@param bonus? number Named by X4.exe.
+---@param arg10? any Unidentified; X4.exe accepts it.
+function AddLogbookEntry(category, text, interaction, interactioncomponent, title, entityname, factionname, money, bonus, arg10) end
 
 
 --- Credits or debits a **container's** account by `amount`, and returns the amount moved. A
@@ -323,7 +335,8 @@ function AddLogbookEntry(category, title, text, ...) end
 --- is not the argument either.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - nine rungs over a station, a ship, a derived entity and the player, each a
 -- +1000 / -1000 pair with the account read back either side; arity stated by the engine in words.
 -- 9.00 repeated the station and the ship: the container's account moves by the amount, the player
@@ -340,8 +353,9 @@ function AddMoney(containerID, amount) end
 --- last one is optional.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 4-5 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 4-5 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:3637, ui/addons/ego_interactmenu/menu_interactmenu.lua:985
+-- Arity: 3-5 - X4.exe 8.00, 9.00
 ---@param tradeOfferID any -- The ID of the trade offer.
 ---@param shipID any -- The ID of the ship performing the trade.
 ---@param amount number -- The amount of the ware to trade.
@@ -357,8 +371,9 @@ function AddTradeToShipQueue(tradeOfferID, shipID, amount, immediate, fromTrader
 --- as well in 9.00.
 -- Environment: addons + core
 -- Versions: 8.00 (addons), 9.00 (addons + core)
--- Usage: confirmed - 122 vanilla call sites, 2-3 arguments
+-- Usage: confirmed - X4.exe count check, 122 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:381, ui/addons/ego_detailmonitor/menu_diplomacy.lua:662
+-- Arity: 2-3 on 8.00, 2 or more on 9.00 - X4.exe
 ---@param menuName string -- The name of the menu or UI area where the event occurred.
 ---@param eventName string -- The name of the event.
 ---@param ... any -- Optional additional data associated with the event.
@@ -399,7 +414,8 @@ function AddUITriggeredEvent(menuName, eventName, ...) end
 --- satellites are `<deployable>`, a separate enum reached through ammo storage.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 4 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - three ships, both storages read back per macro either side of every call;
 -- the amount, the unavailable flag, the consumable path and the fill-to-maxcount clamp are 9.00
 -- measurements, where 8.00 only carried them
@@ -413,8 +429,9 @@ function AddUnits(defensibleID, unitMacro, amount, unavailable) end
 -- Adjusts a multi-line string, likely for formatting or word wrapping.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:6285
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param text string -- The string to adjust.
 ---@return string -- The adjusted string.
 function AdjustMultilineString(text) end
@@ -449,7 +466,8 @@ function AdjustMultilineString(text) end
 --- and the player entity both produce the same signalled set and the same null payload.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - witnessed with an MD group listener, against a positive control; the
 -- subordinates-but-not-the-commander asymmetry reproduced on both versions
 ---@param controllable any The controllable whose subordinates are signalled.
@@ -499,29 +517,37 @@ AKGameplan = nil
 --- ship, so it is not a substitute for the lookup.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - a player station and a capital ship, an MD group listener with no param
 -- filter as the witness; 'update config' raised on the defence entity on both versions
 ---@param defencenpcID any The defence NPC entity to signal. Any entity is accepted; a controllable is not.
 function AttackEnemySettingChanged(defencenpcID) end
 
 
---- Computes the bounding box of a scene element.
---- Sibling of calculateGlobalTransform. No vanilla code calls it; signature unverified.
+--- Computes the bounding box of a scene element into two `Vector` userdata the caller passes
+--- (X4.exe checks both against `VectorType`) and returns them. A fourth argument, read only
+--- when exactly four are passed, must be a boolean.
+--- Sibling of calculateGlobalTransform. No vanilla code calls it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param element any The scene element.
----@param ... any Receives the box; the exact form is unverified.
----@return any box
-function calculateBoundingBox(element, ...) end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 3 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
+---@param element userdata The scene element.
+---@param boxMin userdata A `Vector` that receives one corner.
+---@param boxMax userdata A `Vector` that receives the other corner.
+---@param flag? boolean Unidentified.
+---@return userdata boxMin
+---@return userdata boxMax
+function calculateBoundingBox(element, boxMin, boxMax, flag) end
 
 
 --- Returns a scene element's opacity with every ancestor's opacity folded in.
 --- No vanilla code calls it; signature unverified.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@return number opacity
 function calculateGlobalOpacity(element) end
@@ -594,7 +620,8 @@ function CallWidgetEventScripts(widgetID, eventName, ...) end
 --- `canuseassignment` takes an actual `$assignment` and is the stricter question.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - four pairs including the same two objects in both orders, arity 2; five
 -- more pairs in both orders on 9.00 against one reference ship, where every station answered
 -- `false` as the subordinate and `true` as the commander, and ship against ship was `true` both
@@ -616,7 +643,8 @@ function CanBeSubordinateOf(subordinateID, commanderID) end
 --- line implies rather than one taken.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - called bare on both versions with no conversation running: `false` and
 -- the same engine line either side. No argument is required; the positive case is unmeasured.
 ---@return boolean cancelled `false` when there was no conversation to cancel.
@@ -636,8 +664,9 @@ function CancelEditBoxInput(editBoxID) end
 -- Checks if a trade is possible between a trade offer and a ship.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 3-4 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 3-4 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21382, ui/addons/ego_detailmonitor/menu_map.lua:21403
+-- Arity: 3-4 - X4.exe 8.00, 9.00
 ---@param tradeOfferID any -- The ID of the trade offer.
 ---@param shipID any -- The ID of the ship.
 ---@param amount number -- The amount to trade.
@@ -649,8 +678,9 @@ function CanTradeWith(tradeOfferID, shipID, amount, isMultiTrade) end
 -- Checks if the player has the necessary access to view live data for a component (e.g., video feed from a station).
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:6210
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param componentID any -- The ID of the component.
 ---@return boolean -- True if live data can be viewed.
 function CanViewLiveData(componentID) end
@@ -661,6 +691,7 @@ function CanViewLiveData(componentID) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:5961
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return boolean -- True if a regression is detected.
 function CheckInputProfileRegression() end
 
@@ -668,8 +699,9 @@ function CheckInputProfileRegression() end
 -- Checks if a component has a suitable transport type for a given ware (e.g., solid, liquid, container).
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21868, ui/addons/ego_detailmonitor/menu_station_overview.lua:497
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param componentID any -- The ID of the component (e.g., a ship or station).
 ---@param wareID string -- The ID of the ware to check.
 ---@return boolean -- True if the component can transport the ware.
@@ -680,28 +712,32 @@ function CheckSuitableTransportType(componentID, wareID) end
 --- them with `OnlineClearLogbookRewards` instead.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function ClaimVentureRewards() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param transactionid string Named by X4.exe.
+function ClaimVentureRewards(transactionid) end
 
 
 -- Clears a previously set stock limit override for a specific ware in a container.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_station_overview.lua:2423, ui/addons/ego_detailmonitorhelper/helper.lua:12448
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param containerID any -- The ID of the container.
----@param wareID string -- The ID of the ware.
+---@param wareID? string -- The ID of the ware.
 function ClearContainerStockLimitOverride(containerID, wareID) end
 
 
 -- Clears a previously set ware price override for a specific ware in a container.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:5050, ui/addons/ego_detailmonitor/menu_station_overview.lua:2417
+-- Arity: 1-3 - X4.exe 8.00, 9.00
 ---@param containerID any -- The ID of the container.
----@param wareID string -- The ID of the ware.
----@param isBuyOverride boolean -- True to clear the buy price, false to clear the sell price.
+---@param wareID? string -- The ID of the ware.
+---@param isBuyOverride? boolean -- True to clear the buy price, false to clear the sell price.
 function ClearContainerWarePriceOverride(containerID, wareID, isBuyOverride) end
 
 
@@ -709,20 +745,22 @@ function ClearContainerWarePriceOverride(containerID, wareID, isBuyOverride) end
 --- the same log.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 - X4.exe 8.00, 9.00
 function ClearErrors() end
 
 
 --- Clears logbook entries of one category, or of every category when the category is nil. The
---- first argument is an age and vanilla always passes 0, which clears them all regardless of
---- when they were written.
+--- first argument is the number of entries to keep - the name X4.exe's argument error gives it
+--- - and vanilla always passes 0, which clears them all.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_playerinfo.lua:847
----@param age number -- (inferred) The age of entries to clear (e.g., 0 for all).
----@param category string|nil -- The category to clear, or nil for all categories.
-function ClearLogbook(age, category) end
+-- Arity: 0-2 (more are logged, then ignored) - X4.exe 8.00, 9.00
+---@param keepnumentries? number -- The number of entries to keep; vanilla passes 0.
+---@param category? string|nil -- The category to clear, or nil for all categories.
+function ClearLogbook(keepnumentries, category) end
 
 
 --- Clears a ship's queued trades: every entry of the queue `GetTradeShipData` reports, which is
@@ -739,7 +777,8 @@ function ClearLogbook(age, category) end
 --- would take a station as well, and nothing here confirms or denies that.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - read back through GetTradeShipData, before and twice after; 9.00 repeated
 -- it on a second L trader with two trades queued and read 0 on both reads after the call
 ---@param shipID any The ship whose trade queue should be cleared.
@@ -751,8 +790,9 @@ function ClearTradeQueue(shipID) end
 --- then` - rather than clamping the coordinates itself.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 8 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 8 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:7105
+-- Arity: 8 - X4.exe 8.00, 9.00
 ---@param x0 number -- The starting x-coordinate of the line.
 ---@param y0 number -- The starting y-coordinate of the line.
 ---@param x1 number -- The ending x-coordinate of the line.
@@ -782,15 +822,16 @@ function CloseDropDownOptions(dropdownID) end
 --- screen.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 9 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 9 arguments
 -- Seen at: ui/addons/ego_viewhelper/viewhelper.lua:74
+-- Arity: 1-7 on 8.00, 1-9 on 9.00 - X4.exe
 ---@param frameID any -- The ID of the frame to close.
----@param hasPlayerControls boolean
----@param startAnimation boolean
----@param useMiniWidgetSystem boolean
----@param keepHUDVisible boolean
----@param keepCrosshairVisible boolean
----@param showTickerPermanently boolean
+---@param hasPlayerControls? boolean
+---@param startAnimation? boolean
+---@param useMiniWidgetSystem? boolean
+---@param keepHUDVisible? boolean
+---@param keepCrosshairVisible? boolean
+---@param showTickerPermanently? boolean
 ---@param blurBackground? boolean
 ---@param usePanelMode? boolean
 function CloseFrame(frameID, hasPlayerControls, startAnimation, useMiniWidgetSystem, keepHUDVisible, keepCrosshairVisible, showTickerPermanently, blurBackground, usePanelMode) end
@@ -801,8 +842,9 @@ function CloseFrame(frameID, hasPlayerControls, startAnimation, useMiniWidgetSys
 --- what was on screen.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:1276
+-- Arity: 0 - X4.exe 8.00, 9.00
 function CloseMenusUponMouseClick() end
 
 
@@ -821,7 +863,8 @@ function CloseMenusUponMouseClick() end
 --- one, and two empty routes return `false` like any other tie.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 4 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - a ten-case truth table over literal numbers, both orders of every pair,
 -- every case answering the same either side
 ---@param numgates number Gate transitions of the first route.
@@ -858,8 +901,9 @@ function ConfirmEditBoxInput(editBoxID) end
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 287 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 287 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1648, ui/addons/ego_detailmonitor/menu_docked.lua:746
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param id any -- The component, object, or ID to convert.
 ---@return integer64 -- The 64-bit integer representation of the ID.
 function ConvertIDTo64Bit(id) end
@@ -869,8 +913,9 @@ function ConvertIDTo64Bit(id) end
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 279 vanilla call sites, 2-6 arguments
+-- Usage: confirmed - X4.exe count check, 279 vanilla call sites, 2-6 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:2167, ui/addons/ego_detailmonitor/menu_docked.lua:725
+-- Arity: 1-6 - X4.exe 8.00, 9.00
 ---@param number number -- The number to format.
 ---@param useGroupingSeparator? boolean -- Whether to use thousand separators (e.g., 1,000). (inferred, default: false)
 ---@param padZeros? integer -- The number of digits to pad with leading zeros. (inferred, default: 0)
@@ -885,9 +930,10 @@ function ConvertIntegerString(number, useGroupingSeparator, padZeros, forceSign,
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:18405, ui/addons/ego_detailmonitor/menu_missionbriefing.lua:336
----@param difficulty number|string -- The difficulty level of the mission (e.g., 1, "easy", "hard").
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param difficulty number -- The difficulty level of the mission.
 ---@return string localizedName -- The localized string for the difficulty (e.g., "Easy", "Very Hard").
 ---@return string mouseOverText -- The tooltip text for the difficulty.
 function ConvertMissionLevelString(difficulty) end
@@ -900,8 +946,9 @@ function ConvertMissionLevelString(difficulty) end
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 134 vanilla call sites, 3-6 arguments
+-- Usage: confirmed - X4.exe count check, 134 vanilla call sites, 3-6 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:602, ui/addons/ego_detailmonitor/menu_diplomacy.lua:1772
+-- Arity: 1-6 - X4.exe 8.00, 9.00
 ---@param money number -- The amount of money to format.
 ---@param showSign? boolean -- Whether to always show a sign (+/-). (inferred, default: false)
 ---@param useGrouping? boolean -- Whether to use thousand separators. (inferred, default: true)
@@ -917,8 +964,9 @@ function ConvertMoneyString(money, showSign, useGrouping, accuracy, colorize, ig
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 355 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 355 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:487, ui/addons/ego_detailmonitor/menu_diplomacy.lua:1657
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param idString string -- The string to convert.
 ---@return integer64 -- The resulting 64-bit integer ID.
 function ConvertStringTo64Bit(idString) end
@@ -929,8 +977,9 @@ function ConvertStringTo64Bit(idString) end
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 164 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 164 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:344, ui/addons/ego_detailmonitor/menu_diplomacy.lua:448
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param idString string -- The string representation of the game ID.
 ---@return any -- The Lua object ID, likely a specific userdata type.
 function ConvertStringToLuaID(idString) end
@@ -938,9 +987,8 @@ function ConvertStringToLuaID(idString) end
 
 --- Formats a time in seconds into a string, using the format specifiers below. The default
 --- format is `%T`, which takes the time format from the TextDB and shows days only past one
---- day. Vanilla calls it 63 times and never passes more than two arguments, so `separators`
---- and `precision` are marked optional: their names and meanings are documented, but whether
---- the engine accepts them is unverified here.
+--- day. Vanilla calls it 63 times and never passes more than two arguments; X4.exe's count
+--- check accepts one to four, so `format`, `separators` and `precision` are all optional.
 ---
 --- Specifiers: `%s` all seconds, `%S` seconds 00-59, `%m` all minutes, `%M` minutes 00-59,
 --- `%h` all hours, `%H` hours 00-23, `%d` all days, `%T` the TextDB time format, `%%` a literal
@@ -954,8 +1002,9 @@ function ConvertStringToLuaID(idString) end
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 63 vanilla call sites, 1-2 arguments
+-- Usage: confirmed - X4.exe count check, 63 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1524, ui/addons/ego_detailmonitor/menu_docked.lua:1343
+-- Arity: 1-4 - X4.exe 8.00, 9.00
 ---@param time number The time in seconds to format.
 ---@param format? string A format string, e.g. `"%h:%M:%S"` or `"%T"`. Defaults to `"%T"`.
 ---@param separators? boolean Use thousand separators.
@@ -969,8 +1018,9 @@ function ConvertTimeString(time, format, separators, precision) end
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:10480
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param component any -- The component whose default order parameters are to be copied.
 ---@return nil
 function CopyDefaultOrderParamsForPlanning(component) end
@@ -987,15 +1037,16 @@ function CopyDefaultOrderParamsForPlanning(component) end
 function createAxisPropertyInfo(axisproperty) end
 
 
--- Creates a text element within a colored box, often used for headers or distinct labels in tables.
+--- Creates a text element within a colored box, often used for headers or distinct labels in
+--- tables. X4.exe's count check takes exactly one argument, the descriptor table.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:5646
----@param text string|table -- The text to display, or a descriptor table for the widget.
----@param properties? table -- A table of properties for the widget (e.g., { width, fontsize, boxColor, halign, mouseOverText }).
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param description table -- The descriptor carrying the text and its properties (e.g., { width, fontsize, boxColor, halign, mouseOverText }).
 ---@return table widget -- The created box text widget.
-function CreateBoxText(text, properties) end
+function CreateBoxText(description) end
 
 
 --- Builds a button widget and returns its descriptor. One table carries everything - icon,
@@ -1004,9 +1055,10 @@ function CreateBoxText(text, properties) end
 --- to release later.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 18 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 18 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:420, ui/addons/ego_detailmonitorhelper/helper.lua:2047
----@param properties? table -- A table of properties for the button (e.g., { active, mouseOverText, icon, onClick, height, width }).
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param properties table -- A table of properties for the button (e.g., { active, mouseOverText, icon, onClick, height, width }).
 ---@return table widget -- The created button widget.
 function CreateButton(properties) end
 
@@ -1016,12 +1068,12 @@ function CreateButton(properties) end
 --- reaches it through `Helper.createCheckBox`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:6375
----@param checked boolean|function -- The initial state of the checkbox, or a function that returns the state.
----@param properties? table -- A table of properties for the checkbox (e.g., { active, height, width, mouseOverText, onCheckChanged }).
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param description table -- The descriptor carrying the state and the properties (e.g., { active, height, width, mouseOverText, onCheckChanged }).
 ---@return table widget -- The created checkbox widget.
-function CreateCheckBox(checked, properties) end
+function CreateCheckBox(description) end
 
 
 -- Creates a descriptor table for a cutscene, specifying the cutscene to play and any required reference objects.
@@ -1029,10 +1081,11 @@ function CreateCheckBox(checked, properties) end
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 15 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 15 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2389, ui/addons/ego_detailmonitor/menu_playerinfo.lua:4464
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param cutsceneKey string -- The key/name of the cutscene to play (e.g., "OrbitIndefinitelySlow").
----@param refObjects table -- A table of reference objects for the cutscene, with keys like 'targetobject' or 'npcref'.
+---@param refObjects? table -- A table of reference objects for the cutscene, with keys like 'targetobject' or 'npcref'.
 ---@return table descriptor -- The created cutscene descriptor table.
 function CreateCutsceneDescriptor(cutsceneKey, refObjects) end
 
@@ -1042,12 +1095,12 @@ function CreateCutsceneDescriptor(cutsceneKey, refObjects) end
 --- goes through `Helper.createDropDown`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:2180
----@param options table -- A table of option entries to populate the dropdown. Each entry is a table (e.g., { id, text, mouseOverText }).
----@param properties? table -- A table of properties for the dropdown (e.g., { startOption, active, height, onOptionChanged }).
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param description table -- The descriptor carrying the options and the properties (e.g., { startOption, active, height, onOptionChanged }).
 ---@return table widget -- The created dropdown widget.
-function CreateDropDown(options, properties) end
+function CreateDropDown(description) end
 
 
 --- Builds an edit box widget and returns its descriptor. The single descriptor table carries
@@ -1055,9 +1108,10 @@ function CreateDropDown(options, properties) end
 --- code goes through `Helper.createEditBox`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:2224
----@param properties? table -- A table of properties for the edit box (e.g., { description, defaultText, textHidden, onTextChanged, onConfirmed }).
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param properties table -- A table of properties for the edit box (e.g., { description, defaultText, textHidden, onTextChanged, onConfirmed }).
 ---@return table widget -- The created edit box widget.
 function CreateEditBox(properties) end
 
@@ -1067,8 +1121,9 @@ function CreateEditBox(properties) end
 --- calls this directly.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:7169
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param descriptor table -- A descriptor table containing all properties for the flowchart (nodes, edges, layout, etc.).
 ---@return table widget -- The created flowchart widget.
 function CreateFlowchart(descriptor) end
@@ -1079,8 +1134,9 @@ function CreateFlowchart(descriptor) end
 --- everything and `helper.lua` assembles it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:7660
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param descriptor table -- A descriptor table containing properties for the edge (e.g., source and target nodes).
 ---@return table widget -- The created flowchart edge widget.
 function CreateFlowchartEdge(descriptor) end
@@ -1090,30 +1146,33 @@ function CreateFlowchartEdge(descriptor) end
 --- constructors, the single descriptor table carries everything, and `helper.lua` assembles it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:7379
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param descriptor table -- A descriptor table containing properties for the node (e.g., text, position, size, content).
 ---@return table widget -- The created flowchart node widget.
 function CreateFlowchartNode(descriptor) end
 
 
--- Creates a font string descriptor for use in other UI elements.
+--- Creates a font string descriptor for use in other UI elements. X4.exe's count check takes
+--- exactly one argument, the descriptor table.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 21 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 21 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:418, ui/addons/ego_detailmonitorhelper/helper.lua:905
----@param text string|table -- The text to display, or a full descriptor table for the font string.
----@param properties? table -- A table of properties for the font string (e.g., { font, fontsize, color, halign }).
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param description table -- The descriptor carrying the text and its properties (e.g., { font, fontsize, color, halign }).
 ---@return table descriptor -- The created font string descriptor.
-function CreateFontString(text, properties) end
+function CreateFontString(description) end
 
 
 -- Creates a UI frame widget, which is a container for other UI elements. (Legacy version)
 -- Note: Most code uses Helper.createFrameHandle() or CreateFrame2() instead.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 10-11 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 10-11 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:786, ui/addons/ego_debuglog/debuglog.lua:805
+-- Arity: 1-12 - X4.exe 8.00, 9.00
 ---@param children table -- A table of child widgets to add to the frame.
 ---@param layer? string -- The rendering layer for the frame.
 ---@param background? string -- The background style or texture.
@@ -1125,8 +1184,9 @@ function CreateFontString(text, properties) end
 ---@param y? number -- The y-position of the frame.
 ---@param properties? table -- An additional table of properties.
 ---@param arg11? any -- Unidentified in 9.00 vanilla usage; a standard-button table such as { close = true }.
+---@param arg12? any Unidentified; X4.exe accepts it.
 ---@return table widget -- The created frame widget.
-function CreateFrame(children, layer, background, name, parent, width, height, x, y, properties, arg11) end
+function CreateFrame(children, layer, background, name, parent, width, height, x, y, properties, arg11, arg12) end
 
 
 --- Builds a frame - the box a menu's tables and widgets live in - and returns its descriptor.
@@ -1134,8 +1194,9 @@ function CreateFrame(children, layer, background, name, parent, width, height, x
 --- `Helper.createFrameHandle` wraps it for menu code; the help text menu builds one directly.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:4102, ui/addons/ego_helptext/helptext.lua:410
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param descriptor table -- A descriptor table containing all properties for the frame (e.g., { children, layer, width, height, x, y }).
 ---@return table widget -- The created frame widget.
 function CreateFrame2(descriptor) end
@@ -1157,8 +1218,9 @@ function createFrameTexturePropertyInfo(textureproperty) end
 --- a point on the finished widget.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:6598
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param properties table -- A table of properties for the graph (e.g., { height, scaling, data }).
 ---@return table widget -- The created graph widget.
 function CreateGraph(properties) end
@@ -1168,12 +1230,12 @@ function CreateGraph(properties) end
 --- passes a single descriptor table that already carries the icon and its properties together.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:5741
----@param icon string -- The ID or name of the icon texture to display.
----@param properties? table -- A table of properties for the icon (e.g., { width, height, color, mouseOverText }).
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param description table -- The descriptor carrying the icon and its properties (e.g., { width, height, color, mouseOverText }).
 ---@return table widget -- The created icon widget.
-function CreateIcon(icon, properties) end
+function CreateIcon(description) end
 
 
 --- Builds a **legacy** interaction descriptor and returns it as **userdata**. Deprecated since
@@ -1192,7 +1254,8 @@ function CreateIcon(icon, properties) end
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: none - present in both, but deprecated in 3.00 Beta 6
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Deprecated: 3.00 Beta 6 - superseded by `CreateInteractionDescriptor2`; the descriptor type
 -- changed with it, so nothing in the current pipeline accepts what this one returns
 -- Probed: 8.00, 9.00 - created, then refused by every consumer in the current pipeline, on both
@@ -1225,26 +1288,30 @@ function CreateInteractionDescriptor(interaction, payload) end
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_targetmonitor/targetmonitor.lua:1046
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param interaction string The interaction name the MD handler listens for.
 ---@param component any The payload handed to that handler as event.param2.
 ---@return integer interactionID
 function CreateInteractionDescriptor2(interaction, component) end
 
 
--- Creates a copy of a game object within a special 3D rendering environment (a "presentation cluster") for UI display.
--- Used for things like the encyclopedia and ship previews.
+--- Creates an object from a macro inside a special 3D rendering environment (a "presentation
+--- cluster") for UI display, for things like the encyclopedia and ship previews. The
+--- encyclopedia passes the selected row's `macro`; X4.exe's argument errors name the two
+--- arguments `macro` and `backgroundmacro`.
 -- Source: Game Engine
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 6 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 6 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2392, ui/addons/ego_detailmonitor/menu_playerinfo.lua:4468
----@param object any -- The game object to display.
----@param clusterMacro string -- The macro for the presentation cluster environment (e.g., "cluster_black_wlight_bg_macro").
+-- Arity: 1-2 - X4.exe 8.00, 9.00
+---@param macro string -- The macro of the object to show.
+---@param backgroundMacro? string -- The macro of the presentation cluster (e.g., "cluster_black_wlight_bg_macro").
 ---@return table cluster -- The created presentation cluster.
 ---@return any presentationObject -- The handle to the new object inside the cluster.
-function CreateObjectInPresentationCluster(object, clusterMacro) end
+function CreateObjectInPresentationCluster(macro, backgroundMacro) end
 
 
 --- Builds the help-overlay descriptor for a widget, or nil when it has no overlay text.
@@ -1260,8 +1327,9 @@ function createOverlayPropertyInfo(widget) end
 -- Creates a render target widget, which is an area in the UI used to display 3D objects or scenes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 10 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 10 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:4665
+-- Arity: 2-9 on 8.00, 2-10 on 9.00 - X4.exe
 ---@param width number -- Width of the render target.
 ---@param height number -- Height of the render target.
 ---@param x? number -- X position.
@@ -1277,28 +1345,28 @@ function CreateRenderTarget(width, height, x, y, alpha, mouseOverText, helpOverl
 
 
 --- Builds the combined shield and hull bar and returns its descriptor. `helper.lua`, the only
---- vanilla caller, passes a single descriptor table with the size filled in, so the separate
---- shield and hull parameters here are the older shape.
+--- vanilla caller, passes a single descriptor table with the size filled in, and X4.exe's count
+--- check takes exactly that one argument.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:5950
----@param shield number|table -- The shield percentage, or a full descriptor table.
----@param hull? number -- The current hull percentage (0-100).
----@param properties? table -- A table of properties for the bar (e.g., { width, height, scaling }).
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param description table -- The descriptor carrying the values and the size (e.g., { width, height, scaling }).
 ---@return table widget -- The created shield/hull bar widget.
-function CreateShieldHullBar(shield, hull, properties) end
+function CreateShieldHullBar(description) end
 
 
 -- Creates a data sink for the target element system, used to manage HUD target indicators.
 -- Source: Game Engine
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:1712
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param sinkName string -- The unique name for the sink (e.g., "explicittarget", "poi").
 ---@param numElements integer|table -- The maximum number of elements, or the position elements themselves.
----@param elements? table -- The target elements managed by the sink.
+---@param elements table -- The target elements managed by the sink.
 ---@return nil
 function CreateSink(sinkName, numElements, elements) end
 
@@ -1306,8 +1374,9 @@ function CreateSink(sinkName, numElements, elements) end
 -- Creates a slider cell widget, used for selecting a numerical value within a range.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:2331
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param properties table -- A table of properties for the slider (e.g., { min, max, start, step, onValueChanged }).
 ---@return table widget -- The created slider cell widget.
 function CreateSliderCell(properties) end
@@ -1317,8 +1386,9 @@ function CreateSliderCell(properties) end
 -- Source: Game Engine
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 12 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 12 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/targetsystem.lua:1788
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param sourceName string -- The unique name for the source (e.g., "basic", "missionobjective").
 ---@return nil
 function CreateSource(sourceName) end
@@ -1344,8 +1414,9 @@ function CreateSource(sourceName) end
 --- reaches it through `Helper.createStatusBar` rather than directly.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:6452
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param properties StatusBarProperties
 ---@return any
 function CreateStatusBar(properties) end
@@ -1361,9 +1432,10 @@ function CreateStatusBar(properties) end
 --- is what menu code uses.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 8-22 arguments
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 8-22 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:784, ui/addons/ego_debuglog/debuglog.lua:799
----@param header table|string
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
+---@param header string
 ---@param tableContent table
 ---@param columnWidths table|number
 ---@param columnWidthPercent? boolean
@@ -1397,29 +1469,30 @@ function CreateTable(header, tableContent, columnWidths, columnWidthPercent, bor
 --- only vanilla caller and passes all ten.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 10 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 10 arguments
 -- Seen at: ui/addons/ego_viewhelper/viewhelper.lua:39
+-- Arity: 1-8 on 8.00, 1-10 on 9.00 - X4.exe
 ---@param frameDescriptors table
----@param exclusiveInteractions boolean
----@param closeOnUnhandledClick boolean
----@param useMiniWidgetSystem boolean
----@param startAnimation boolean
----@param keepHUDVisible boolean
----@param keepCrosshairVisible boolean
----@param showTickerPermanently boolean
+---@param exclusiveInteractions? boolean
+---@param closeOnUnhandledClick? boolean
+---@param useMiniWidgetSystem? boolean
+---@param startAnimation? boolean
+---@param keepHUDVisible? boolean
+---@param keepCrosshairVisible? boolean
+---@param showTickerPermanently? boolean
 ---@param blurBackground? boolean
 ---@param usePanelMode? boolean
 ---@return any
 function CreateView(frameDescriptors, exclusiveInteractions, closeOnUnhandledClick, useMiniWidgetSystem, startAnimation, keepHUDVisible, keepCrosshairVisible, showTickerPermanently, blurBackground, usePanelMode) end
 
 
---- Deactivates a view. No vanilla code calls it, so nothing here confirms what it takes or how
---- it differs from `HideView`.
+--- Deactivates a view. No vanilla code calls it, and X4.exe's count check takes no argument;
+--- what it deactivates, and how it differs from `HideView`, is unverified.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param view any
-function DeactivateView(view) end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 - X4.exe 8.00, 9.00
+function DeactivateView() end
 
 
 --- The debug library's configuration, kept global so it can be changed at runtime.
@@ -1440,28 +1513,29 @@ DebugConfig = {}
 --- data.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 449 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 449 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:445, ui/addons/ego_debuglog/debuglog.lua:973
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param message string
 function DebugError(message) end
 
 
---- Opens a profiling timer under a name, to be closed with `DebugProfileStop`. No vanilla code
---- calls either half.
+--- Opens a profiling timer, to be closed with `DebugProfileStop`. No vanilla code calls either
+--- half, and X4.exe's count check takes no argument, so the timer carries no name.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param profileName string
-function DebugProfileStart(profileName) end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 - X4.exe 8.00, 9.00
+function DebugProfileStart() end
 
 
---- Stops the profiling timer `DebugProfileStart` opened under that name. No vanilla code calls
---- either half.
+--- Stops the profiling timer `DebugProfileStart` opened. No vanilla code calls either half, and
+--- X4.exe's count check takes no argument.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param profileName string
-function DebugProfileStop(profileName) end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 - X4.exe 8.00, 9.00
+function DebugProfileStop() end
 
 
 --- Destroys a presentation cluster and everything drawn in it. Menus that show a rendered
@@ -1469,8 +1543,9 @@ function DebugProfileStop(profileName) end
 --- after stopping the cutscene and releasing its descriptor.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 11 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 11 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2343, ui/addons/ego_detailmonitor/menu_playerinfo.lua:4421
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param cluster any
 function DestroyPresentationCluster(cluster) end
 
@@ -1482,6 +1557,7 @@ function DestroyPresentationCluster(cluster) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/core/lua/dialogmenu.lua:680
+-- Arity: not checked - X4.exe 8.00, 9.00
 function DialogMenuHidden() end
 
 
@@ -1492,6 +1568,7 @@ function DialogMenuHidden() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/core/lua/dialogmenu.lua:878
+-- Arity: not checked - X4.exe 8.00, 9.00
 function DialogMenuShown() end
 
 
@@ -1502,6 +1579,7 @@ function DialogMenuShown() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 8 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/debugline.lua:124, ui/core/lua/infobar.lua:109
+-- Arity: not checked - X4.exe 8.00, 9.00
 function DisableCameraEffectSync() end
 
 
@@ -1510,8 +1588,9 @@ function DisableCameraEffectSync() end
 --- descriptors the view was created with.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_viewhelper/viewhelper.lua:40
+-- Arity: 1-3 - X4.exe 8.00, 9.00
 ---@param viewDescriptor any
 ---@param suppressDisplayErrors? boolean
 ---@param hasPlayerControls? boolean
@@ -1576,6 +1655,7 @@ function DrawTriangle(width, height, offsetX, offsetY, angle, z, color) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:897
+-- Arity: not checked - X4.exe 8.00, 9.00
 function DumpAllMessages() end
 
 
@@ -1585,6 +1665,7 @@ function DumpAllMessages() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:1717
+-- Arity: not checked - X4.exe 8.00, 9.00
 function DumpAllMessageSinks() end
 
 
@@ -1594,6 +1675,7 @@ function DumpAllMessageSinks() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:1716
+-- Arity: not checked - X4.exe 8.00, 9.00
 function DumpAllMessageSources() end
 
 
@@ -1602,6 +1684,7 @@ function DumpAllMessageSources() end
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
+-- Arity: not checked - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
 -- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function EnableCameraEffectSync() end
@@ -1611,8 +1694,9 @@ function EnableCameraEffectSync() end
 --- command and parameter and passes both through.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:464
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param command string
 ---@param parameter? string
 function ExecuteDebugCommand(command, parameter) end
@@ -1637,6 +1721,7 @@ function ExecuteDebugCommand(command, parameter) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
+-- Arity: not checked - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - seven calls, arity stated by the engine in words; every shared rung
 -- answered the same either side
 ---@param page integer|string The text page id. Strings are coerced - `("1001", "2954")` works.
@@ -1664,8 +1749,9 @@ function ExistsText(page, line) end
 --- `IsValidComponent` before calling, which the Distance Tool does not.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site; also read against kuertee_ui_extensions
+-- Usage: confirmed - X4.exe count check, no vanilla call site; also read against kuertee_ui_extensions
 -- Seen at: kuertee_ui_extensions ui/addons/ego_detailmonitor/menu_map.xpl:34321
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - a hop ladder of sector pairs in both directions plus a sector against
 -- itself, the ladder repeated over five 9.00 clicks; arity and the parameter name `fromsector`
 -- are the engine's own words on 8.00, where a cdata argument was passed
@@ -1680,40 +1766,42 @@ function FindJumpRoute(startSector, endSector) end
 --- The counterpart of registerForEvent. No vanilla code calls it; signature unverified.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param element any The scene element to raise the event on.
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param event string The event name.
----@param ... any Event arguments.
-function fireEvent(element, event, ...) end
+---@param element userdata The scene element to raise the event on.
+---@param ... any Event arguments: numbers, booleans, strings or userdata.
+function fireEvent(event, element, ...) end
 
 
 --- Raises a named event on a whole presentation rather than one element.
 --- No vanilla code calls it; signature unverified.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param presentation any The presentation.
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
+---@param presentation string The presentation's name.
 ---@param event string The event name.
----@param ... any Event arguments.
-function fireEventOnPresentation(presentation, event, ...) end
+function fireEventOnPresentation(presentation, event) end
 
 
 --- Raises an event on the Anark gameplan.
 --- See AKGameplan. No vanilla code calls it; signature unverified.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param event string The event name.
----@param ... any Event arguments.
-function fireGameplanEvent(event, ...) end
+function fireGameplanEvent(event) end
 
 
 --- Forces the Anark presentation to update now instead of on the next frame. The core target
 --- system calls it when it has changed something the player has to see immediately.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:4238, ui/widget/lua/widget_fullscreen.lua:2788
+-- Arity: 0 - X4.exe 8.00, 9.00
 function ForceAnarkUpdate() end
 
 
@@ -1721,10 +1809,11 @@ function ForceAnarkUpdate() end
 --- nothing when the component has no account, so every caller falls back with `or 0`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 6 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 6 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:14278, ui/addons/ego_detailmonitor/menu_playerinfo.lua:962
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 ---@param component any
----@param key string
+---@param key? string
 ---@return any
 function GetAccountData(component, key) end
 
@@ -1736,8 +1825,9 @@ function GetAccountData(component, key) end
 --- asks for the fourth to decide whether the target has an instant action at all.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 7 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 7 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1501, ui/core/lua/firstperson_crosshair.lua:173
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param messageID any
 ---@return string, boolean, integer, boolean, any, any, integer, any, any, any, any
 function GetActionInfo(messageID) end
@@ -1748,8 +1838,9 @@ function GetActionInfo(messageID) end
 --- table the player is not actually in.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 7 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 7 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:27238, ui/addons/ego_detailmonitorhelper/helper.lua:966
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return any
 function GetActiveFrame() end
 
@@ -1758,7 +1849,8 @@ function GetActiveFrame() end
 --- map reads `GetActiveMission` and works from the mission.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return any
 function GetActiveGuidanceMissionComponent() end
 
@@ -1767,8 +1859,9 @@ function GetActiveGuidanceMissionComponent() end
 --- compares each mission against it to mark the active row.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:18698
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return any
 function GetActiveMission() end
 
@@ -1777,8 +1870,9 @@ function GetActiveMission() end
 --- build the dropdown and preselect the current entry.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:6935
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return any
 function GetAdapterOption() end
 
@@ -1788,8 +1882,9 @@ function GetAdapterOption() end
 --- off.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:6557
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number
 function GetAimAssistOption() end
 
@@ -1798,8 +1893,9 @@ function GetAimAssistOption() end
 --- and the width when it measures a text for layout.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:13142
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param fontStringID any
 ---@return any
 function GetAlignment(fontStringID) end
@@ -1810,8 +1906,9 @@ function GetAlignment(fontStringID) end
 --- `GetCommander` returns only the immediate one.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:7621
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param controllable any
 ---@return table
 function GetAllCommanders(controllable) end
@@ -1830,8 +1927,9 @@ function GetAllCommanders(controllable) end
 --- options menu refetches the whole table after each change rather than editing it in place.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2979
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return table<integer, ExtensionSetting>
 function GetAllExtensionSettings() end
 
@@ -1848,8 +1946,9 @@ function GetAllExtensionSettings() end
 --- rather than with `exists = false`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_playerinfo.lua:2525
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - 124 ids on both versions, matching libraries/stats.xml exactly
 ---@return string[] statIDs Every statistics ID, as declared in libraries/stats.xml.
 function GetAllStatIDs() end
@@ -1882,8 +1981,9 @@ function GetAllStatIDs() end
 --- when they are empty, so both are always present and may be empty tables.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_targetmonitor/targetmonitor.lua:1199
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param component any The destructible to inspect.
 ---@return WeaponData
 function GetAllWeapons(component) end
@@ -1894,8 +1994,9 @@ function GetAllWeapons(component) end
 --- map menu reads the two together.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21341
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param container any
 ---@return table
 function GetAmmoCountAfterTradeOrders(container) end
@@ -1907,6 +2008,7 @@ function GetAmmoCountAfterTradeOrders(container) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:6734
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return any
 function GetAutoPilotTarget() end
 
@@ -1915,8 +2017,9 @@ function GetAutoPilotTarget() end
 --- the row whose callback toggles it with `SetAutorollOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2029
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function GetAutorollOption() end
 
@@ -1925,8 +2028,9 @@ function GetAutorollOption() end
 --- option rows do.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:1996
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function GetAutosaveOption() end
 
@@ -1949,8 +2053,9 @@ function GetAutosaveOption() end
 --- allows one change per entry per session.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:10474
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return BonusContentEntry[]
 function GetBonusContentData() end
 
@@ -1959,8 +2064,9 @@ function GetBonusContentData() end
 --- `SetBoostToggleOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2045
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function GetBoostToggleOption() end
 
@@ -1989,7 +2095,8 @@ function GetBoostToggleOption() end
 --- ship tried answered `0` to both keys rather than refusing the call.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - a player factory, bare, with each key alone and with all three together;
 -- the same four shapes on 9.00 over four ships and four stations, `responsibility` refused by
 -- name as an unknown key every time, and the `min` = 2/3 `max` relation measured on the three
@@ -2004,8 +2111,9 @@ function GetBudgetData(container, ...) end
 --- asks for it once it knows the component is a container, to show what is being built there.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_targetmonitor/targetmonitor.lua:869
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param component any
 ---@return any
 function GetBuildAnchor(component) end
@@ -2027,7 +2135,8 @@ function GetBuildAnchor(component) end
 --- declare was borrowed from the FFI function of the same name, which is a different function.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 3 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - six ships of four races on 8.00; on 9.00 five more ships, three station
 -- build modules and a production module, every figure matching its ware's `default` production
 -- time in that version's own wares.xml to the second, the finished Asgard answering its 516 again,
@@ -2052,7 +2161,8 @@ function GetBuildDuration(component, unused1, unused2) end
 --- call is really about.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - a shipyard and each of its three bays, arity 1; on 9.00 a shipyard and a
 -- wharf, 107 entries each, and empty on every other target tried
 ---@param containerID any The container or build module to ask about.
@@ -2069,7 +2179,8 @@ function GetBuilderMacros(containerID) end
 --- ATF Asgard built at an Argon shipyard still returned `.default`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - a shipyard and its three bays, four macros, arity 2; the three bays again
 -- on 9.00, each answering with the macro it is building
 ---@param containerID any The container or build module that would build it.
@@ -2082,8 +2193,9 @@ function GetBuildProductionMethod(containerID, macro) end
 --- `widget_fullscreen.lua` reads them to re-apply the button's glow factor on top.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:15416
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return number, number, number, number
 function GetButtonColor(buttonID) end
@@ -2094,8 +2206,9 @@ function GetButtonColor(buttonID) end
 --- come back empty.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12000
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return boolean, any, number, number
 function GetButtonHotkeyDetails(buttonID) end
@@ -2105,8 +2218,9 @@ function GetButtonHotkeyDetails(buttonID) end
 --- button is showing before it changes it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12057
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return any
 function GetButtonIcon(buttonID) end
@@ -2116,8 +2230,9 @@ function GetButtonIcon(buttonID) end
 --- icons side by side, which is how vanilla draws a paired state on one button.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12098
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return any
 function GetButtonIcon2(buttonID) end
@@ -2128,8 +2243,9 @@ function GetButtonIcon2(buttonID) end
 --- inactive.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12103
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return number, number, number, number
 function GetButtonIcon2Color(buttonID) end
@@ -2139,8 +2255,9 @@ function GetButtonIcon2Color(buttonID) end
 --- applies to an icon that is not full-sized.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12118
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return number, number
 function GetButtonIcon2Offset(buttonID) end
@@ -2150,8 +2267,9 @@ function GetButtonIcon2Offset(buttonID) end
 --- second icon to place, the same convention as `GetButtonIconSize`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12115
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return number, number
 function GetButtonIcon2Size(buttonID) end
@@ -2161,8 +2279,9 @@ function GetButtonIcon2Size(buttonID) end
 --- switching the icon element to its active slide, then applies the glow factor on top.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12062
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return number, number, number, number
 function GetButtonIconColor(buttonID) end
@@ -2173,8 +2292,9 @@ function GetButtonIconColor(buttonID) end
 --- zeroes when the icon fills the button.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12080
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return number, number
 function GetButtonIconOffset(buttonID) end
@@ -2184,8 +2304,9 @@ function GetButtonIconOffset(buttonID) end
 --- either as no icon at all.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12077
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return number, number
 function GetButtonIconSize(buttonID) end
@@ -2195,8 +2316,9 @@ function GetButtonIconSize(buttonID) end
 --- `widget_fullscreen.lua` caches it next to the main icon.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12070
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return any
 function GetButtonSwapIcon(buttonID) end
@@ -2206,8 +2328,9 @@ function GetButtonSwapIcon(buttonID) end
 --- `GetButtonIcon2` returns the second icon itself.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12108
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return any
 function GetButtonSwapIcon2(buttonID) end
@@ -2217,8 +2340,9 @@ function GetButtonSwapIcon2(buttonID) end
 --- deciding whether the button needs one at all.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12136
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return string
 function GetButtonText(buttonID) end
@@ -2228,8 +2352,9 @@ function GetButtonText(buttonID) end
 --- horizontal offset it draws the text at.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12140
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return any
 function GetButtonTextAlignment(buttonID) end
@@ -2239,8 +2364,9 @@ function GetButtonTextAlignment(buttonID) end
 --- `widget_fullscreen.lua` reads it to re-apply the text glow factor on top.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:15506
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return number, number, number, number
 function GetButtonTextColor(buttonID) end
@@ -2249,8 +2375,9 @@ function GetButtonTextColor(buttonID) end
 --- Returns the font and font size of a button's label, as two values.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12035
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return any, number
 function GetButtonTextFont(buttonID) end
@@ -2260,8 +2387,9 @@ function GetButtonTextFont(buttonID) end
 --- text that is not simply centred.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12142
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any
 ---@return number, number
 function GetButtonTextOffset(buttonID) end
@@ -2271,8 +2399,9 @@ function GetButtonTextOffset(buttonID) end
 --- the way the other option rows do.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:1899
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function GetCaptureHQOption() end
 
@@ -2283,8 +2412,9 @@ function GetCaptureHQOption() end
 --- `GetAmmoCountAfterTradeOrders` is the same idea for ammunition.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 1-2 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:14099, ui/addons/ego_detailmonitor/menu_map.lua:21340
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param component any
 ---@param includeSubordinates? boolean
 ---@return table
@@ -2296,8 +2426,9 @@ function GetCargoAfterTradeOrders(component, includeSubordinates) end
 --- table: read the cell, then call `SetButtonColor` or `SetScript` on what comes back.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 41 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 41 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:1088, ui/addons/ego_detailmonitorhelper/helper.lua:2654
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param tableObj any
 ---@param row integer
 ---@param col integer
@@ -2310,8 +2441,9 @@ function GetCellContent(tableObj, row, col) end
 --- text widget, and `Helper.updateCellText` tests for that before writing.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:1496, ui/addons/ego_detailmonitorhelper/helper.lua:2642
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param tableObj any
 ---@param row integer
 ---@param col integer
@@ -2327,7 +2459,8 @@ function GetCellText(tableObj, row, col) end
 --- is not exactly representable comes back approximate - `0.8` reads as `0.80000001192093`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - the read-back witness for SetCharacterDensityOption across four values, on
 -- both versions
 ---@return number density Characters on platforms. 0 to 1 by convention; the setter does not clamp.
@@ -2339,8 +2472,9 @@ function GetCharacterDensityOption() end
 --- does not know wraps the call in `table.pack`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 7 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 7 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:1087, ui/addons/ego_detailmonitorhelper/helper.lua:1634
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param frame any
 ---@return ... any
 function GetChildren(frame) end
@@ -2350,7 +2484,8 @@ function GetChildren(frame) end
 --- No vanilla code calls it; signature unverified.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@return table children
 function getChildren(element) end
@@ -2360,8 +2495,9 @@ function getChildren(element) end
 --- clusters come with them; every vanilla call passes true.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 8 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 8 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:524, ui/addons/ego_detailmonitor/menu_map.lua:20885
+-- Arity: 0-1 - X4.exe 8.00, 9.00
 ---@param includeHighways? boolean
 ---@return table
 function GetClusters(includeHighways) end
@@ -2393,8 +2529,9 @@ function GetClusters(includeHighways) end
 --- between the "cannot collect container" and "cannot collect materials" warnings.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:20221, ui/addons/ego_targetmonitor/targetmonitor.lua:689
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param component any The collectable to inspect.
 ---@return CollectableData
 function GetCollectableData(component) end
@@ -2404,8 +2541,9 @@ function GetCollectableData(component) end
 --- `SetCollisionAvoidanceAssistOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2037
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function GetCollisionAvoidanceAssistOption() end
 
@@ -2415,45 +2553,47 @@ function GetCollisionAvoidanceAssistOption() end
 --- text.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:17732
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param fontStringID any
 ---@return number, number, number, number
 function GetColor(fontStringID) end
 
 
 --- Returns one column of an Anark data table.
---- Part of the data-port API around AKDataPort. No vanilla code calls it; unverified.
+--- Part of the data-port API around AKDataPort. No vanilla code calls it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param table any The data table, as returned by getTable.
----@param column any Column name or index.
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
+---@param tableName string The data table's name.
+---@param column string The column's name.
 ---@return any column
-function getColumn(table, column) end
+function getColumn(tableName, column) end
 
 
 --- Returns the column names of an Anark data table.
---- Part of the data-port API around AKDataPort. No vanilla code calls it; unverified.
+--- Part of the data-port API around AKDataPort. No vanilla code calls it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param table any The data table, as returned by getTable.
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
+---@param tableName string The data table's name.
 ---@return table names
-function getColumnNames(table) end
+function getColumnNames(tableName) end
 
 
 --- Returns the commander of a controllable, or nothing when it has none - which is the test for
---- whether a ship is a subordinate at all. The second parameter addresses a fleet unit; no
---- vanilla call passes it.
+--- whether a ship is a subordinate at all. X4.exe's count check takes exactly one argument.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 19 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 19 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:7890, ui/addons/ego_detailmonitor/menu_ship_configuration.lua:1674
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param controllableid any
----@param fleetUnitID? any
 ---@return any
-function GetCommander(controllableid, fleetUnitID) end
+function GetCommander(controllableid) end
 
 
 --- Returns the **pilot character of the direct commander**, class `npc` - not the commanding
@@ -2463,7 +2603,8 @@ function GetCommander(controllableid, fleetUnitID) end
 --- its ship and call again until the result is empty.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - one three-ship fleet, every returned handle's class resolved; four 9.00
 -- ships, two answering with an npc handle and two with nil
 ---@param controllableid any The controllable whose commander to ask about.
@@ -2519,8 +2660,9 @@ function GetCommanderEntity(controllableid) end
 --- `width`, `workforcebonus`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 832 vanilla call sites, 2-16 arguments
+-- Usage: confirmed - X4.exe count check, 832 vanilla call sites, 2-16 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:488, ui/addons/ego_detailmonitor/menu_crafting.lua:228
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 ---@param component any
 ---@param ... string One or more property names.
 ---@return ... any One value per name, in the order asked.
@@ -2533,12 +2675,13 @@ function GetComponentData(component, ...) end
 --- not identifiable from the call sites.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 6 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 6 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_station_overview.lua:3243, ui/addons/ego_targetmonitor/targetmonitor.lua:358
+-- Arity: 4-6 - X4.exe 8.00, 9.00
 ---@param componentid any
----@param font? string Font used to measure the name for truncation.
----@param fontsize? number Font size used to measure the name.
----@param maxwidth? number Width the name is truncated to.
+---@param font string Font used to measure the name for truncation.
+---@param fontsize number Font size used to measure the name.
+---@param maxwidth number Width the name is truncated to.
 ---@param arg5? any Unidentified in 9.00 vanilla usage; a boolean or nil.
 ---@param arg6? any Unidentified in 9.00 vanilla usage; a boolean.
 ---@return string
@@ -2548,8 +2691,9 @@ function GetComponentName(componentid, font, fontsize, maxwidth, arg5, arg6) end
 --- Returns whether the mouse is confined to the window, and pairs with `SetConfineMouseOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2464
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function GetConfineMouseOption() end
 
@@ -2558,11 +2702,13 @@ function GetConfineMouseOption() end
 --- and filters the list down itself.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_playerinfo.lua:2585
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param owner string
+---@param space? any A component ID, named by X4.exe.
 ---@return table
-function GetContainedBuildStoragesByOwner(owner) end
+function GetContainedBuildStoragesByOwner(owner, space) end
 
 
 --- Returns the objects of one owner, as a list. Called with just a faction ID - `"player"` - it
@@ -2571,8 +2717,9 @@ function GetContainedBuildStoragesByOwner(owner) end
 --- station.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 6 vanilla call sites, 1-2 arguments
+-- Usage: confirmed - X4.exe count check, 6 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2258, ui/addons/ego_detailmonitor/menu_map.lua:4836
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param owner string
 ---@param container? any
 ---@return table
@@ -2593,7 +2740,8 @@ function GetContainedObjectsByOwner(owner, container) end
 --- pass `true`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0-2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - both arguments measured in-game, the class named by the engine on 8.00;
 -- both forms again over eight 9.00 clicks
 ---@param space? any The sector or zone whose ships to list. Omitted, it covers the whole universe.
@@ -2611,7 +2759,8 @@ function GetContainedShips(space, showOnMap) end
 --- table, so the result is only readable against the log line above it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - both forms measured in-game, the class named by the engine on 8.00; both
 -- again over eight 9.00 clicks, with and without the space argument
 ---@param owner string The faction id, e.g. `"player"`.
@@ -2625,17 +2774,20 @@ function GetContainedShipsByOwner(owner, space) end
 ---
 --- The count is per savegame, not a constant: `GetContainedSpacesByOwner("player")` answered 0,
 --- 323 and 334 entries on three different saves. **The engine reports a minimum, not a fixed
---- count** - a bare call answers `Invalid number of arguments (0, expected >= 1)` - so there is
---- at least one further parameter, presumably the `space` its sibling `GetContainedShipsByOwner`
---- takes to limit the search. Only the one-argument form has been called.
+--- count** - a bare call answers `Invalid number of arguments (0, expected >= 1)` - and X4.exe's
+--- count check accepts one or two: the second is a `space`, the name its argument error gives
+--- it, as its sibling `GetContainedShipsByOwner` takes to limit the search. Only the
+--- one-argument form has been called.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - the one-argument form on three savegames and again on 9.00, arity minimum
--- stated by the engine in words on 8.00; any further parameter is unmeasured
+-- stated by the engine in words on 8.00; the two-argument form has not been called
 ---@param owner string The faction id, e.g. `"player"`.
+---@param space? any A component ID, named by X4.exe: the space to search.
 ---@return table spaces Array of space components.
-function GetContainedSpacesByOwner(owner) end
+function GetContainedSpacesByOwner(owner, space) end
 
 
 --- Returns the stations inside a container, whoever owns them - `GetContainedStationsByOwner`
@@ -2643,12 +2795,14 @@ function GetContainedSpacesByOwner(owner) end
 --- stations; both vanilla calls pass true.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 7 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 7 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2727, ui/addons/ego_detailmonitor/menu_map.lua:14812
----@param container any
+-- Arity: 0-3 - X4.exe 8.00, 9.00
+---@param container? any
 ---@param includeGates? boolean
+---@param arg3? any Unidentified; X4.exe accepts it.
 ---@return table
-function GetContainedStations(container, includeGates) end
+function GetContainedStations(container, includeGates, arg3) end
 
 
 --- Returns the stations of one owner. With a container it is limited to that container; with
@@ -2656,8 +2810,9 @@ function GetContainedStations(container, includeGates) end
 --- third argument decides whether gates count as stations.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 6 vanilla call sites, 1-3 arguments
+-- Usage: confirmed - X4.exe count check, 6 vanilla call sites, 1-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1925, ui/addons/ego_detailmonitor/menu_map.lua:5132
+-- Arity: 1-3 - X4.exe 8.00, 9.00
 ---@param owner string
 ---@param container? any
 ---@param includeGates? boolean
@@ -2672,10 +2827,11 @@ function GetContainedStationsByOwner(owner, container, includeGates) end
 --- price is in force.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 7 vanilla call sites, 3-4 arguments
+-- Usage: confirmed - X4.exe count check, 7 vanilla call sites, 3-4 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_ship_configuration.lua:4887, ui/addons/ego_detailmonitor/menu_station_configuration.lua:4269
+-- Arity: 3-4 - X4.exe 8.00, 9.00
 ---@param container any
----@param ware any
+---@param ware string
 ---@param isBuy boolean
 ---@param useBuildPrice? boolean
 ---@return number
@@ -2687,8 +2843,9 @@ function GetContainerWarePrice(container, ware, isBuy, useBuildPrice) end
 --- itself counts when it is already of that class.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 21 vanilla call sites, 2-3 arguments
+-- Usage: confirmed - X4.exe count check, 21 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:4151, ui/addons/ego_detailmonitor/menu_map.lua:14895
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param componentid any
 ---@param classname string
 ---@param includeSelf? boolean
@@ -2701,8 +2858,9 @@ function GetContextByClass(componentid, classname, includeSelf) end
 --- unavailable.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_interactmenu/menu_interactmenu.lua:6881
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param component any
 ---@return any
 function GetControlEntity(component) end
@@ -2718,8 +2876,9 @@ function GetControlEntity(component) end
 --- upwards and rotation running clockwise.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 21 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 21 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:20560, ui/addons/ego_detailmonitor/menu_scenario_selection.lua:326
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return string mode, number? angle
 function GetControllerInfo() end
 
@@ -2748,7 +2907,8 @@ function GetControllerInfo() end
 --- `Ship Trader`, `shipdealer_active`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - six post ids answered for "name" and "icon"; every other column of the row
 -- was refused by name, and a person returns nothing. The six ids answer identically on both
 -- versions, value for value, over seven shared rungs
@@ -2762,8 +2922,9 @@ function GetControlPostData(controlPost, ...) end
 --- page.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2887
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function GetCrashReportOption() end
 
@@ -2773,8 +2934,9 @@ function GetCrashReportOption() end
 --- help text was last refreshed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 20 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 20 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_ship_configuration.lua:9924, ui/addons/ego_detailmonitor/menu_station_configuration.lua:6385
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number
 function GetCurRealTime() end
 
@@ -2804,8 +2966,9 @@ function GetCurrentMouseOverWidth() end
 --- this, not against `GetCurRealTime`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21083, ui/addons/ego_detailmonitorhelper/helper.lua:11583
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number
 function GetCurTime() end
 
@@ -2817,6 +2980,7 @@ function GetCurTime() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:1027
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param format string
 ---@param timestamp? number
 ---@return string
@@ -2827,8 +2991,9 @@ function GetDate(format, timestamp) end
 --- multiplies it back up for its 0-100 slider, whose callback is `SetDeadzoneOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7560
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number
 function GetDeadzoneOption() end
 
@@ -2842,8 +3007,9 @@ function GetDeadzoneOption() end
 --- fifth value really is the text and not something internal.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/dialogmenu.lua:850
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param index integer
 ---@return string text, boolean selectable, boolean immediate, string shortcutKey, string mouseOverText
 function GetDialogOption(index) end
@@ -2852,8 +3018,9 @@ function GetDialogOption(index) end
 --- Returns whether the distortion graphics option is on, and pairs with `SetDistortionOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:1815
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function GetDistortionOption() end
 
@@ -2862,8 +3029,9 @@ function GetDistortionOption() end
 --- `widget_fullscreen.lua` caches it on the element as `closeMenuOnBack`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12693
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param editBoxID any
 ---@return boolean
 function GetEditBoxCloseMenuOption(editBoxID) end
@@ -2873,8 +3041,9 @@ function GetEditBoxCloseMenuOption(editBoxID) end
 --- `widget_fullscreen.lua` reads them back to keep its cached element colour in step.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12736
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param editBoxID any
 ---@return number, number, number, number
 function GetEditBoxColor(editBoxID) end
@@ -2884,8 +3053,9 @@ function GetEditBoxColor(editBoxID) end
 --- caches both on the element when it builds it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12651
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param editBoxID any
 ---@return any, number
 function GetEditBoxFont(editBoxID) end
@@ -2896,8 +3066,9 @@ function GetEditBoxFont(editBoxID) end
 --- straight away.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12616
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param editBoxID any
 ---@return boolean, any, number, number
 function GetEditBoxHotkeyDetails(editBoxID) end
@@ -2907,8 +3078,9 @@ function GetEditBoxHotkeyDetails(editBoxID) end
 --- when the text differs from what it last saw.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:2649
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param editBoxID any
 ---@return string
 function GetEditBoxText(editBoxID) end
@@ -2918,8 +3090,9 @@ function GetEditBoxText(editBoxID) end
 --- horizontal offset it draws the text at.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12674
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param editBoxID any
 ---@return any
 function GetEditBoxTextAlignment(editBoxID) end
@@ -2929,8 +3102,9 @@ function GetEditBoxTextAlignment(editBoxID) end
 --- box's own colour comes from `GetEditBoxColor`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:12754
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param editBoxID any
 ---@return number, number, number, number
 function GetEditBoxTextColor(editBoxID) end
@@ -2940,8 +3114,9 @@ function GetEditBoxTextColor(editBoxID) end
 --- for its slider.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7010
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number
 function GetEffectDistanceOption() end
 
@@ -2960,7 +3135,8 @@ function GetEffectDistanceOption() end
 --- measured return, so what a populated one holds is still unknown.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - arity 1; empty on every target tried, a production module included, and
 -- empty again on every 9.00 target, none of which was a production module
 ---@param destructible any The destructible to ask about.
@@ -2972,7 +3148,8 @@ function GetEfficiencyUpgrades(destructible) end
 --- No vanilla code calls it; signature unverified.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@return string type
 function getElementType(element) end
@@ -3011,7 +3188,8 @@ function getElementType(element) end
 --- validate the key before calling. Keys are case sensitive.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - all six entity type ids answered for "name" and "icon"; every other column
 -- of the row was refused by name; a person plus each of ten property names returned nothing, so
 -- argument 1 is the key, never a component. The six ids answer identically on both versions,
@@ -3026,7 +3204,8 @@ function GetEntityTypeData(entityType, ...) end
 --- through `DebugError` instead.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param messageID any
 ---@return string
 function GetError(messageID) end
@@ -3038,8 +3217,9 @@ function GetError(messageID) end
 --- 5 a panic. `debuglog.lua:928` skips everything at 0 and raises its popup only for 2, 3 and 4.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:809
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param messageID number The ID of the error message.
 ---@return number severity 0 info, 1 master info, 2 error, 3 optional assertion, 4 assertion, 5 panic.
 function GetErrorSeverity(messageID) end
@@ -3049,8 +3229,9 @@ function GetErrorSeverity(messageID) end
 --- `GetErrorSeverity` to build one line - timestamp, prefix, message.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:822
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param messageID number The ID of the error message.
 ---@return any timestamp The timestamp of the error.
 function GetErrorTimestamp(messageID) end
@@ -3099,8 +3280,9 @@ function GetErrorTimestamp(messageID) end
 --- before warning that the save will be marked as modified.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_mapeditor.lua:1012, ui/addons/ego_gameoptions/gameoptions.lua:5899
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return ExtensionEntry[] extensions
 function GetExtensionList() end
 
@@ -3110,8 +3292,9 @@ function GetExtensionList() end
 --- always `""` and `false` in vanilla, so what they select is not identifiable.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:6313
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param arg1 string A string parameter (purpose unclear from usage).
 ---@param arg2 boolean A boolean parameter (purpose unclear from usage).
 ---@return string|nil warning The warning text, or nil if no warning is present.
@@ -3121,8 +3304,9 @@ function GetExtensionUpdateWarningText(arg1, arg2) end
 --- Retrieves specific data about a faction. This is a variadic function.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 65 vanilla call sites, 2-6 arguments
+-- Usage: confirmed - X4.exe count check, 65 vanilla call sites, 2-6 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1198, ui/addons/ego_detailmonitor/menu_diplomacy.lua:1224
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 ---@param faction string The ID of the faction.
 ---@param ... string One or more string keys for the data to retrieve (e.g., "name", "color", "shortname").
 ---@return any ... The requested faction data. The number and types of return values depend on the keys provided.
@@ -3134,9 +3318,10 @@ function GetFactionData(faction, ...) end
 --- before reading it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:4182, ui/widget/lua/widget_fullscreen.lua:12810
----@param widgetID any The ID of the flowchart widget.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param widgetID number The ID of the flowchart widget.
 ---@return table flowchartData A table with flowchart data, including fields like `selectedRow`, `selectedCol`, `firstVisibleRow`, `firstVisibleCol`.
 function GetFlowchartData(widgetID) end
 
@@ -3145,9 +3330,10 @@ function GetFlowchartData(widgetID) end
 --- `widget_fullscreen.lua` checks before refreshing the edge it holds.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:7215
----@param flowchartEdgeID any The ID of the flowchart edge.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param flowchartEdgeID number The ID of the flowchart edge.
 ---@return table edgeData The data for the specified edge.
 function GetFlowchartEdgeData(flowchartEdgeID) end
 
@@ -3156,8 +3342,9 @@ function GetFlowchartEdgeData(flowchartEdgeID) end
 --- `flowchartData.numEdges`, and the ID it returns is what `GetFlowchartEdgeData` takes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:4205, ui/widget/lua/widget_fullscreen.lua:12969
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param widgetID any The ID of the flowchart widget.
 ---@param edgeIdx number The index of the edge.
 ---@return any edgeID The ID of the specified edge.
@@ -3180,9 +3367,10 @@ function GetFlowchartFirstVisibleCell(flowchartID) end
 --- which `widget_fullscreen.lua` tests before using it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:7179
----@param flowchartNodeID any The ID of the flowchart node.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param flowchartNodeID number The ID of the flowchart node.
 ---@return table nodeData The data for the specified node.
 function GetFlowchartNodeData(flowchartNodeID) end
 
@@ -3201,9 +3389,10 @@ function GetFlowchartNodeExpandedFrameData(flowchartNodeID) end
 --- Retrieves the ID of a specific node in a flowchart by its row and column.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:2920, ui/widget/lua/widget_fullscreen.lua:12953
----@param flowChartID any The ID of the flowchart widget.
+-- Arity: 3 - X4.exe 8.00, 9.00
+---@param flowChartID number The ID of the flowchart widget.
 ---@param row number The row of the node.
 ---@param col number The column of the node.
 ---@return any nodeID The ID of the specified node.
@@ -3227,8 +3416,9 @@ function GetFlowchartSelectedCell(flowchartID) end
 --- `GetFontHeight`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:17728
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param fontStringID any The ID of the font string.
 ---@return string font The name of the font.
 ---@return number size The size of the font.
@@ -3239,8 +3429,9 @@ function GetFont(fontStringID) end
 --- size, because layout asks for it constantly and the value never changes.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:7352
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param fontName string The name of the font.
 ---@param fontSize number The size of the font.
 ---@return number fontHeight The height of the font.
@@ -3251,8 +3442,9 @@ function GetFontHeight(fontName, fontSize) end
 --- 90 to show degrees, and `SetFOVOption` divides by 90 on the way back.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7060
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number fov The current FOV value.
 function GetFOVOption() end
 
@@ -3260,7 +3452,8 @@ function GetFOVOption() end
 --- Gets the background ID of a frame. (No usage found in provided files)
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param frameID any The ID of the frame.
 ---@return any backgroundID The background ID of the frame.
 function GetFrameBackgroundID(frameID) end
@@ -3271,8 +3464,9 @@ function GetFrameBackgroundID(frameID) end
 --- one it would act on.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 6 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 6 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:7388, ui/widget/lua/widget_fullscreen.lua:5518
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param frameID any The ID of the frame.
 ---@return number layer The layer of the frame.
 function GetFrameLayer(frameID) end
@@ -3281,7 +3475,8 @@ function GetFrameLayer(frameID) end
 --- Gets the overlay ID of a frame. (No usage found in provided files)
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param frameID any The ID of the frame.
 ---@return any overlayID The overlay ID of the frame.
 function GetFrameOverlayID(frameID) end
@@ -3291,8 +3486,9 @@ function GetFrameOverlayID(frameID) end
 --- position to work out where inside the frame the player grabbed it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:337, ui/widget/lua/widget_fullscreen.lua:16925
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param frameID any The ID of the frame.
 ---@return number x The x-coordinate of the frame.
 ---@return number y The y-coordinate of the frame.
@@ -3302,8 +3498,9 @@ function GetFramePosition(frameID) end
 --- Calculates the free cargo space for a specific ware on a ship after accounting for trade orders.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21793
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param shipID any The ID of the ship.
 ---@param ware string The ware to check.
 ---@return number freeCargo The amount of free cargo space.
@@ -3313,8 +3510,9 @@ function GetFreeCargoAfterTradeOrders(shipID, ware) end
 --- Calculates the free unit storage on a ship after accounting for trade orders.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21789
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param shipID any The ID of the ship.
 ---@return number freeUnitStorage The amount of free unit storage.
 function GetFreeUnitStorageAfterTradeOrders(shipID) end
@@ -3325,8 +3523,9 @@ function GetFreeUnitStorageAfterTradeOrders(shipID) end
 --- single dropdown index.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7181
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean fullscreen True if fullscreen is enabled.
 ---@return boolean borderless True if borderless window is enabled.
 function GetFullscreenOption() end
@@ -3336,8 +3535,9 @@ function GetFullscreenOption() end
 --- one for its dropdown index.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7537
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number gamepadMode The current gamepad mode.
 function GetGamepadModeOption() end
 
@@ -3346,8 +3546,9 @@ function GetGamepadModeOption() end
 --- for its slider, which hands the value back divided by 100 through `SetGammaOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7204
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number gamma The current gamma value.
 function GetGammaOption() end
 
@@ -3369,7 +3570,8 @@ function GetGammaOption() end
 --- work.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - both arguments and the return shape measured in-game, all three call
 -- shapes repeated over eight 9.00 clicks
 ---@param space any The sector or zone whose gates to list.
@@ -3383,8 +3585,9 @@ function GetGates(space, showOnMap) end
 --- setter drops it back to Custom with `SetGfxQualityOption(0)`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7349
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number quality The current graphics quality setting.
 function GetGfxQualityOption() end
 
@@ -3393,8 +3596,9 @@ function GetGfxQualityOption() end
 --- The options menu reads it for the privacy page.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3368
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return any syncSetting The current global sync setting.
 function GetGlobalSyncSetting() end
 
@@ -3403,8 +3607,9 @@ function GetGlobalSyncSetting() end
 --- adds one to turn it into a dropdown index.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7229
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number glowOption The current glow option.
 function GetGlowOption() end
 
@@ -3414,8 +3619,9 @@ function GetGlowOption() end
 --- itself.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:14419
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param tableID any The ID of the table.
 ---@return any header The header of the table.
 function GetHeader(tableID) end
@@ -3444,7 +3650,8 @@ function GetHeader(tableID) end
 --- nothing" from "no such faction" from "wrong argument entirely".
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - six holders, whole-array field histograms, arity 1; on 9.00 the player's
 -- 232 licences, each an eight-field record, with an empty array for a bogus faction string and
 -- for a component alike
@@ -3458,9 +3665,10 @@ function GetHeldLicences(faction) end
 --- hang off the edge.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_helptext/helptext.lua:406
----@param position any The identifier for the hint's position.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param position number The identifier for the hint's position.
 ---@return number position_x The x-coordinate.
 ---@return number position_y The y-coordinate.
 function GetHintPosition(position) end
@@ -3482,8 +3690,9 @@ function GetHintPosition(position) end
 --- the escape sequence, which is the arithmetic that proves the range.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13070
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return HoloMapColor productionColor
 ---@return HoloMapColor buildColor
 ---@return HoloMapColor storageColor
@@ -3514,8 +3723,9 @@ function GetHoloMapColors() end
 --- `C.GetIconGlowFactor` on top.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:17864
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param iconID any The ID of the icon.
 ---@return string textureName The name of the texture.
 ---@return number red The red color component.
@@ -3542,8 +3752,9 @@ function GetIconDetails(iconID) end
 --- table rather than being absent, which is what clearing a binding writes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0-1 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:4844, ui/addons/ego_gameoptions/gameoptions.lua:4938
+-- Arity: 0-1 - X4.exe 8.00, 9.00
 ---@param default? boolean If true, gets the default map.
 ---@return table<integer, InputBinding[]> actions
 function GetInputActionMap(default) end
@@ -3566,6 +3777,7 @@ function GetInputActionMap(default) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:12558
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return InputProfile[] inputProfiles
 function GetInputProfiles() end
 
@@ -3576,8 +3788,9 @@ function GetInputProfiles() end
 --- which the options menu keeps side by side to show what has been changed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0-1 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:4844, ui/addons/ego_gameoptions/gameoptions.lua:4938
+-- Arity: 0-1 - X4.exe 8.00, 9.00
 ---@param default? boolean If true, gets the default map.
 ---@return table<integer, InputBinding[]> ranges
 function GetInputRangeMap(default) end
@@ -3590,8 +3803,9 @@ function GetInputRangeMap(default) end
 --- three back together.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0-1 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:4844, ui/addons/ego_gameoptions/gameoptions.lua:4938
+-- Arity: 0-1 - X4.exe 8.00, 9.00
 ---@param default? boolean If true, gets the default map.
 ---@return table<integer, InputBinding[]> states
 function GetInputStateMap(default) end
@@ -3602,8 +3816,9 @@ function GetInputStateMap(default) end
 --- its own frame is active **and** the table that changed is the interactive one.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 8 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 8 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:27238, ui/addons/ego_detailmonitorhelper/helper.lua:966
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param frameID any The ID of the frame.
 ---@return any interactiveWidgetID The ID of the interactive widget.
 function GetInteractiveObject(frameID) end
@@ -3621,8 +3836,9 @@ function GetInteractiveObject(frameID) end
 --- the map passes a pilot, the player info menu the HQ defence NPC.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 10 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 10 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:4112, ui/addons/ego_detailmonitor/menu_map.lua:6516
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param entityID any The entity whose inventory to read.
 ---@return table<string, InventoryWare> inventory
 function GetInventory(entityID) end
@@ -3632,9 +3848,10 @@ function GetInventory(entityID) end
 --- Inverted or Normal label of that row, whose callback is `SetInversionSetting`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7556
----@param rangeID any The ID of the control range.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param rangeID number The ID of the control range.
 ---@return boolean isInverted True if the control is inverted.
 function GetInversionSetting(rangeID) end
 
@@ -3654,8 +3871,9 @@ function GetInversionSetting(rangeID) end
 --- choose between the controller and the joystick icon.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:4926
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return table<integer, JoystickSlot> joysticks
 function GetJoysticksOption() end
 
@@ -3663,7 +3881,8 @@ function GetJoysticksOption() end
 --- Gets the legacy shaders option. (No usage found in provided files)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean legacyShadersEnabled True if legacy shaders are enabled.
 function GetLegacyShadersOption() end
 
@@ -3690,8 +3909,9 @@ function GetLegacyShadersOption() end
 --- `LibraryItemFaction` back, which has `relation`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 16 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 16 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1188, ui/addons/ego_detailmonitor/menu_docked.lua:627
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@overload fun(libraryName: "factions"): LibraryItemFaction[]
 ---@param libraryName string The name of the library to retrieve, e.g. `"factions"` or `"stationtypes"`.
 ---@return LibraryItem[] library
@@ -3994,8 +4214,9 @@ function GetLibrary(libraryName) end
 --- nine separate hull-and-shield permutations rather than one `dps`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 34 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 34 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1568, ui/addons/ego_detailmonitor/menu_encyclopedia.lua:776
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@overload fun(libraryName: "factions"|"races", entryID: any): LibraryEntryFaction
 ---@overload fun(libraryName: "licences", entryID: any): LibraryEntryLicence
 ---@overload fun(libraryName: "ship_xl"|"ship_l"|"ship_m"|"ship_s"|"shiptypes_xl"|"shiptypes_l"|"shiptypes_m"|"shiptypes_s"|"shiptypes_xs", entryID: any): LibraryEntryShip
@@ -4007,7 +4228,7 @@ function GetLibrary(libraryName) end
 ---@overload fun(libraryName: "shieldgentypes", entryID: any): LibraryEntryShield
 ---@overload fun(libraryName: "wares"|"inventory_wares"|"software"|"paintmods"|"satellites"|"navbeacons"|"resourceprobes"|"countermeasures", entryID: any): LibraryEntryWare
 ---@param libraryName string The name of the library.
----@param entryID any The ID of the entry to retrieve.
+---@param entryID string The ID of the entry to retrieve.
 ---@return LibraryEntry entry The union of every library's fields; pass a literal library name for a narrow type.
 function GetLibraryEntry(libraryName, entryID) end
 
@@ -4016,8 +4237,9 @@ function GetLibraryEntry(libraryName, entryID) end
 --- subcategories to show a count per category without reading the entries themselves.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2574
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param libraryName string The name of the library.
 ---@return number size The number of entries in the library.
 function GetLibrarySize(libraryName) end
@@ -4054,11 +4276,12 @@ function GetLiveData(placeholder, component, templateConnectionName) end
 --- Retrieves live data from a bridge, used for UI updates between different components.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 3 arguments
 -- Seen at: ui/core/lua/monitors.lua:1742
+-- Arity: 1-3 - X4.exe 8.00, 9.00
 ---@param dataName string The name of the data to retrieve (e.g., "targetmonitorstate").
----@param component string The component requesting the data.
----@param connection any The connection context.
+---@param component? string The component requesting the data.
+---@param connection? any The connection context.
 ---@return any data The live data.
 function GetLiveDataBridge(dataName, component, connection) end
 
@@ -4069,8 +4292,9 @@ function GetLiveDataBridge(dataName, component, connection) end
 --- it needs and skips the rest with `_`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/loading.lua:269
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return string text The current loading text.
 ---@return number percentage The loading progress percentage.
 ---@return number loadCount The number of items loaded.
@@ -4085,8 +4309,9 @@ function GetLoadingInfo() end
 --- Gets the localized name for a key based on its input type and ID.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 14 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 14 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_docked.lua:436, ui/addons/ego_detailmonitorhelper/helper.lua:8849
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param inputType string The type of input (e.g., "action").
 ---@param inputID any The ID of the input.
 ---@return string keyName The localized name of the key.
@@ -4097,9 +4322,10 @@ function GetLocalizedKeyName(inputType, inputID) end
 --- for a keyboard binding, next to the icon for the device.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:4955
----@param code any The raw key code.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param code number The raw key code.
 ---@return string keyName The localized name of the key.
 function GetLocalizedRawKeyName(code) end
 
@@ -4110,6 +4336,7 @@ function GetLocalizedRawKeyName(code) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 3 vanilla call sites, 0 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:2992
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return number x The x-coordinate of the mouse click.
 ---@return number y The y-coordinate of the mouse click.
 function GetLocalMouseClickPosition() end
@@ -4122,6 +4349,7 @@ function GetLocalMouseClickPosition() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 92 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:336, ui/addons/ego_detailmonitor/menu_crafting.lua:454
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return number x The x-coordinate of the mouse.
 ---@return number y The y-coordinate of the mouse.
 function GetLocalMousePosition() end
@@ -4131,8 +4359,9 @@ function GetLocalMousePosition() end
 --- and clamps to its slider's 1 to 100 range.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7294
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number lod The current LOD value.
 function GetLODOption() end
 
@@ -4162,11 +4391,12 @@ function GetLODOption() end
 --- `interactioncomponent`; vanilla checks both before drawing the button.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:16808, ui/addons/ego_detailmonitor/menu_playerinfo.lua:2855
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param startIndex number The starting index for retrieval.
 ---@param numQuery number The number of entries to query.
----@param category any The category of logbook entries to retrieve.
+---@param category? string The category of logbook entries to retrieve.
 ---@return LogbookEntry[] logbook
 function GetLogbook(startIndex, numQuery, category) end
 
@@ -4193,8 +4423,9 @@ function GetLogbook(startIndex, numQuery, category) end
 --- `resourcedetectionrange`, `waregroupicon`, `workforcecapacity`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 251 vanilla call sites, 2-9 arguments
+-- Usage: confirmed - X4.exe count check, 251 vanilla call sites, 2-9 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_docked.lua:509, ui/addons/ego_detailmonitor/menu_encyclopedia.lua:574
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 ---@param macro string The name of the macro.
 ---@param ... string One or more property names.
 ---@return ... any One value per name, in the order asked.
@@ -4205,9 +4436,10 @@ function GetMacroData(macro, ...) end
 --- the ship configuration menu can show the capacity of a ship that does not exist yet.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_ship_configuration.lua:10461
----@param macro any The macro to check.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param macro string The macro to check.
 ---@return number capacity The unit storage capacity.
 function GetMacroUnitStorageCapacity(macro) end
 
@@ -4216,8 +4448,9 @@ function GetMacroUnitStorageCapacity(macro) end
 --- returns the slot assignments themselves.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:4927
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return table mappedjoysticks A table of mapped joysticks.
 function GetMappedJoysticks() end
 
@@ -4231,7 +4464,8 @@ function GetMappedJoysticks() end
 --- object and changes nothing, so it can be called from anywhere at any time.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 4 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - one working call with synthesised arguments, arity stated by the engine
 -- in words; both rungs answered the same either side
 ---@param text string The string to measure.
@@ -4245,7 +4479,8 @@ function GetMaxTextLength(text, fontname, fontsize, width) end
 --- Gets the parameters of the current menu. (No usage found in provided files)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return table params The menu parameters.
 function GetMenuParameters() end
 
@@ -4255,8 +4490,9 @@ function GetMenuParameters() end
 --- the parameters on offer are not for it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:1345
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return string name The name of the menu.
 ---@return any param The first parameter.
 ---@return any param2 The second parameter.
@@ -4267,8 +4503,9 @@ function GetMenuParameters2() end
 --- what the player information menu needs to play the cutscene a message refers to.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_playerinfo.lua:4491
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param messageID any The ID of the message.
 ---@param category any The category of the message.
 ---@return any cutsceneparameter The cutscene parameter.
@@ -4281,9 +4518,10 @@ function GetMessageCutsceneParameter(messageID, category) end
 --- tests.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/targetsystem.lua:2166
----@param messageID any The ID of the message.
+-- Arity: 1 or more (fewer return silently, doing nothing) - X4.exe 8.00, 9.00
+---@param messageID integer The ID of the message.
 ---@return number x2d The x-coordinate on the screen.
 ---@return number y2d The y-coordinate on the screen.
 ---@return boolean onScreen True if the position is on the screen.
@@ -4304,7 +4542,8 @@ function GetMessageScreenPosition(messageID) end
 --- set plus the cargo drone, so this is the mining subset of that one.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - 54 calls over nine ship macros and a station macro, one non-empty; twelve
 -- more calls on 9.00, still at most one entry
 ---@param macro string The macro name of the ship to ask about.
@@ -4320,9 +4559,10 @@ function GetMiningUnitMacros(macro) end
 --- from 1 to `GetNumMissions`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:10052, ui/addons/ego_detailmonitor/menu_missionbriefing.lua:144
----@param mission any The mission identifier.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param mission number The mission identifier.
 ---@return any missionID
 ---@return string name
 ---@return string description
@@ -4355,9 +4595,10 @@ function GetMissionDetails(mission) end
 --- needs for one objective line comes out of this single call.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:18686
----@param mission any The mission identifier.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param mission number The mission identifier.
 ---@return string objectiveText The text of the objective.
 ---@return any timeout The timeout for the objective.
 ---@return string progressName The name of the progress tracker.
@@ -4371,8 +4612,9 @@ function GetMissionObjective(mission) end
 --- objective of a sub-mission - the briefing menu passes both shapes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 2-3 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:28271, ui/addons/ego_detailmonitor/menu_missionbriefing.lua:934
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param missionID any The ID of the mission.
 ---@param i number The index of the objective.
 ---@param j? number An optional sub-index.
@@ -4388,8 +4630,9 @@ function GetMissionObjectiveEncyclopediaReference(missionID, i, j) end
 --- `mission` for there to be anything to return.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_interactmenu/menu_interactmenu.lua:3332, ui/addons/ego_targetmonitor/targetmonitor.lua:934
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param component any The component ID.
 ---@param templateConnectionName string The name of the template connection.
 ---@return string mName Mission name.
@@ -4414,8 +4657,9 @@ function GetMissionOfferAtConnection(component, templateConnectionName) end
 --- `GetMissionDetails` is the same idea for a mission already accepted.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 6 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 6 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:18512, ui/addons/ego_detailmonitor/menu_missionbriefing.lua:894
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param missionOfferID any The ID of the mission offer.
 ---@return string name
 ---@return string description
@@ -4448,10 +4692,11 @@ function GetMissionOfferDetails(missionOfferID) end
 --- has the macro.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1-2 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:8867, ui/addons/ego_detailmonitor/menu_map.lua:8895
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param moduleID any The ID of the module.
----@param moduleMacro? any An optional macro for the module.
+---@param moduleMacro? string An optional macro for the module.
 ---@return string moduleType The type of the module.
 function GetModuleType(moduleID, moduleMacro) end
 
@@ -4460,8 +4705,9 @@ function GetModuleType(moduleID, moduleMacro) end
 --- `SetMouseLookToggleOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2096
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean isToggleEnabled True if mouse look toggle is enabled.
 function GetMouseLookToggleOption() end
 
@@ -4471,6 +4717,7 @@ function GetMouseLookToggleOption() end
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return number x
 ---@return number y
 function getMousePosition() end
@@ -4481,8 +4728,9 @@ function getMousePosition() end
 --- result under the priority it got from `GetNotificationPriority`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:2709
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param notificationID any The ID of the notification.
 ---@return table notificationInfos A table containing the details of the notification.
 function GetNotificationDetails(notificationID) end
@@ -4492,8 +4740,9 @@ function GetNotificationDetails(notificationID) end
 --- which is exactly what the monitor code tests for before showing it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:2986
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param notificationID any The ID of the notification.
 ---@return any priority The priority of the notification.
 function GetNotificationPriority(notificationID) end
@@ -4505,8 +4754,9 @@ function GetNotificationPriority(notificationID) end
 --- fall back with `or 0`. `SetNPCBlackboard` writes the same values back.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 6 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 6 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:740, ui/addons/ego_detailmonitor/menu_map.lua:4137
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param entity any The ID of the NPC entity.
 ---@param key string The key for the value to retrieve (e.g., "$HiringFee").
 ---@return any value The value associated with the key on the blackboard.
@@ -4516,8 +4766,9 @@ function GetNPCBlackboard(entity, key) end
 --- Retrieves a table of NPCs from a given container (e.g., a room or a ship).
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:15435, ui/addons/ego_detailmonitor/menu_transporter.lua:819
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param containerID any The ID of the container.
 ---@return table npcs A table of NPCs.
 function GetNPCs(containerID) end
@@ -4541,7 +4792,8 @@ function GetNPCs(containerID) end
 --- `Invalid argument #1 <sector> (got cdata, expected component ID)` - convert it first.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - the reference point measured against three candidates over seven sectors
 -- and then proved by moving the player: the gradient followed them, so no sector-local point can
 -- be what the radius is measured from. The same split on 9.00 over eight sectors: the player's
@@ -4557,8 +4809,9 @@ function GetNPCsInSectorOnStations(sectorID, distance) end
 --- Calculates the number of items that can be afforded with a given amount of money.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21858
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param availableMoney number The amount of money available.
 ---@param itemPrice number The price of a single item.
 ---@return number affordableAmount The number of items that can be afforded.
@@ -4569,8 +4822,9 @@ function GetNumAffordableTradeItems(availableMoney, itemPrice) end
 --- anything to report at all, without walking the log.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:884
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return number numErrors The total number of errors.
 function GetNumErrors() end
 
@@ -4579,9 +4833,10 @@ function GetNumErrors() end
 --- then page through the entries with `GetLogbook`, which takes a start index and a length.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:16803, ui/addons/ego_detailmonitor/menu_playerinfo.lua:2829
----@param category any The category of the logbook.
+-- Arity: 0-1 (more are logged, then ignored) - X4.exe 8.00, 9.00
+---@param category? string The category of the logbook.
 ---@return number numEntries The number of entries in that category.
 function GetNumLogbook(category) end
 
@@ -4591,8 +4846,9 @@ function GetNumLogbook(category) end
 --- over as a list.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:10050, ui/addons/ego_detailmonitor/menu_missionbriefing.lua:142
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number numMissions The number of missions.
 function GetNumMissions() end
 
@@ -4601,8 +4857,9 @@ function GetNumMissions() end
 --- position on top to get a screen position - the offset alone is relative, not absolute.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 19 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 19 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:865, ui/widget/lua/widget_fullscreen.lua:12016
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param widgetID any The ID of the widget.
 ---@return number x The x-offset.
 ---@return number y The y-offset.
@@ -4613,8 +4870,9 @@ function GetOffset(widgetID) end
 --- run. The failure is addressed by its numeric ID on the object that failed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:11923
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param object any The object associated with the order.
 ---@param failureID number The ID of the failure.
 ---@return table params A table containing the failure parameters.
@@ -4626,20 +4884,24 @@ function GetOrderFailureParams(object, failureID) end
 --- default order slots - the same addressing `SetOrderParam` takes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 20 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 20 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:8727, ui/addons/ego_detailmonitor/menu_ship_configuration.lua:2880
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param object any The object (e.g., ship) whose order is being queried.
 ---@param orderIndex number | "default" | "planneddefault" The index of the order in the queue, or a string for the default order.
 ---@return table params A table containing the order parameters.
 function GetOrderParams(object, orderIndex) end
 
 
---- Gets the origin of something. (No usage found in provided files)
+--- Gets the origin of something. No vanilla code calls it, and X4.exe's count check takes
+--- exactly one argument, which its error messages do not name.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param arg1 any Unidentified; X4.exe accepts it.
 ---@return any origin The origin.
-function GetOrigin() end
+function GetOrigin(arg1) end
 
 
 ---@meta
@@ -4665,8 +4927,9 @@ function GetOrigin() end
 --- cannot be bought until that one is held.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1200, ui/addons/ego_detailmonitor/menu_encyclopedia.lua:564
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param factionID string The ID of the faction.
 ---@return OwnLicence[] licences
 function GetOwnLicences(factionID) end
@@ -4692,7 +4955,8 @@ function GetOwnLicences(factionID) end
 --- not by itself evidence that the call was accepted.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - both arguments and the return shape measured in-game; on 9.00 the bare
 -- call refused with "expected >= 1", seven role ids each answering, and a person refused as not
 -- of class controllable
@@ -4707,8 +4971,9 @@ function GetPeopleRoleData(controllable, role) end
 --- reports are sent at all.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2895
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean isEnabled True if personalized crash reports are enabled.
 function GetPersonalizedCrashReportsOption() end
 
@@ -4720,7 +4985,8 @@ function GetPersonalizedCrashReportsOption() end
 --- Katana corvette 0 - the empty being the correct answer for a ship with no bay.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - arity 1, every element's class resolved over the whole array, on both
 -- versions
 ---@param container any The ship or station whose docking bays to list.
@@ -4734,8 +5000,9 @@ function GetPlatforms(container) end
 --- `C.StopPlayerActivity` to stop whatever it turns out to be.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 13 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 13 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_docked.lua:447, ui/addons/ego_detailmonitor/menu_map.lua:5370
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return string activity The name of the current activity (e.g., "travel", "seta", "scan").
 ---@return any activityColor The color associated with the activity.
 ---@return any activityBackgroundColor The background color for the activity.
@@ -4748,8 +5015,9 @@ function GetPlayerActivity() end
 --- place.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_station_overview.lua:388, ui/addons/ego_detailmonitor/menu_trader_inventory.lua:84
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param className string The class name of the context to retrieve (e.g., "container").
 ---@return any contextID The ID of the context object.
 function GetPlayerContextByClass(className) end
@@ -4761,8 +5029,9 @@ function GetPlayerContextByClass(className) end
 --- fresh rather than caching it, because crafting and trading both change it underneath.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 11 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 11 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:227, ui/addons/ego_detailmonitor/menu_diplomacy.lua:4110
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return table<string, InventoryWare> inventory
 function GetPlayerInventory() end
 
@@ -4772,8 +5041,9 @@ function GetPlayerInventory() end
 --- arithmetic.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 41 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 41 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:2572, ui/addons/ego_detailmonitor/menu_map.lua:3495
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number money The player's current money.
 function GetPlayerMoney() end
 
@@ -4781,7 +5051,8 @@ function GetPlayerMoney() end
 --- Gets the player's current room. (No usage found in provided files)
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return any roomID The ID of the player's room.
 function GetPlayerRoom() end
 
@@ -4793,6 +5064,7 @@ function GetPlayerRoom() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/crosshair handling.lua:2231
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return number playerHull The current hull percentage.
 ---@return number playerShield The current shield percentage.
 ---@return any timeSinceLastAttack Time since the last attack.
@@ -4809,6 +5081,7 @@ function GetPlayerShipHullShield() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/crosshair handling.lua:2938
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return number actualSpeed The current actual speed.
 ---@return number targetedSpeed The targeted speed.
 ---@return number actualSpeedPerSecond The speed in units per second.
@@ -4825,8 +5098,9 @@ function GetPlayerSpeed() end
 --- softtarget lock while that is true.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:2399
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return number strength The current steering strength.
 function GetPlayerSteeringStrength() end
 
@@ -4835,8 +5109,9 @@ function GetPlayerSteeringStrength() end
 --- it before offering an Attack My Target action.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_interactmenu/menu_interactmenu.lua:4971
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return any targetID The ID of the player's target.
 function GetPlayerTarget() end
 
@@ -4852,8 +5127,9 @@ function GetPlayerTarget() end
 --- dropdown's value.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:6936
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return DisplayAdapter[] adapters
 function GetPossibleAdapters() end
 
@@ -4885,7 +5161,8 @@ function GetPossibleAdapters() end
 --- answered the ware in full.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - two wares, two owners, entries dumped in full, arity 1; on 9.00 a
 -- production module answered one entry in full while the station holding it answered empty
 ---@param moduleID any The production module to ask about.
@@ -4902,8 +5179,9 @@ function GetPossibleProducts(moduleID) end
 --- and marks the one `GetResolutionOption` reports.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7386
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return ScreenResolution[] resolutions
 function GetPossibleResolutions() end
 
@@ -4913,8 +5191,9 @@ function GetPossibleResolutions() end
 --- room list from the same order.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_transporter.lua:814, ui/addons/ego_targetmonitor/targetmonitor.lua:776
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param component any The platform component.
 ---@return table npcs A table of prioritized NPCs.
 function GetPrioritizedPlatformNPCs(component) end
@@ -4925,8 +5204,9 @@ function GetPrioritizedPlatformNPCs(component) end
 --- the result.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_station_overview.lua:2680
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param module any The module identifier.
 ---@return table data The data for the processing module.
 function GetProcessingModuleData(module) end
@@ -4967,8 +5247,9 @@ function GetProcessingModuleData(module) end
 --- `efficiency` percentage as a named field alongside them, so walk them with `ipairs`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 21 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 21 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:17814, ui/addons/ego_detailmonitor/menu_research.lua:271
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param module any The production module to inspect.
 ---@return ProductionModuleData data
 function GetProductionModuleData(module) end
@@ -4979,8 +5260,9 @@ function GetProductionModuleData(module) end
 --- station produces anything at all.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 9 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 9 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2761, ui/addons/ego_detailmonitor/menu_map.lua:14498
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param objectID any The ID of the object (e.g., station).
 ---@return table modules A table of production modules, as Lua-side component ids. Every vanilla
 --- site feeds them straight back to a Lua global such as `GetComponentData`; an `ffi` call needs
@@ -4995,6 +5277,7 @@ function GetProductionModules(objectID) end
 -- Environment: addons only
 -- Versions: 8.00 - deprecated in 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: 1 on 8.00, not checked (deprecated) on 9.00 - X4.exe
 -- Deprecated: 9.00 - the engine answers every call with `has been deprecated and has no
 -- effect`, and stops checking the argument count; 8.00 still refuses a bare call
 -- Probed: 8.00, 9.00 - the one behaviour difference the 9.00 pass found: "" and a live arity
@@ -5009,8 +5292,9 @@ function GetRadarModuleName(object) end
 --- menu adds one for its dropdown index.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7367
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number radarOption The current radar option.
 function GetRadarOption() end
 
@@ -5021,14 +5305,16 @@ function GetRadarOption() end
 --- both calls fall back with `or 0`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 4 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 4 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21721
+-- Arity: 4-5 - X4.exe 8.00, 9.00
 ---@param shipID any The ID of the ship.
 ---@param ware string The ware being traded.
 ---@param price number The price of the ware.
 ---@param amount number The amount being traded.
+---@param arg5? number Unidentified; X4.exe checks for a number.
 ---@return number profit The calculated reference profit.
-function GetReferenceProfit(shipID, ware, price, amount) end
+function GetReferenceProfit(shipID, ware, price, amount, arg5) end
 
 
 ---@meta
@@ -5061,8 +5347,9 @@ function GetReferenceProfit(shipID, ware, price, amount) end
 --- afterwards and do not come from here.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 8 vanilla call sites, 0-1 arguments
+-- Usage: confirmed - X4.exe count check, 8 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_help.lua:215, ui/addons/ego_detailmonitor/menu_scenario_debriefing.lua:90
+-- Arity: 0-1 - X4.exe 8.00, 9.00
 ---@param includeScenarios? boolean If true, includes scenarios in the list.
 ---@return RegisteredModule[] modules
 function GetRegisteredModules(includeScenarios) end
@@ -5078,8 +5365,9 @@ function GetRegisteredModules(includeScenarios) end
 --- mouse is over. Two of the three call sites take x and y alone and ignore z.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/dialogmenu.lua:892, ui/core/lua/monitors.lua:3633
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param elementID any The ID of the UI element.
 ---@param useElementSize? boolean Scale to the element's own size instead of 0 to 1.
 ---@return number x The relative x-coordinate.
@@ -5116,8 +5404,9 @@ function GetRenderTargetTexture(renderTargetID) end
 --- branch of the change dialogue puts the old one back.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0-1 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7385, ui/addons/ego_gameoptions/gameoptions.lua:8990
+-- Arity: 0-1 - X4.exe 8.00, 9.00
 ---@param fromSettings? boolean If true, gets the value from settings rather than the current state.
 ---@return any resolution The current resolution setting.
 function GetResolutionOption(fromSettings) end
@@ -5126,8 +5415,9 @@ function GetResolutionOption(fromSettings) end
 --- Retrieves NPCs of a specific role and skill tier from a controllable object.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_playerinfo.lua:3763
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param controllableID any The ID of the controllable object (e.g., ship).
 ---@param role string The role to search for (e.g., "unassigned").
 ---@param skillLevel number The skill level tier.
@@ -5135,23 +5425,28 @@ function GetResolutionOption(fromSettings) end
 function GetRoleTierNPCs(controllableID, role, skillLevel) end
 
 
---- Returns one row of an Anark data table.
---- Part of the data-port API around AKDataPort. No vanilla code calls it; unverified.
+--- Returns the row of an Anark data table whose `keyColumn` holds `keyValue`. Tables and
+--- columns are addressed by name. `keyValue` is checked as a number or a string, whichever
+--- the key column holds; an unknown table or column returns without an error.
+--- Part of the data-port API around AKDataPort. No vanilla code calls it; the return is unverified.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param table any The data table, as returned by getTable.
----@param row number Row index.
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
+---@param tableName string The data table's name.
+---@param keyColumn string The name of the column to match.
+---@param keyValue number|string The value to find in that column.
 ---@return any row
-function getRow(table, row) end
+function getRow(tableName, keyColumn, keyValue) end
 
 
 --- Returns the controller rumble strength on the engine's 0 to 1 scale; the options menu
 --- multiplies by 100 for its slider.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:6741
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number rumble The current rumble value.
 function GetRumbleOption() end
 
@@ -5189,9 +5484,9 @@ function GetRumbleOption() end
 ---@field difficulty? any Save difficulty. Documented; vanilla does not read it.
 ---@field mindifficulty? any The lowest difficulty the save was ever set to. Documented; vanilla does not read it.
 
---- Returns the savegames as a list. The argument is a filter function the engine calls per
---- file - vanilla passes `Helper.validSaveFilenames`, which keeps the game's own naming scheme
---- and drops anything else in the folder.
+--- Returns the savegames as a list. The argument is a set of accepted file names, keyed by
+--- name - vanilla passes `Helper.validSaveFilenames` (`quicksave`, `autosave_01`, ...), which
+--- keeps the game's own naming scheme and drops anything else in the folder.
 ---
 --- It is performance critical: do not call it unnecessarily. The three `invalid*` fields are
 --- what the load menu checks before letting a save be opened, and `error` marks a save that
@@ -5199,19 +5494,21 @@ function GetRumbleOption() end
 --- savegame name.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:24909, ui/addons/ego_gameoptions/gameoptions.lua:11608
----@param filter? function An optional function to filter the save game list.
+-- Arity: 0-1 - X4.exe 8.00, 9.00
+---@param allowedfilenames? table<string, boolean> File names to list, without extension. Named by X4.exe.
 ---@return SaveGameEntry[] savegames
-function GetSaveList(filter) end
+function GetSaveList(allowedfilenames) end
 
 
 --- Returns the sectors of a cluster as a list. Walking the galaxy means `GetClusters` and then
 --- this per cluster - there is no call that returns every sector at once.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 9 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 9 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:528, ui/addons/ego_detailmonitor/menu_map.lua:20887
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param cluster any The cluster identifier.
 ---@return table sectors A table of sectors in the cluster.
 function GetSectors(cluster) end
@@ -5232,9 +5529,10 @@ function GetSelectedRows(tableID) end
 --- multiplies by 100 and clamps to its slider's range.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7602
----@param rangeID any The ID of the control range.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param rangeID number The ID of the control range.
 ---@return number sensitivity The current sensitivity value.
 function GetSensitivitySetting(rangeID) end
 
@@ -5243,8 +5541,9 @@ function GetSensitivitySetting(rangeID) end
 --- menu adds one for its dropdown index.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7412
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number qualityOption The current shader quality setting.
 function GetShaderQualityOption() end
 
@@ -5254,8 +5553,9 @@ function GetShaderQualityOption() end
 --- `SetShadowOption` expects back.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7429
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return integer option 0 off, 1 low, 2 medium, 3 high.
 function GetShadowOption() end
 
@@ -5277,8 +5577,9 @@ function GetShiftStartEndRow(tableID) end
 --- Returns the rendered size of a widget or scene element in pixels.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 26 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 26 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:864, ui/widget/lua/widget_fullscreen.lua:6645
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param elementID any The widget or element to measure.
 ---@return number width
 ---@return number height
@@ -5288,8 +5589,9 @@ function GetSize(elementID) end
 --- Returns whether soft shadows are on, and pairs with `SetSoftShadowsOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:1766
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean enabled
 function GetSoftShadowsOption() end
 
@@ -5297,8 +5599,9 @@ function GetSoftShadowsOption() end
 --- Returns whether sound output is on, and pairs with `SetSoundOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:1926
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean enabled
 function GetSoundOption() end
 
@@ -5306,8 +5609,9 @@ function GetSoundOption() end
 --- Gets the current Screen Space Ambient Occlusion (SSAO) setting.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7446
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number ssaoOption The current SSAO option.
 function GetSSAOOption() end
 
@@ -5317,8 +5621,9 @@ function GetSSAOOption() end
 --- title bar when none is set.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:14217
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param frame any The frame element.
 ---@return any back
 ---@return any close
@@ -5341,7 +5646,8 @@ function GetStandardButtons(frame) end
 --- macro returns an empty array.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - 54 calls over nine ship macros and a station macro; no target has yet
 -- returned more than two entries, twelve more 9.00 calls included
 ---@param macro string The macro name of the ship to ask about.
@@ -5367,8 +5673,9 @@ function GetStandardUnitMacros(macro) end
 --- `false`. Use `GetAllStatIDs` to test for a statistic, not this.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2-3 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_playerinfo.lua:2527, ui/addons/ego_detailmonitor/menu_playerinfo.lua:2531
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - five keys measured on one statistic, plus a bad-key and an absent-id
 -- control; the same answers on both versions, the good key still returned beside the bad one
 ---@param stat string The statistic ID, one of those `GetAllStatIDs` returns.
@@ -5381,8 +5688,9 @@ function GetStatData(stat, ...) end
 --- `SetSteeringNoteOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2183
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean enabled
 function GetSteeringNoteOption() end
 
@@ -5390,8 +5698,9 @@ function GetSteeringNoteOption() end
 --- Gets whether the player ship is stopped while a menu is open.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2060
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean enabled
 function GetStopShipInMenuOption() end
 
@@ -5430,8 +5739,9 @@ function GetStopShipInMenuOption() end
 --- with `next(storagearray)`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:14043, ui/addons/ego_targetmonitor/targetmonitor.lua:878
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param object any The container to inspect.
 ---@return StorageData
 function GetStorageData(object) end
@@ -5442,30 +5752,33 @@ function GetStorageData(object) end
 --- is always `nil` in vanilla and its purpose is not identifiable from the call sites.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 28 vanilla call sites, 1-3 arguments
+-- Usage: confirmed - X4.exe count check, 28 vanilla call sites, 1-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_docked.lua:939, ui/addons/ego_detailmonitor/menu_map.lua:4902
+-- Arity: 1-3 - X4.exe 8.00, 9.00
 ---@param component any The commander.
----@param unknown? any Unidentified in 9.00 vanilla usage; always nil.
+---@param assignment? string Named by X4.exe; always nil in 9.00 vanilla usage.
 ---@param checkRendered? boolean Restrict the result to subordinates currently rendered.
 ---@return table subordinates
-function GetSubordinates(component, unknown, checkRendered) end
+function GetSubordinates(component, assignment, checkRendered) end
 
 
 --- Gets the current subtitle setting.
 --- One of auto, true, false - the ids the options menu offers.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:6803
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return any option
 function GetSubtitleOption() end
 
 
 --- Looks up an Anark data table by name.
---- Part of the data-port API around AKDataPort. No vanilla code calls it; unverified.
+--- Part of the data-port API around AKDataPort. No vanilla code calls it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param name string The table name.
 ---@return any table
 function getTable(name) end
@@ -5475,9 +5788,10 @@ function getTable(name) end
 --- 0 means the cell is covered by the background of an earlier column.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 3 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:6014
----@param tableID any The table widget.
+-- Arity: 3 - X4.exe 8.00, 9.00
+---@param tableID integer The table widget.
 ---@param row number 1-based row index.
 ---@param col number 1-based column index.
 ---@return number colspan
@@ -5489,8 +5803,9 @@ function GetTableBackgroundColumnSpan(tableID, row, col) end
 --- against each other.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:9446
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param tableID any The table widget.
 ---@param row number 1-based row index.
 ---@param col number 1-based column index.
@@ -5505,9 +5820,10 @@ function GetTableCellColor(tableID, row, col) end
 --- 0 means the cell is covered by a span starting in an earlier column.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 3 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:5985
----@param tableID any The table widget.
+-- Arity: 3 - X4.exe 8.00, 9.00
+---@param tableID integer The table widget.
 ---@param row number 1-based row index.
 ---@param col number 1-based column index.
 ---@return number colspan
@@ -5519,8 +5835,9 @@ function GetTableColumnSpan(tableID, row, col) end
 --- pixels or percentages.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:14365
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param tableID any The table widget.
 ---@return table widths One entry per column.
 function GetTableColumnWidths(tableID) end
@@ -5540,8 +5857,9 @@ function GetTableData(...) end
 --- Returns the height of all table rows together, ignoring the visible height.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:14343
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param tableID any The table widget.
 ---@return number height In pixels.
 function GetTableFullHeight(tableID) end
@@ -5550,8 +5868,9 @@ function GetTableFullHeight(tableID) end
 --- Returns how many leading rows of a table are fixed, i.e. do not scroll.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:14321
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param tableID any The table widget.
 ---@return number numfixedrows
 function GetTableNumFixedRows(tableID) end
@@ -5561,8 +5880,9 @@ function GetTableNumFixedRows(tableID) end
 --- not the number of selectable rows.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:5702
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param tableID any The table widget.
 ---@return number numrows
 function GetTableNumRows(tableID) end
@@ -5573,8 +5893,9 @@ function GetTableNumRows(tableID) end
 --- to be laid out again.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 11 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 11 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:4142, ui/widget/lua/widget_fullscreen.lua:5584
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param tableID any The table widget.
 ---@param row number 1-based row index.
 ---@return number height
@@ -5585,8 +5906,9 @@ function GetTableRowHeight(tableID, row) end
 --- The target system uses it to build the target elements drawn around the crosshair.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/targetsystem.lua:5370
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param targetElementQuery any The query descriptor.
 ---@return any info
 function GetTargetElementInfo(targetElementQuery) end
@@ -5626,11 +5948,12 @@ function GetTargetMonitorDetails(component, templateConnectionName, isSofttarget
 --- directly, so it calls this instead. See also GetNotificationDetails.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/core/lua/monitors.lua:2129
+-- Arity: 1-3 - X4.exe 8.00, 9.00
 ---@param componentID string The component ID as a string.
----@param connectionName string The connection the template is bound to.
----@param isSofttarget boolean Whether the component is the current soft target.
+---@param connectionName? string The connection the template is bound to.
+---@param isSofttarget? boolean Whether the component is the current soft target.
 ---@return table details
 function GetTargetMonitorDetailsBridge(componentID, connectionName, isSofttarget) end
 
@@ -5638,8 +5961,9 @@ function GetTargetMonitorDetailsBridge(componentID, connectionName, isSofttarget
 --- Returns the text currently displayed by a font-string element.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:17727
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param fontStringID any The font-string element.
 ---@return string text
 function GetText(fontStringID) end
@@ -5648,8 +5972,9 @@ function GetText(fontStringID) end
 --- Word-wraps a string to a given width and returns the resulting lines.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 74 vanilla call sites, 4 arguments
+-- Usage: confirmed - X4.exe count check, 74 vanilla call sites, 4 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:277, ui/addons/ego_detailmonitor/menu_diplomacy.lua:1354
+-- Arity: 4 - X4.exe 8.00, 9.00
 ---@param text string The text to wrap.
 ---@param font string Font name.
 ---@param fontsize number Font size, already scaled.
@@ -5661,8 +5986,9 @@ function GetTextLines(text, font, fontsize, width) end
 --- Returns how many lines a string wraps to, and the width it needs.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 4 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 4 arguments
 -- Seen at: ui/core/lua/dialogmenu.lua:953, ui/widget/lua/widget_fullscreen.lua:16769
+-- Arity: 4 - X4.exe 8.00, 9.00
 ---@param text string The text to measure.
 ---@param fontName string Font name.
 ---@param fontSize number Font size, already scaled.
@@ -5677,7 +6003,8 @@ function GetTextNumLines(text, fontName, fontSize, maxWidth) end
 --- For the UI clock use getElapsedTime instead.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@return number time
 function getTime(element) end
@@ -5701,8 +6028,9 @@ function GetTopRow(tableID) end
 --- The target system uses it to pick which target elements to draw.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:2474
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param category string Message category, e.g. basic or fastobject.
 ---@param maxMessages number Maximum number of messages to return.
 ---@return table messages
@@ -5712,11 +6040,12 @@ function GetTopTargetPriorityMessages(category, maxMessages) end
 --- Returns the total value of a ship, optionally priced at a specific shipyard.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:26284
+-- Arity: 1-3 - X4.exe 8.00, 9.00
 ---@param ship any The ship to price.
----@param unknown boolean Unidentified in 9.00 vanilla usage; always true.
----@param shipyard any The shipyard whose prices apply.
+---@param unknown? boolean Unidentified in 9.00 vanilla usage; always true.
+---@param shipyard? any The shipyard whose prices apply.
 ---@return number value
 function GetTotalValue(ship, unknown, shipyard) end
 
@@ -5770,8 +6099,9 @@ function GetTotalValue(ship, unknown, shipyard) end
 --- the menu writes those itself - they do not come from here.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1-2 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:1063, ui/addons/ego_detailmonitor/menu_map.lua:27498
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param tradeID any The trade to read.
 ---@param component? any Container the trade is viewed from, which decides the buy/sell direction.
 ---@return TradeData tradedata
@@ -5787,8 +6117,9 @@ function GetTradeData(tradeID, component) end
 --- deduplicating them against the first set by trade id.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 6 vanilla call sites, 1-3 arguments
+-- Usage: confirmed - X4.exe count check, 6 vanilla call sites, 1-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21371, ui/addons/ego_detailmonitor/menu_map.lua:21372
+-- Arity: 1-3 - X4.exe 8.00, 9.00
 ---@param tradeOfferContainer any The station or ship offering the trades.
 ---@param currentShip? any The ship the offers are evaluated for.
 ---@param unknown? boolean Selects which half of the list is returned.
@@ -5814,7 +6145,8 @@ function GetTradeList(tradeOfferContainer, currentShip, unknown) end
 --- empty table, so an empty result means no orders, not a bad call.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - signature and return shape measured in-game, on both versions
 ---@param container any The ship or station whose orders to report.
 ---@return table orders Array of { amount, minamount, name, price, averageprice, id, station, stationname, isbuyoffer, isselloffer, ispassive, isshiptoship, iswareexchange }.
@@ -5842,6 +6174,7 @@ function GetTradeOrders(container) end
 -- Environment: addons only
 -- Versions: none - present in both, but deprecated in 3.20
 -- Usage: unverified - no vanilla call site
+-- Arity: not checked (deprecated) - X4.exe 8.00, 9.00
 -- Deprecated: 3.20 - the engine answers every call with `Obsolete since version 3.20,
 -- returns empty data!` and an empty table, on both versions
 -- Probed: 8.00, 9.00 - empty data, with the engine's obsolescence notice beside it, on both
@@ -5862,7 +6195,8 @@ function GetTradeRestrictions(containerID) end
 --- point, which can only be clicked in first person, where the interact menu does not open.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - arity from the engine on both versions; no tagged connection has been
 -- reached to ask on
 ---@param component any The container the connection belongs to.
@@ -5876,13 +6210,15 @@ function GetTradesAtConnection(component, templateConnectionName) end
 --- site, which always passes true.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_interactmenu/menu_interactmenu.lua:6143
+-- Arity: 3-4 - X4.exe 8.00, 9.00
 ---@param component any The station or ship offering the trades.
----@param ware any The ware ID to filter by.
+---@param ware string The ware ID to filter by.
 ---@param unknown boolean Unidentified in 9.00 vanilla usage; always true.
+---@param arg4? any Unidentified; X4.exe checks for a component ID.
 ---@return table tradeoffers
-function GetTradesForWare(component, ware, unknown) end
+function GetTradesForWare(component, ware, unknown, arg4) end
 
 
 ---@meta
@@ -5935,7 +6271,8 @@ function GetTradesForWare(component, ware, unknown) end
 --- `isselloffer = true` at 481 where it buys and `isbuyoffer = true` at 485 where it sells.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - the whole structure, on a loaded miner and a trader with two trades
 -- queued; the same eight keys on four 9.00 ships, with `cargo` and `queue` empty
 ---@param shipID any The ship to ask about.
@@ -5954,8 +6291,9 @@ function GetTradeShipData(shipID) end
 --- what the community reference describes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:30308
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return TradeShipData[] ships
 function GetTradeShipList() end
 
@@ -5969,51 +6307,63 @@ function GetTradeShipList() end
 --- not exactly representable comes back approximate - `0.8` reads as `0.80000001192093`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - the read-back witness for SetTrafficDensityOption across four values, on
 -- both versions
 ---@return number density Traffic density. 0 to 1 by convention; the setter does not clamp.
 function GetTrafficDensityOption() end
 
 
---- Reads a value out of an Anark data table.
---- Part of the data-port API around AKDataPort. No vanilla code calls it; unverified.
+--- Reads a value out of an Anark data table by position. The table is addressed by name, the
+--- cell by row and column index; a negative index or an unknown table returns nil.
+--- Part of the data-port API around AKDataPort. No vanilla code calls it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param table any The data table, as returned by getTable.
----@param row number Row index.
----@param column any Column name or index.
----@return any value
-function getValue(table, row, column) end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 3 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
+---@param tableName string The data table's name.
+---@param row integer Row index.
+---@param column integer Column index.
+---@return number|string|nil value A number or a string, per the column's type.
+function getValue(tableName, row, column) end
 
 
 --- Returns the ventures currently known to the client.
---- No vanilla code calls this; the parameters and return shape are unverified.
+--- No vanilla code calls this, and X4.exe's count check takes no argument; the return shape is
+--- unverified.
 --- The Online* family is the interface vanilla actually uses for ventures.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return any ventures
 function GetVentures() end
 
 
 --- Returns the success chance of a venture.
---- No vanilla code calls this; the parameters and return shape are unverified.
+--- No vanilla code calls this, and the return shape is unverified. X4.exe accepts two to four
+--- arguments and names the second and third.
 --- OnlineGetVentureBaseSuccessChance is the Online* equivalent.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2-4 - X4.exe 8.00, 9.00
+---@param arg1 any Unidentified; X4.exe accepts it.
+---@param ventureplatformid any A component ID, named by X4.exe.
+---@param successfactorwares? table Named by X4.exe.
+---@param arg4? any Unidentified; X4.exe accepts it.
 ---@return any chance
-function GetVentureSuccessChance() end
+function GetVentureSuccessChance(arg1, ventureplatformid, successfactorwares, arg4) end
 
 
 --- Returns the game version as a string. The options menu shows it followed by
 --- `C.GetBuildVersionSuffix()`, which carries the build number.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:1249
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return string # The version string.
 function GetVersionString() end
 
@@ -6022,9 +6372,10 @@ function GetVersionString() end
 --- multiplies by 100 for its slider, which hands it back through `SetVolumeOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7890
----@param sfxType any The sound category, as passed to SetVolumeOption.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param sfxType string The sound category, as passed to SetVolumeOption.
 ---@return number volume In the 0-1 range.
 function GetVolumeOption(sfxType) end
 
@@ -6032,10 +6383,11 @@ function GetVolumeOption(sfxType) end
 --- Retrieves the total cargo capacity for a specific ware on a component.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 9 vanilla call sites, 2-3 arguments
+-- Usage: confirmed - X4.exe count check, 9 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:12381, ui/addons/ego_detailmonitor/menu_map.lua:20230
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param componentID any The ID of the component (e.g., ship, station).
----@param wareID any The ID of the ware.
+---@param wareID string The ID of the ware.
 ---@param arg3? any Unidentified in 9.00 vanilla usage; a boolean.
 ---@return number capacity The total capacity for the specified ware.
 function GetWareCapacity(componentID, wareID, arg3) end
@@ -6063,8 +6415,9 @@ function GetWareCapacity(componentID, wareID, arg3) end
 --- `storagename`, `tags`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 338 vanilla call sites, 2-8 arguments
+-- Usage: confirmed - X4.exe count check, 338 vanilla call sites, 2-8 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:102, ui/addons/ego_detailmonitor/menu_crafting.lua:238
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 ---@param wareID string The ID of the ware.
 ---@param ... string One or more property names.
 ---@return ... any One value per name, in the order asked.
@@ -6080,11 +6433,12 @@ function GetWareData(wareID, ...) end
 --- site passes a third argument.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21362
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param tradingShipID any The ship doing the exchange.
 ---@param tradedContainerID any The container it is exchanging with.
----@param sortby? any Sort order. Documented; no vanilla call site passes one.
+---@param sortby? string Sort order. Documented; no vanilla call site passes one.
 ---@return TradeData[] tradeList
 function GetWareExchangeTradeList(tradingShipID, tradedContainerID, sortby) end
 
@@ -6094,8 +6448,9 @@ function GetWareExchangeTradeList(tradingShipID, tradedContainerID, sortby) end
 --- shortfall.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 18 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 18 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:14116, ui/addons/ego_detailmonitorhelper/helper.lua:11604
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param componentID any The component (station or storage) to query.
 ---@param wareID string The ID of the ware.
 ---@return number limit The production limit for the ware.
@@ -6117,23 +6472,25 @@ function GetWidgetSystemSize() end
 --- `GetAlignment` and `GetSize` when it measures a text for layout.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:13143
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param fontStringID any The ID of the font string.
 ---@return boolean isWordWrapEnabled True if word wrap is enabled.
 function GetWordWrap(fontStringID) end
 
 
 --- Returns the workforce resource needs per race for a container - what the station has to
---- supply to keep its people. Despite the parameter name here, every vanilla call passes a
---- **container**, not a race ID, and guards it with `IsComponentClass(container, "container")`.
+--- supply to keep its people. Every vanilla call guards the argument with
+--- `IsComponentClass(container, "container")`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_ship_configuration.lua:6026, ui/addons/ego_detailmonitor/menu_station_overview.lua:895
----@param raceID string The ID of the race.
----@return table resources A table of workforce resources for the race.
-function GetWorkForceRaceResources(raceID) end
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param container any The container, as a component ID.
+---@return table resources One entry per race the container's workforce needs supplying.
+function GetWorkForceRaceResources(container) end
 
 
 --- Returns a scene element to the slide it was on before the current one.
@@ -6141,6 +6498,7 @@ function GetWorkForceRaceResources(raceID) end
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 function goToBackSlide(element) end
 
@@ -6150,6 +6508,7 @@ function goToBackSlide(element) end
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 function goToNextSlide(element) end
 
@@ -6159,6 +6518,7 @@ function goToNextSlide(element) end
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 function goToPreviousSlide(element) end
 
@@ -6166,10 +6526,11 @@ function goToPreviousSlide(element) end
 --- Checks if all resources required to craft an item are available.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:101, ui/addons/ego_detailmonitor/menu_playerinfo.lua:730
----@param componentID? any The component crafting; vanilla always passes nil.
----@param wareID? any The ID of the ware to craft.
+-- Arity: 2-3 - X4.exe 8.00, 9.00
+---@param componentID any The component crafting; vanilla always passes nil.
+---@param wareID string The ID of the ware to craft.
 ---@param amount? number The amount to craft.
 ---@return boolean hasResources True if all resources are available.
 function HasAllResourcesToCraft(componentID, wareID, amount) end
@@ -6180,7 +6541,8 @@ function HasAllResourcesToCraft(componentID, wareID, amount) end
 --- No vanilla code calls it; signature unverified.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@param attribute string Attribute path, e.g. position.x.
 ---@return boolean has
@@ -6190,38 +6552,40 @@ function hasAttribute(element, attribute) end
 --- Checks if a container has a stock limit override for a specific ware.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:11683
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param containerID any The ID of the container.
 ---@param wareID string The ID of the ware.
+---@param arg3? any Unidentified; X4.exe accepts it.
 ---@return boolean hasOverride True if a stock limit override is set.
-function HasContainerStockLimitOverride(containerID, wareID) end
+function HasContainerStockLimitOverride(containerID, wareID, arg3) end
 
 
 --- Checks if a container has a price override for a specific ware.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:10999, ui/addons/ego_detailmonitorhelper/helper.lua:11985
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param containerID any The ID of the container.
 ---@param wareID string The ID of the ware.
----@param isBuyOverride boolean True to check for a buy price override, false for a sell price override.
+---@param isBuyOverride? boolean True to check for a buy price override, false for a sell price override.
 ---@return boolean hasOverride True if a price override is set.
 function HasContainerWarePriceOverride(containerID, wareID, isBuyOverride) end
 
 
 --- Reports whether the player currently has flight control. All three vanilla calls pass
 --- nothing and read it as a question about the player: `crosshair handling.lua` activates the
---- crosshair when this is true and the game is not in external target mode. `componentID` is
---- marked optional because no vanilla code passes one, so whether the engine accepts one, and
---- what it would mean, is unverified.
+--- crosshair when this is true and the game is not in external target mode. X4.exe's count
+--- check takes no argument.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/crosshair handling.lua:1131
----@param componentID? any Optional component to ask about. No vanilla code passes one.
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return boolean hasFlightControl True if flight control is held.
-function HasFlightControl(componentID) end
+function HasFlightControl() end
 
 
 --- Reports whether a faction holds a licence with another faction. Always three arguments: who
@@ -6229,11 +6593,12 @@ function HasFlightControl(componentID) end
 --- between two factions, not a property of one.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 9 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 9 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1780, ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2103
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param factionID string The ID of the faction.
 ---@param licenceID string The ID of the licence.
----@param otherFactionID? string The faction the licence applies to.
+---@param otherFactionID string The faction the licence applies to.
 ---@return boolean hasLicence True if the faction holds the licence.
 function HasLicence(factionID, licenceID, otherFactionID) end
 
@@ -6251,11 +6616,12 @@ function HasLicence(factionID, licenceID, otherFactionID) end
 --- anything the caller has in hand.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0-1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - 51 calls, the true and the silent case each matched against the map across
 -- thirteen sectors; two 9.00 sectors, one silent with no shipyard in its seed data and one `true`
 -- with the player's own shipyard in it
----@param spaceID any The cluster, sector or zone to ask about.
+---@param spaceID? any The cluster, sector or zone to ask about.
 ---@return boolean? isShipyard `true`, or no value at all when there is none.
 function HasShipyard(spaceID) end
 
@@ -6266,8 +6632,9 @@ function HasShipyard(spaceID) end
 --- somewhere.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 15 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 15 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_targetmonitor/targetmonitor.lua:376
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param componentID any The ID of the component.
 ---@param connectionName string The connection on the component to check.
 ---@param tag string The tag to check for.
@@ -6287,11 +6654,12 @@ function HasTag(componentID, connectionName, tag) end
 --- space-class argument here is the engine's own, taken from its rejection of everything else.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0-1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - 51 calls, the true and the silent case each matched against the map across
 -- thirteen sectors; two 9.00 sectors, both `true`, one for `wharf_alliance_toa` in its seed data
 -- and one for the player's own wharf
----@param spaceID any The cluster, sector or zone to ask about.
+---@param spaceID? any The cluster, sector or zone to ask about.
 ---@return boolean? hasWharf `true`, or no value at all when there is none.
 function HasWharf(spaceID) end
 
@@ -6300,8 +6668,9 @@ function HasWharf(spaceID) end
 --- options menu turns into the warning icon that a restart is needed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:5903
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean haveChanged True if settings have changed.
 function HaveExtensionSettingsChanged() end
 
@@ -6373,6 +6742,7 @@ function HideCircle(circleID) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 11 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/compass.lua:438, ui/core/lua/debugline.lua:184
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param clusterID? any Optional presentation cluster to hide. No vanilla code passes one.
 function HidePresentation(clusterID) end
 
@@ -6396,15 +6766,14 @@ function HideTriangle(triangleID) end
 
 
 --- Hides the current view. Its one vanilla caller, `ego_viewhelper/viewhelper.lua:84`, passes
---- nothing and clears its own frame table afterwards, so the engine hides whatever view is up.
---- `viewID` is marked optional because no vanilla code passes one, so whether the engine
---- accepts one is unverified.
+--- nothing and clears its own frame table afterwards, so the engine hides whatever view is up;
+--- X4.exe's count check takes no argument.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_viewhelper/viewhelper.lua:84
----@param viewID? any Optional view to hide. No vanilla code passes one.
-function HideView(viewID) end
+-- Arity: 0 - X4.exe 8.00, 9.00
+function HideView() end
 
 
 --- Adds to a statistic. **`addvalue` is optional and defaults to 1**: measured, the
@@ -6421,7 +6790,8 @@ function HideView(viewID) end
 --- account rather than to the savegame.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - +7 and the bare +1 default, both read back and witnessed from MD, on both
 -- versions
 ---@param statID string The ID of the statistic to increment.
@@ -6449,16 +6819,18 @@ function initMissionBarScale() end
 --- is not installed, and `UninstallSteamDLC` for one that is.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:13537
----@param appid any -- The AppID of the DLC to install.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param appid number -- The AppID of the DLC to install.
 function InstallSteamDLC(appid) end
 
 
 -- Interrupts the player's computer control, likely to regain control for the UI.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
 -- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function InterruptPlayerComputer() end
@@ -6468,8 +6840,9 @@ function InterruptPlayerComputer() end
 --- building the table element and caches it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:14479
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param tableID any The ID of the table.
 ---@return boolean isBorderEnabled True if the border is enabled.
 function IsBorderEnabled(tableID) end
@@ -6480,8 +6853,9 @@ function IsBorderEnabled(tableID) end
 --- greyed out.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:5313
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param buttonID any The ID of the button.
 ---@return boolean isActive True if the button is active.
 function IsButtonActive(buttonID) end
@@ -6492,8 +6866,9 @@ function IsButtonActive(buttonID) end
 --- code ships in both builds.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 18 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 18 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:12742, ui/addons/ego_detailmonitor/menu_mapeditor.lua:297
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean isCheatVersion True if it is a cheat version.
 function IsCheatVersion() end
 
@@ -6504,8 +6879,9 @@ function IsCheatVersion() end
 --- same test through the ffi interface.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 92 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 92 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:912, ui/addons/ego_detailmonitor/menu_map.lua:1964
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param componentID any The ID of the component.
 ---@param className string The name of the class to check against.
 ---@return boolean isClass True if the component is of the specified class.
@@ -6517,8 +6893,9 @@ function IsComponentClass(componentID, className) end
 --- which is why vanilla tests both together.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 32 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 32 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:8999, ui/addons/ego_detailmonitor/menu_station_configuration.lua:4668
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param componentID any The ID of the component.
 ---@return boolean isConstructing True if the component is under construction.
 function IsComponentConstruction(componentID) end
@@ -6529,8 +6906,9 @@ function IsComponentConstruction(componentID) end
 --- when it is false, and actions like comm or change formation are not offered at all.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 17 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 17 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:5470, ui/addons/ego_detailmonitor/menu_platformundock.lua:160
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param componentID any The ID of the component.
 ---@return boolean isOperational True if the component is operational.
 function IsComponentOperational(componentID) end
@@ -6550,7 +6928,8 @@ function IsComponentOperational(componentID) end
 --- measured, so the condition behind the boolean remains the name's own claim.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - four call shapes on a player HQ: bare, and against its zone, sector and
 -- cluster; the same four on each of nine 9.00 targets, where the bare call is refused as
 -- "(1, expected 2)" and the other three always agree with one another, so the space argument does
@@ -6567,8 +6946,9 @@ function IsContainerOperationalRangeSufficient(containerID, spaceID) end
 --- progress rather than wait for an event that has been and gone.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/core/lua/dialogmenu.lua:1124
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return boolean isActive True if a dialog is active.
 function IsDialogActive() end
 
@@ -6578,8 +6958,9 @@ function IsDialogActive() end
 --- from the call sites, which pass a container, `true` and a boolean respectively.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 11 vanilla call sites, 2-5 arguments
+-- Usage: confirmed - X4.exe count check, 11 vanilla call sites, 2-5 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_docked.lua:1031, ui/addons/ego_detailmonitor/menu_map.lua:16355
+-- Arity: 2-4 on 8.00, 2-5 on 9.00 - X4.exe
 ---@param shipID any The ID of the ship.
 ---@param dockID any The ID of the dock.
 ---@param arg3? any Unidentified in 9.00 vanilla usage; a container, or nil.
@@ -6593,8 +6974,9 @@ function IsDockingPossible(shipID, dockID, arg3, arg4, arg5) end
 --- faction to the known items, so what the player has already met is not re-announced.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_targetmonitor/targetmonitor.lua:259
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param factionID string The ID of the faction.
 ---@return boolean isKnown True if the faction is known.
 function IsFactionKnown(factionID) end
@@ -6607,6 +6989,7 @@ function IsFactionKnown(factionID) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 7 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:1303, ui/addons/ego_detailmonitor/menu_map.lua:5566
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return boolean isFirstPerson True if in first-person mode.
 function IsFirstPerson() end
 
@@ -6616,7 +6999,8 @@ function IsFirstPerson() end
 --- in one call.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean isGamepadActive True if a gamepad is active.
 function IsGamepadActive() end
 
@@ -6636,8 +7020,9 @@ function isIconPropertyFunctionCell(cell, iconproperty) end
 --- Checks if a specific piece of information is unlocked for the player.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 21 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 21 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:5476, ui/addons/ego_detailmonitorhelper/helper.lua:13032
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param componentid any The component the information belongs to.
 ---@param infoString string The information key, e.g. "name", "storage_amounts".
 ---@return boolean isUnlocked True if the information is unlocked.
@@ -6648,8 +7033,9 @@ function IsInfoUnlockedForPlayer(componentid, infoString) end
 --- acting on a click inside it, so a click on a display-only table is simply dropped.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:3632
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param elementID any The ID of the UI element.
 ---@return boolean isInteractive True if the element is interactive.
 function IsInteractive(elementID) end
@@ -6660,8 +7046,9 @@ function IsInteractive(elementID) end
 --- the player has not discovered yet.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 13 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 13 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:666, ui/addons/ego_detailmonitor/menu_map.lua:13796
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param category string The category of the item.
 ---@param itemID string The ID of the item.
 ---@return boolean isKnown True if the item is known.
@@ -6673,8 +7060,9 @@ function IsKnownItem(category, itemID) end
 --- absent otherwise.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_debug/debug.lua:12
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean isEnabled True if debug input is enabled.
 function IsLuaDebugInputEnabled() end
 
@@ -6684,8 +7072,9 @@ function IsLuaDebugInputEnabled() end
 --- comparison classify things that are not in the game world at all.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 65 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 65 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:978, ui/addons/ego_detailmonitor/menu_map.lua:9375
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param macroName string The name of the macro.
 ---@param className string The class name to check against.
 ---@return boolean isClass True if the macro belongs to the class.
@@ -6702,10 +7091,11 @@ function IsMacroClass(macroName, className) end
 --- counts as an obstruction, which is the pre-4.20 behaviour and remains the default.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:3946
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param position any The position id of the target element to check.
----@param obstructedByOwnComponent? boolean Let the element's own component obstruct it.
+---@param obstructedByOwnComponent boolean Let the element's own component obstruct it.
 ---@param ignoreCockpitObstruction? boolean Do not treat the player cockpit as an obstruction. Defaults to true.
 ---@return boolean isObstructed True if the position is obstructed.
 function IsObstructed(position, obstructedByOwnComponent, ignoreCockpitObstruction) end
@@ -6717,6 +7107,7 @@ function IsObstructed(position, obstructedByOwnComponent, ignoreCockpitObstructi
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:24896
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return boolean isPossible True if an online save is possible.
 function IsOnlineSavePossible() end
 
@@ -6725,7 +7116,8 @@ function IsOnlineSavePossible() end
 --- what the UI uses, and the two look like the same question asked twice.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean isFirstPerson True if in first-person mode.
 function IsPlayerFirstPerson() end
 
@@ -6735,8 +7127,9 @@ function IsPlayerFirstPerson() end
 --- up in a list it already holds goes through this.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 28 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 28 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:890, ui/addons/ego_detailmonitor/menu_map.lua:7343
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param componentA any The first component.
 ---@param componentB any The second component.
 ---@return boolean areSame True if the components are the same.
@@ -6747,8 +7140,9 @@ function IsSameComponent(componentA, componentB) end
 --- map menu walks its buy offers with this to find the one it already holds data for.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:21765
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param tradeA any The first trade.
 ---@param tradeB any The second trade.
 ---@return boolean areSame True if the trades are the same.
@@ -6761,8 +7155,9 @@ function IsSameTrade(tradeA, tradeB) end
 --- sites.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 0-1 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_userquestion.lua:311, ui/addons/ego_gameoptions/gameoptions.lua:6241
+-- Arity: 0-1 - X4.exe 8.00, 9.00
 ---@param arg1? boolean Unidentified in 9.00 vanilla usage; true or false.
 ---@return boolean isPossible True if saving is possible.
 function IsSavingPossible(arg1) end
@@ -6772,8 +7167,9 @@ function IsSavingPossible(arg1) end
 --- cell with it to find the first cell the player can actually land on.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:7690
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param elementID any The ID of the UI element.
 ---@return boolean isSelectable True if the element is selectable.
 function IsSelectable(elementID) end
@@ -6783,8 +7179,9 @@ function IsSelectable(elementID) end
 --- change the softtarget while it is true, whoever took the lock with `RequestSofttargetLock`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:2464
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return boolean isLocked True if the soft target is locked.
 function IsSofttargetLocked() end
 
@@ -6793,8 +7190,9 @@ function IsSofttargetLocked() end
 --- overlay is guarded with it, because the same UI runs on builds that have no Steam at all.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 10 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 10 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13242, ui/addons/ego_gameoptions/gameoptions.lua:3437
+-- Arity: 0 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - false on the GOG build and true on the Steam build, the same rung on both stores
 ---@return boolean isEnabled True if Steamworks is enabled.
 function IsSteamworksEnabled() end
@@ -6805,8 +7203,9 @@ function IsSteamworksEnabled() end
 --- deployed.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:14366
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param tableID any The ID of the table.
 ---@return boolean isPercentage True if column widths are percentages.
 function IsTableColumnWidthPercentage(tableID) end
@@ -6817,8 +7216,9 @@ function IsTableColumnWidthPercentage(tableID) end
 --- them without asking again.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site (8.00 only), 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site (8.00 only), 2 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:13638
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param tableID any The ID of the table.
 ---@param row number The row index.
 ---@return boolean isSelectable True if the row is selectable.
@@ -6829,8 +7229,9 @@ function IsTableRowSelectable(tableID, row) end
 --- `widget_fullscreen.lua` reads it once while building the table element and caches it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:14485
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param tableID any The ID of the table.
 ---@return boolean isWrapAround True if wrap-around is enabled.
 function IsTableWrapAround(tableID) end
@@ -6853,8 +7254,9 @@ function isTextPropertyFunctionCell(cell, textproperty) end
 --- as opaque IDs.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 79 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 79 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:2347, ui/widget/lua/widget_fullscreen.lua:1701
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param componentID any The ID of the component.
 ---@param typeName string The type name to check against.
 ---@return boolean isType True if the component is of the specified type.
@@ -6866,8 +7268,9 @@ function IsType(componentID, typeName) end
 --- remembered object - because the object can be gone by the time the player clicks the row.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 40 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 40 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:4357, ui/addons/ego_detailmonitor/menu_playerinfo.lua:853
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param componentID any The ID of the component.
 ---@return boolean isValid True if the component is valid.
 function IsValidComponent(componentID) end
@@ -6877,8 +7280,9 @@ function IsValidComponent(componentID) end
 --- with it, because a trade can be gone by the time the row that shows it is redrawn.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:1063
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param tradeID any The ID of the trade.
 ---@return boolean isValid True if the trade is valid.
 function IsValidTrade(tradeID) end
@@ -6889,8 +7293,9 @@ function IsValidTrade(tradeID) end
 --- working with a freed element is what causes the errors it is there to report.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 79 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 79 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:1010, ui/addons/ego_detailmonitorhelper/helper.lua:1522
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param elementID any The ID of the widget element.
 ---@return boolean isValid True if the element is valid.
 function IsValidWidgetElement(elementID) end
@@ -6902,8 +7307,9 @@ function IsValidWidgetElement(elementID) end
 --- inventory rows from the answer.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 9 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 9 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:560, ui/addons/ego_detailmonitor/menu_map.lua:14122
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param wareID string The ID of the ware.
 ---@param factionID string The ID of the faction owning the ware.
 ---@param policeFactionID? string The faction whose police laws are checked.
@@ -6916,8 +7322,9 @@ function IsWareIllegalTo(wareID, factionID, policeFactionID) end
 --- here, the only vanilla call passes `true`, not an action name.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:5262
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param actionName string The name of the input action to listen for.
 function ListenForInput(actionName) end
 
@@ -6927,8 +7334,9 @@ function ListenForInput(actionName) end
 --- it is gone before the load starts.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:2963
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param filename string -- The name of the save file to load.
 function LoadGame(filename) end
 
@@ -6938,10 +7346,11 @@ function LoadGame(filename) end
 --- default map.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8436
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param profileName string The name of the input profile to load.
----@param personal? boolean Whether the profile is a personal (user) profile.
+---@param personal boolean Whether the profile is a personal (user) profile.
 function LoadInputProfile(profileName, personal) end
 
 
@@ -6952,6 +7361,7 @@ function LoadInputProfile(profileName, personal) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 20 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/compass.lua:170, ui/core/lua/debugline.lua:126
+-- Arity: not checked - X4.exe 8.00, 9.00
 function LockPresentation() end
 
 
@@ -6983,7 +7393,8 @@ function MakeGlobalAvailable(objectname) end
 --- a mod can check from here.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - argument 2 typed by the engine's own rejection of a number, repeated on
 -- 9.00 against a station's defence computer and a ship's pilot
 ---@param entityID any The entity whose repair queue is reordered.
@@ -7006,6 +7417,7 @@ Matrix = {}
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: not checked - X4.exe 8.00, 9.00
 function memoryReport() end
 
 
@@ -7023,27 +7435,26 @@ Menus = {}
 --- view helper passes `View.hasPlayerControls()` to both so the restored state matches.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_viewhelper/viewhelper.lua:261
+-- Arity: 1-3 - X4.exe 8.00, 9.00
 ---@param frame any -- The frame to minimize.
 ---@param text? string -- Optional text to display on the minimized frame.
 ---@param hasPlayerControls? boolean -- Whether the frame has player controls.
 function MinimizeFrame(frame, text, hasPlayerControls) end
 
 
---- Starts a new game from a game start module - `NewGame("x4ep1_gamestart_hub")`. Every vanilla
---- call passes only the module name, so the parameter table and its count are optional; the
+--- Starts a new game from a game start module - `NewGame("x4ep1_gamestart_hub")`. X4.exe's
+--- count check takes exactly the module name, which is all any vanilla call passes; the
 --- tutorial and scenario menus store their own context in user data first, because the UI is
 --- torn down as the new game starts.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 13 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 13 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_help.lua:446, ui/addons/ego_detailmonitor/menu_scenario_debriefing.lua:617
----@overload fun(moduleName:string)
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param moduleName string -- The name of the game start module (e.g., "startmenu", "x4ep1_gamestart_hub").
----@param params? table -- A table of `NewGameParameter` objects.
----@param numParams? integer -- The number of parameters.
-function NewGame(moduleName, params, numParams) end
+function NewGame(moduleName) end
 
 
 ---
@@ -7051,8 +7462,9 @@ function NewGame(moduleName, params, numParams) end
 ---
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1108
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnActiveWeaponGroupChanged(contract) end
 
@@ -7062,8 +7474,9 @@ function NotifyOnActiveWeaponGroupChanged(contract) end
 ---
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:2281
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnChangedEnvironmentObject(contract) end
 
@@ -7073,8 +7486,9 @@ function NotifyOnChangedEnvironmentObject(contract) end
 --- shows what is being said.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/firstperson_crosshair.lua:150, ui/core/lua/subchannelbar.lua:126
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnConversationFinished(contract) end
 
@@ -7083,8 +7497,9 @@ function NotifyOnConversationFinished(contract) end
 --- `NotifyOnConversationFinished` so both ends are covered.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/firstperson_crosshair.lua:149
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnConversationStarted(contract) end
 
@@ -7094,8 +7509,9 @@ function NotifyOnConversationStarted(contract) end
 --- addon menu passes `getElement("Scene.UIContract")`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/customgame.lua:5134, ui/core/lua/monitors.lua:784
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnCutsceneReady(contract) end
 
@@ -7105,8 +7521,9 @@ function NotifyOnCutsceneReady(contract) end
 --- caller sets its own flag alongside, so it registers only once.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 11 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 11 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_playerinfo.lua:3352, ui/addons/ego_detailmonitor/menu_timeline.lua:430
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnCutsceneStopped(contract) end
 
@@ -7116,8 +7533,9 @@ function NotifyOnCutsceneStopped(contract) end
 --- subscribes to everything it reacts to.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:786
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnIncomingMail(contract) end
 
@@ -7126,8 +7544,9 @@ function NotifyOnIncomingMail(contract) end
 --- family the monitor code registers together on a single contract.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1109
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnIncomingMissile(contract) end
 
@@ -7137,8 +7556,9 @@ function NotifyOnIncomingMissile(contract) end
 ---
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1103
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnInventoryWaresAdded(contract) end
 
@@ -7147,8 +7567,9 @@ function NotifyOnInventoryWaresAdded(contract) end
 --- `NotifyOnIncomingMail`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:787
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnMailRead(contract) end
 
@@ -7157,8 +7578,9 @@ function NotifyOnMailRead(contract) end
 --- `NotifyOnMissileLockLost` so the crosshair can follow the lock to either end.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1110
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnMissileLockInitiated(contract) end
 
@@ -7167,8 +7589,9 @@ function NotifyOnMissileLockInitiated(contract) end
 --- `NotifyOnMissileLockInitiated` so the crosshair can follow the lock both ways.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1111
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnMissileLockLost(contract) end
 
@@ -7177,8 +7600,9 @@ function NotifyOnMissileLockLost(contract) end
 --- `NotifyOn*` family the monitor code registers together on one contract.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:788
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnMissionInfoUpdate(contract) end
 
@@ -7187,8 +7611,9 @@ function NotifyOnMissionInfoUpdate(contract) end
 --- `NotifyOn*` family the monitor code registers together on one contract.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:789
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnMissionObjectiveBarUpdate(contract) end
 
@@ -7197,8 +7622,9 @@ function NotifyOnMissionObjectiveBarUpdate(contract) end
 --- family the monitor code registers together on one contract.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:790
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnNotificationFreed(contract) end
 
@@ -7208,7 +7634,8 @@ function NotifyOnNotificationFreed(contract) end
 ---
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnOnlineOperationUpdated(contract) end
 
@@ -7218,8 +7645,9 @@ function NotifyOnOnlineOperationUpdated(contract) end
 ---
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_docked.lua:274, ui/core/lua/crosshair handling.lua:1112
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnPlayerActivityChanged(contract) end
 
@@ -7229,8 +7657,9 @@ function NotifyOnPlayerActivityChanged(contract) end
 ---
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1113
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnPlayerFlightControlStarted(contract) end
 
@@ -7240,8 +7669,9 @@ function NotifyOnPlayerFlightControlStarted(contract) end
 ---
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1114
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnPlayerFlightControlStopped(contract) end
 
@@ -7251,8 +7681,9 @@ function NotifyOnPlayerFlightControlStopped(contract) end
 --- scan from start to either end.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1115
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnScanAborted(contract) end
 
@@ -7261,8 +7692,9 @@ function NotifyOnScanAborted(contract) end
 --- `NotifyOnScanAborted`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1116
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnScanFinished(contract) end
 
@@ -7271,8 +7703,9 @@ function NotifyOnScanFinished(contract) end
 --- finished notifications, which are the two ways it can end.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1117
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnScanStarted(contract) end
 
@@ -7282,8 +7715,9 @@ function NotifyOnScanStarted(contract) end
 --- event for the speech it shows.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/dialogmenu.lua:323, ui/core/lua/subchannelbar.lua:127
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnStartDialog(contract) end
 
@@ -7292,8 +7726,9 @@ function NotifyOnStartDialog(contract) end
 --- together with `NotifyOnStartDialog`, so it hears both ends of a conversation.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/dialogmenu.lua:324
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnStopDialog(contract) end
 
@@ -7302,8 +7737,9 @@ function NotifyOnStopDialog(contract) end
 --- and the monitors, both of which have to redraw for the new location.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1118, ui/core/lua/monitors.lua:792
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnTeleportSucceeded(contract) end
 
@@ -7312,8 +7748,9 @@ function NotifyOnTeleportSucceeded(contract) end
 --- registers it, since that is what it draws.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:1119
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyOnWeaponGroupChanged(contract) end
 
@@ -7324,6 +7761,7 @@ function NotifyOnWeaponGroupChanged(contract) end
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: not checked (a no-op stub) - X4.exe 8.00, 9.00
 ---@param elementID any The ID of the element that was hidden.
 function NotifyTargetElementHidden(elementID) end
 
@@ -7332,8 +7770,9 @@ function NotifyTargetElementHidden(elementID) end
 --- target system sends it once per element and keeps its own flag so it cannot be sent twice.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/targetsystem.lua:5172
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param elementID any The ID of the element that was shown.
 function NotifyTargetElementShown(elementID) end
 
@@ -7343,8 +7782,9 @@ function NotifyTargetElementShown(elementID) end
 --- and the end of the conversation.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/subchannelbar.lua:125
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param contract any The UI contract to notify.
 function NotifyVoiceOutput(contract) end
 
@@ -7367,28 +7807,32 @@ function onGamePaused() end
 function onGameUnpaused() end
 
 
---- Aborts the running venture. No vanilla code calls it, and the declaration carries no
---- parameters.
+--- Aborts the running venture. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function OnlineAbortVenture() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param ventureplatformid any A component ID, named by X4.exe.
+function OnlineAbortVenture(ventureplatformid) end
 
 
---- Accepts a pending online team invite. No vanilla code calls it, and the declaration carries
---- no parameters.
+--- Accepts a pending online team invite. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function OnlineAcceptTeamInvite() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
+---@param senderid number Named by X4.exe.
+---@param teamid number Named by X4.exe.
+function OnlineAcceptTeamInvite(senderid, teamid) end
 
 
---- Activates an online user item. No vanilla code calls it, and the declaration carries no
---- parameters.
+--- Activates an online user item. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function OnlineActivateUserItem() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param wareid string Named by X4.exe.
+function OnlineActivateUserItem(wareid) end
 
 
 --- Adds a user to the contact list, or to the blocked list when the second argument is true.
@@ -7396,9 +7840,10 @@ function OnlineActivateUserItem() end
 --- through.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13397
----@param userID any The ID of the user.
+-- Arity: 2 - X4.exe 8.00, 9.00
+---@param userID number The ID of the user.
 ---@param block boolean `true` to block the user, `false` to add as a contact.
 function OnlineAddContact(userID, block) end
 
@@ -7407,7 +7852,8 @@ function OnlineAddContact(userID, block) end
 --- `OnlineChangeTeamName`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 ---@return boolean # `true` if the team name can be changed, otherwise `false`.
 function OnlineCanChangeTeamName() end
 
@@ -7416,16 +7862,19 @@ function OnlineCanChangeTeamName() end
 --- it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param userid number Named by X4.exe.
 ---@return boolean # `true` if a user can be invited, otherwise `false`.
-function OnlineCanInviteUser() end
+function OnlineCanInviteUser(userid) end
 
 
 --- Reports whether venture asset access can be unlocked. No vanilla code calls it, though
 --- `OnlineIsVentureAssetAccessUnlocked` reads the same state.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return boolean # `true` if access can be unlocked, otherwise `false`.
 function OnlineCanUnlockVentureAssetAccess() end
 
@@ -7434,7 +7883,8 @@ function OnlineCanUnlockVentureAssetAccess() end
 --- `OnlineCanChangeTeamName`, which would say whether it is allowed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param newName string The new name for the team.
 function OnlineChangeTeamName(newName) end
 
@@ -7443,17 +7893,19 @@ function OnlineChangeTeamName(newName) end
 --- `helper.lua` stores its own request instance and waits for the answer to arrive.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13390
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param username string The username to check.
 function OnlineCheckUsername(username) end
 
 
---- Clears the online logbook. No vanilla code calls it, and the declaration carries no
---- parameters.
+--- Clears the online logbook. No vanilla code calls it, and X4.exe's count check takes no
+--- argument.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function OnlineClearLogbook() end
 
 
@@ -7461,42 +7913,49 @@ function OnlineClearLogbook() end
 --- calls it as the reward context frame closes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:29663
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function OnlineClearLogbookRewards() end
 
 
 --- Converts Brane energy, in the Ventures economy. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function OnlineConvertBraneEnergy() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param amount number Named by X4.exe.
+function OnlineConvertBraneEnergy(amount) end
 
 
---- Creates an online team with the given name. No vanilla code calls it, though the menus do
---- call the rest of the team family - `OnlineJoinTeam`, `OnlineLeaveTeam`.
+--- Creates an online team. No vanilla code calls it, though the menus do call the rest of the
+--- team family - `OnlineJoinTeam`, `OnlineLeaveTeam`. X4.exe's count check takes no argument,
+--- and one passed anyway is logged and ignored.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param teamName string The name of the team to create.
-function OnlineCreateTeam(teamName) end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
+function OnlineCreateTeam() end
 
 
---- Declines a pending online team invite. No vanilla code calls it, and the declaration carries
---- no parameters.
+--- Declines a pending online team invite. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function OnlineDeclineTeamInvite() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
+---@param senderid number Named by X4.exe.
+---@param teamid number Named by X4.exe.
+function OnlineDeclineTeamInvite(senderid, teamid) end
 
 
 --- Looks a contact up by user ID and returns it, or nothing when the player has no such contact
 --- - `helper.lua` tests for nil to tell a new contact from a known one.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13418
----@param userID any The ID of the user to find.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param userID number The ID of the user to find.
 ---@return any # The contact object if found, otherwise `nil`.
 function OnlineFindContact(userID) end
 
@@ -7505,7 +7964,8 @@ function OnlineFindContact(userID) end
 --- `OnlineConvertBraneEnergy`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return number # The conversion rate.
 function OnlineGetBraneEnergyConversionRate() end
 
@@ -7514,9 +7974,10 @@ function OnlineGetBraneEnergyConversionRate() end
 --- empty table as a group it could not read.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:220
----@param groupID string The ID of the chat group.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param groupID number The ID of the chat group.
 ---@return table # A list of user objects in the group.
 function OnlineGetChatGroupUsers(groupID) end
 
@@ -7525,8 +7986,9 @@ function OnlineGetChatGroupUsers(groupID) end
 --- whenever its own outdated flag is set, rather than being handed new messages one by one.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:263
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 ---@return table # A list of chat message objects.
 function OnlineGetChatMessages() end
 
@@ -7536,6 +7998,7 @@ function OnlineGetChatMessages() end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: 0 (more are logged, then ignored) on 8.00, not checked on 9.00 - X4.exe
 ---@return table # A table of coalition objects.
 function OnlineGetCoalitions() end
 
@@ -7545,8 +8008,9 @@ function OnlineGetCoalitions() end
 --- all of them.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13138
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param pageSize integer The number of contacts per page.
 ---@param startIndex integer The starting index for pagination.
 ---@param blocked boolean `true` to retrieve the blocked list, `false` for the contacts list.
@@ -7560,6 +8024,7 @@ function OnlineGetContacts(pageSize, startIndex, blocked) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites (8.00 only), 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:18312
+-- Arity: 0 (more are logged, then ignored) on 8.00, not checked on 9.00 - X4.exe
 ---@return table # The current coalition object.
 function OnlineGetCurrentCoalition() end
 
@@ -7568,8 +8033,9 @@ function OnlineGetCurrentCoalition() end
 --- it to build the time-left string shown on the map.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:6428, ui/addons/ego_detailmonitorhelper/helper.lua:11349
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 ---@return table # The current operation object.
 function OnlineGetCurrentOperation() end
 
@@ -7578,8 +8044,9 @@ function OnlineGetCurrentOperation() end
 --- `C.GetCurrentUTCDataTime()` to work out how much of the season is left.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:18999, ui/addons/ego_detailmonitorhelper/helper.lua:11360
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 ---@return table # The current season object.
 function OnlineGetCurrentSeason() end
 
@@ -7589,8 +8056,9 @@ function OnlineGetCurrentSeason() end
 --- check for.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:6429, ui/addons/ego_detailmonitorhelper/helper.lua:13494
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 ---@return table # The current team object.
 function OnlineGetCurrentTeam() end
 
@@ -7599,8 +8067,9 @@ function OnlineGetCurrentTeam() end
 --- preselect the dropdown that writes back through `OnlineSetUserLanguage`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7790
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return string # The language code (e.g., "en").
 function OnlineGetCurrentUserLanguage() end
 
@@ -7609,8 +8078,9 @@ function OnlineGetCurrentUserLanguage() end
 --- context frame of their own.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:3405
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return table # A table of reward objects.
 function OnlineGetLogbookRewards() end
 
@@ -7620,9 +8090,11 @@ function OnlineGetLogbookRewards() end
 --- No usage found in the workspace.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param onlinemissionid string Named by X4.exe.
 ---@return table # A table representing the mission order.
-function OnlineGetMissionUIOrder() end
+function OnlineGetMissionUIOrder(onlinemissionid) end
 
 
 --- Returns the patron information of a multiverse object - the team behind a ship that belongs
@@ -7630,8 +8102,9 @@ function OnlineGetMissionUIOrder() end
 --- online one.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_targetmonitor/targetmonitor.lua:855
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param component userdata The component to get information for.
 ---@return table|nil # A table with patron information, or nil if not found.
 function OnlineGetMultiversePatronInfo(component) end
@@ -7642,8 +8115,9 @@ function OnlineGetMultiversePatronInfo(component) end
 --- `OnlineGetContacts`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13135
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param blocked boolean `true` to count blocked users, `false` to count contacts.
 ---@return integer # The number of contacts or blocked users.
 function OnlineGetNumContacts(blocked) end
@@ -7653,17 +8127,20 @@ function OnlineGetNumContacts(blocked) end
 --- notification and caps its own display at 100.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/core/lua/monitors.lua:3238
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 ---@return integer # The number of unread messages.
 function OnlineGetNumUnreadChatMessages() end
 
 
 --- Returns the online missions currently offered.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it, and X4.exe's count check takes no argument; the return shape is
+--- unverified.
 -- Environment: addons only
 -- Versions: 9.00 only - new in 9.00, absent from 8.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 - X4.exe 9.00
 ---@return any missions
 function OnlineGetOnlineMissions() end
 
@@ -7672,19 +8149,22 @@ function OnlineGetOnlineMissions() end
 --- `helper.lua` uses it to offer platform friends as online contacts.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13438
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return table # A table of friend objects.
 function OnlineGetPlatformFriendList() end
 
 
 --- Returns the public profile of a team.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it; the return shape is unverified.
 -- Environment: addons only
 -- Versions: 9.00 only - new in 9.00, absent from 8.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 9.00
+---@param teamid number Named by X4.exe.
 ---@return any teaminfo
-function OnlineGetPublicTeamInfo() end
+function OnlineGetPublicTeamInfo(teamid) end
 
 
 --- Returns the ladder rankings of a scenario. It reads what is already there:
@@ -7692,9 +8172,10 @@ function OnlineGetPublicTeamInfo() end
 --- success.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_scenario_debriefing.lua:67, ui/addons/ego_detailmonitor/menu_scenario_selection.lua:56
----@param scenarioID any The ID of the scenario.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param scenarioID string The ID of the scenario.
 ---@return table # A table of ranking data.
 function OnlineGetScenarioRankings(scenarioID) end
 
@@ -7702,15 +8183,20 @@ function OnlineGetScenarioRankings(scenarioID) end
 --- Returns the success impact of an online operation. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2-3 - X4.exe 8.00, 9.00
+---@param ventureid number Named by X4.exe.
+---@param wareid string Named by X4.exe.
+---@param amount? number Named by X4.exe.
 ---@return any # The success impact data.
-function OnlineGetSuccessImpact() end
+function OnlineGetSuccessImpact(ventureid, wareid, amount) end
 
 
 --- Returns the online team's inventory. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 ---@return table # A table representing the team's inventory.
 function OnlineGetTeamInventory() end
 
@@ -7719,7 +8205,8 @@ function OnlineGetTeamInventory() end
 --- `OnlineRequestTeamInvitations` - the request-then-read pair are both unused.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return table # A table of team invitation objects.
 function OnlineGetTeamInvitations() end
 
@@ -7727,7 +8214,8 @@ function OnlineGetTeamInvitations() end
 --- Returns the invitations the team has sent out. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return table # A table of open invitation objects.
 function OnlineGetTeamOpenInvitations() end
 
@@ -7735,7 +8223,8 @@ function OnlineGetTeamOpenInvitations() end
 --- Returns information about the team's ventures. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 ---@return table # A table of venture information.
 function OnlineGetTeamVentureInfo() end
 
@@ -7743,100 +8232,127 @@ function OnlineGetTeamVentureInfo() end
 --- Returns the online inbox messages. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 ---@return table # A table of inbox messages.
 function OnlineGetUserInbox() end
 
 
 --- Returns a venture's success chance before bonuses are applied.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it; the return shape is unverified.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param ventureid number Named by X4.exe.
 ---@return any chance
-function OnlineGetVentureBaseSuccessChance() end
+function OnlineGetVentureBaseSuccessChance(ventureid) end
 
 
 --- Returns the bonuses that modify a venture's outcome.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it; the return shape is unverified.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 3 - X4.exe 8.00, 9.00
+---@param ventureid number Named by X4.exe.
+---@param bonustype string Named by X4.exe.
+---@param ventureships table Named by X4.exe.
 ---@return any bonuses
-function OnlineGetVentureBonusValues() end
+function OnlineGetVentureBonusValues(ventureid, bonustype, ventureships) end
 
 
 --- Returns how long a venture takes.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it; the return shape is unverified.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1-3 - X4.exe 8.00, 9.00
+---@param ventureid number Named by X4.exe.
+---@param branefuelamount? number Named by X4.exe.
+---@param arg3? any Unidentified; X4.exe accepts it.
 ---@return any duration
-function OnlineGetVentureDuration() end
+function OnlineGetVentureDuration(ventureid, branefuelamount, arg3) end
 
 
 --- Returns the venture logbook entries.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it, and X4.exe's count check takes no argument; the return shape is
+--- unverified.
 --- OnlineClearLogbook and OnlineHasVentureLogbookReward act on the same data.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return any logbook
 function OnlineGetVentureLogbook() end
 
 
 --- Returns the reward a venture pays out.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it; the return shape is unverified.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
+---@param wareid string Named by X4.exe.
+---@param amount number Named by X4.exe.
 ---@return any amount
-function OnlineGetVentureRewardAmount() end
+function OnlineGetVentureRewardAmount(wareid, amount) end
 
 
 --- Returns a venture's risk rating.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it; the return shape is unverified.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param ventureid number Named by X4.exe.
 ---@return any risk
-function OnlineGetVentureRisk() end
+function OnlineGetVentureRisk(ventureid) end
 
 
 --- Returns the display order of the ventures.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it; the return shape is unverified.
 --- OnlineGetMissionUIOrder is the equivalent for online missions.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param ventureid number Named by X4.exe.
 ---@return any order
-function OnlineGetVentureUIOrder() end
+function OnlineGetVentureUIOrder(ventureid) end
 
 
 --- Returns the ware information attached to a venture.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it; the return shape is unverified.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param wareid string Named by X4.exe.
 ---@return any wareinfo
-function OnlineGetVentureWareInfo() end
+function OnlineGetVentureWareInfo(wareid) end
 
 
 --- Invites a user to the player's team.
---- No vanilla code calls it; the parameters are unverified.
+--- No vanilla code calls it.
 --- OnlineCanInviteUser reports whether inviting is currently allowed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function OnlineInviteUser() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1-2 - X4.exe 8.00, 9.00
+---@param userid number Named by X4.exe.
+---@param arg2? any Unidentified; X4.exe accepts it.
+function OnlineInviteUser(userid, arg2) end
 
 
 --- Reports whether venture asset access has been unlocked.
---- No vanilla code calls it; the parameters and return shape are unverified.
+--- No vanilla code calls it, and X4.exe's count check takes no argument; the return shape is
+--- unverified.
 --- OnlineCanUnlockVentureAssetAccess and OnlineUnlockVentureAssetAccess are the pair.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return any unlocked
 function OnlineIsVentureAssetAccessUnlocked() end
 
@@ -7847,55 +8363,70 @@ function OnlineIsVentureAssetAccessUnlocked() end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: 1 on 8.00, not checked (a no-op stub) on 9.00 - X4.exe
 function OnlineJoinCoalition() end
 
 
 --- Joins an arbitrary open team.
---- No vanilla code calls it; the parameters are unverified.
+--- No vanilla code calls it, and X4.exe's count check takes no argument.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 function OnlineJoinRandomTeam() end
 
 
 --- Joins a specific team.
---- No vanilla code calls it; the parameters are unverified.
+--- No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 9.00 only - new in 9.00, absent from 8.00
--- Usage: unverified - no vanilla call site
-function OnlineJoinTeam() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 9.00
+---@param teamid number Named by X4.exe.
+function OnlineJoinTeam(teamid) end
 
 
 --- Leaves the player's current team.
---- No vanilla code calls it; the parameters are unverified.
+--- No vanilla code calls it, and X4.exe's count check takes no argument.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) on 8.00, 0 on 9.00 - X4.exe
 function OnlineLeaveTeam() end
 
 
 --- Reports a chat message for moderation.
---- No vanilla code calls it; the parameters are unverified.
+--- No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function OnlineReportChat() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
+---@param timestamp any A component ID, named by X4.exe.
+---@param reason string Named by X4.exe.
+function OnlineReportChat(timestamp, reason) end
 
 
 --- Reports a shared ship design for moderation.
---- No vanilla code calls it; the parameters are unverified.
+--- No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function OnlineReportShip() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 3 - X4.exe 8.00, 9.00
+---@param context string Named by X4.exe.
+---@param transactionid string Named by X4.exe.
+---@param reason string Named by X4.exe.
+function OnlineReportShip(context, transactionid, reason) end
 
 
 --- Reports a user for moderation.
---- No vanilla code calls it; the parameters are unverified.
+--- No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function OnlineReportUser() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
+---@param userid number Named by X4.exe.
+---@param reason string Named by X4.exe.
+function OnlineReportUser(userid, reason) end
 
 
 --- Starts fetching the platform friend list. It returns nothing: the result is read afterwards
@@ -7903,8 +8434,9 @@ function OnlineReportUser() end
 --- API uses.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13402
+-- Arity: 0 - X4.exe 8.00, 9.00
 function OnlineRequestPlatformFriendList() end
 
 
@@ -7913,18 +8445,22 @@ function OnlineRequestPlatformFriendList() end
 --- `OnlineGetScenarioRankings`; the scenario list re-requests on a ten second timer.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_scenario_debriefing.lua:58, ui/addons/ego_detailmonitor/menu_scenario_selection.lua:218
----@param scenarioID any The ID of the scenario.
----@param displayMode? any The ladder display mode to request.
-function OnlineRequestScenarioRankings(scenarioID, displayMode) end
+-- Arity: 1-4 - X4.exe 8.00, 9.00
+---@param scenarioID string The ID of the scenario.
+---@param displayMode? number The ladder display mode to request.
+---@param arg3? any Unidentified; X4.exe accepts it.
+---@param arg4? number Named `end` by X4.exe.
+function OnlineRequestScenarioRankings(scenarioID, displayMode, arg3, arg4) end
 
 
 --- Starts fetching the pending team invitations, to be read afterwards with
 --- `OnlineGetTeamInvitations`. No vanilla code calls either half.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function OnlineRequestTeamInvitations() end
 
 
@@ -7932,35 +8468,41 @@ function OnlineRequestTeamInvitations() end
 --- the chat window passes whichever its command parsing produced.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:443
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param text string The message text.
----@param userID string|nil The ID of the recipient user or nil for the current group.
+---@param userID? number|nil The ID of the recipient user, or nil for the current group. X4.exe checks for a number.
 function OnlineSendChatMessage(text, userID) end
 
 
---- Sets whether the player's online team is public. No vanilla code calls it.
+--- Sets whether the player's online team is public. No vanilla code calls it. X4.exe's count
+--- check takes no argument, and one passed anyway is logged and ignored, so what it sets the
+--- flag to is unverified.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param isPublic boolean Whether the team should be public.
-function OnlineSetTeamPublic(isPublic) end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
+function OnlineSetTeamPublic() end
 
 
 --- Sets the description text attached to a user-generated-content submission.
---- No vanilla code calls it; the parameters are unverified.
+--- No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 9.00 only - new in 9.00, absent from 8.00
--- Usage: unverified - no vanilla call site
-function OnlineSetUGCSubmissionText() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 9.00
+---@param text string Named by X4.exe.
+function OnlineSetUGCSubmissionText(text) end
 
 
 --- Sets the language for online features, by language ID. The options menu passes the dropdown
 --- value unchanged.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9249
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param languageID number The ID of the language to set.
 function OnlineSetUserLanguage(languageID) end
 
@@ -7970,28 +8512,39 @@ function OnlineSetUserLanguage(languageID) end
 --- `allow_update_once` from a checkbox.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 15 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 15 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3399
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param configName string The name of the configuration value (e.g., "allow_validation", "disable_popup").
----@param value? any The value to set.
+---@param value any The value to set.
 ---@return any # The value of the configuration setting.
 function OnlineSetVentureConfig(configName, value) end
 
 
---- Starts a venture, by venture ID. No vanilla code calls it - like most of the `Online*`
---- family it is engine plumbing the shipped menus never reach.
+--- Starts a venture. No vanilla code calls it - like most of the `Online*` family it is engine
+--- plumbing the shipped menus never reach. The parameter names and types are the ones X4.exe's
+--- argument errors give.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param ventureID string The ID of the venture to start.
-function OnlineStartVenture(ventureID) end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 8 - X4.exe 8.00, 9.00
+---@param ships table Named by X4.exe.
+---@param ventureplatformid any A component ID, named by X4.exe.
+---@param ventureid string Named by X4.exe.
+---@param fuelamount number Named by X4.exe.
+---@param successfactors table Named by X4.exe.
+---@param npcs table Named by X4.exe.
+---@param transferwares table Named by X4.exe.
+---@param targetuserid number Named by X4.exe.
+function OnlineStartVenture(ships, ventureplatformid, ventureid, fuelamount, successfactors, npcs, transferwares, targetuserid) end
 
 
 --- Starts fetching the team's open invitations, to be read with `OnlineGetTeamOpenInvitations`.
 --- No vanilla code calls either half.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function OnlineTeamRequestOpenInvitations() end
 
 
@@ -7999,15 +8552,18 @@ function OnlineTeamRequestOpenInvitations() end
 --- `OnlineIsVentureAssetAccessUnlocked` reads the same state.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function OnlineUnlockVentureAssetAccess() end
 
 
 --- Uploads the player's inventory items to the online service. No vanilla code calls it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
-function OnlineUploadPlayerInventoryItems() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0-1 - X4.exe 8.00, 9.00
+---@param wareamounts? table Named by X4.exe.
+function OnlineUploadPlayerInventoryItems(wareamounts) end
 
 
 --- Uploads the statistics of a finished scenario and returns a **string** result, not a
@@ -8015,8 +8571,9 @@ function OnlineUploadPlayerInventoryItems() end
 --- only called with an online session in hand.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_scenario_debriefing.lua:137
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param scenarioID string The ID of the scenario.
 ---@return boolean # True if the upload was successful.
 function OnlineUploadScenarioStats(scenarioID) end
@@ -8027,8 +8584,9 @@ function OnlineUploadScenarioStats(scenarioID) end
 --- in.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9233
+-- Arity: 1 (more are logged, then ignored) on 8.00, 1 on 9.00 - X4.exe
 ---@param allow boolean True to allow invitations, false to disallow.
 function OnlineUserAllowInvites(allow) end
 
@@ -8038,8 +8596,9 @@ function OnlineUserAllowInvites(allow) end
 --- them.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9237
+-- Arity: 1 (more are logged, then ignored) on 8.00, 1 on 9.00 - X4.exe
 ---@param allow boolean True to allow private messages, false to disallow.
 function OnlineUserAllowPrivateMessages(allow) end
 
@@ -8048,8 +8607,9 @@ function OnlineUserAllowPrivateMessages(allow) end
 --- options page.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:7770
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean # True if private messages are allowed, false otherwise.
 function OnlineUserArePrivateMessagesAllowed() end
 
@@ -8100,17 +8660,19 @@ function onTickerOnlyMode(_, enabled, showpermanently) end
 function onUpdate() end
 
 
---- Opens a menu by name, with up to two parameters - `"TopLevelMenu"`, `"DockedMenu"`,
---- `"MapMenu"`. The second parameter is the menu's own argument list, whose shape each menu
+--- Opens a menu by name, with two parameters - `"TopLevelMenu"`, `"DockedMenu"`, `"MapMenu"`.
+--- X4.exe's count check wants both, and a force flag after them is optional. The second
+--- parameter is the menu's own argument list, whose shape each menu
 --- defines: the map takes `{ x, y, ... }` and can be handed a whole submenu request in it. This
 --- is the call that opens a vanilla menu from anywhere, including from a mod.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 18 vanilla call sites, 3-4 arguments
+-- Usage: confirmed - X4.exe count check, 18 vanilla call sites, 3-4 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:344, ui/addons/ego_detailmonitor/menu_docked.lua:213
+-- Arity: 3-4 - X4.exe 8.00, 9.00
 ---@param menuName string -- The name of the menu to open (e.g., "TopLevelMenu", "DockedMenu", "MapMenu").
----@param param1? any -- An optional parameter for the menu.
----@param param2? any -- An optional second parameter for the menu.
+---@param param1 any -- The first parameter for the menu.
+---@param param2 any -- The second parameter for the menu.
 ---@param force? boolean -- If `true`, forces the menu to open.
 function OpenMenu(menuName, param1, param2, force) end
 
@@ -8120,8 +8682,9 @@ function OpenMenu(menuName, param1, param2, force) end
 --- different path entirely.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 6 vanilla call sites, 0-1 arguments
+-- Usage: confirmed - X4.exe count check, 6 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3438, ui/addons/ego_gameoptions/gameoptions.lua:10557
+-- Arity: 0-1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - bare on both stores: the game's own store page in the overlay on Steam, nothing at all on GOG
 ---@param appID? number The Steam AppID of the page to open.
 function OpenSteamOverlayStorePage(appID) end
@@ -8152,7 +8715,8 @@ function OpenSteamOverlayStorePage(appID) end
 --- apart, landed as two tabs in call order rather than two windows.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - eleven rungs on each store, three environment readings first and the real URL last, with OpenSteamOverlayStorePage as the control
 ---@param url string The URL to open. Not validated: a number is coerced, an empty or non-URL string is accepted and opens nothing.
 function OpenSteamOverlayWebPage(url) end
@@ -8162,10 +8726,11 @@ function OpenSteamOverlayWebPage(url) end
 --- items; the options menu passes both straight from the selected extension.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8193
----@param id? string The ID of the workshop item.
----@param personal? boolean Whether the item is personal.
+-- Arity: 2 - X4.exe 8.00, 9.00
+---@param id string The ID of the workshop item.
+---@param personal boolean Whether the item is personal.
 function OpenWorkshop(id, personal) end
 
 
@@ -8174,8 +8739,9 @@ function OpenWorkshop(id, personal) end
 --- finished. Unpausing has its own global, `Unpause`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 7 vanilla call sites, 0-2 arguments
+-- Usage: confirmed - X4.exe count check, 7 vanilla call sites, 0-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_scenario_debriefing.lua:85, ui/addons/ego_detailmonitor/menu_scenario_debriefing.lua:119
+-- Arity: 0-2 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@param unpause? boolean If `true`, unpauses the game.
 ---@param force? boolean If `true`, forces the pause/unpause action.
 function Pause(unpause, force) end
@@ -8186,6 +8752,7 @@ function Pause(unpause, force) end
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 function pause(element) end
 
@@ -8195,10 +8762,11 @@ function pause(element) end
 --- target.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:4368
----@param messageID any The ID of the message associated with the action.
----@param actionType integer The type of action to perform (e.g., 1).
+-- Arity: 1 or more - X4.exe 8.00, 9.00
+---@param messageID integer The ID of the message associated with the action.
+---@param actionType? integer The type of action to perform (e.g., 1).
 function PerformAction(messageID, actionType) end
 
 
@@ -8209,6 +8777,7 @@ function PerformAction(messageID, actionType) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 2 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/write text.lua:85
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 function play(element) end
 
@@ -8217,18 +8786,19 @@ function play(element) end
 --- cues and `StartPlayingSound` for a loop they intend to stop again.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param soundName string The name of the sound to play.
 function PlayAmbientSound(soundName) end
 
 
---- Plays the game credits. No vanilla code calls it, so what the parameter selects is
---- unverified.
+--- Plays the game credits. No vanilla code calls it, and X4.exe's count check takes no
+--- argument.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param option? any An optional parameter for the credits display.
-function PlayCredits(option) end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 - X4.exe 8.00, 9.00
+function PlayCredits() end
 
 
 --- Plays a UI sound by name. The name is one of the game's sound cues as a plain string:
@@ -8236,8 +8806,9 @@ function PlayCredits(option) end
 --- `ui_menu_dlg_btn_select_core`. This is the most-called global in the whole UI.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 154 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 154 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:730, ui/addons/ego_detailmonitor/menu_crafting.lua:117
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param soundName string The name of the sound to play (e.g., "ui_positive_select").
 function PlaySound(soundName) end
 
@@ -8246,8 +8817,9 @@ function PlaySound(soundName) end
 --- screenshots this way before showing any of them, the same way `PrepareMesh` handles meshes.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/extro.lua:78
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param iconName string The name of the icon to prepare.
 function PrepareIcon(iconName) end
 
@@ -8256,8 +8828,9 @@ function PrepareIcon(iconName) end
 --- mesh list and prepares every one of them while setting up.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/debugline.lua:111, ui/core/lua/promo.lua:161
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param meshName string The name of the mesh to prepare.
 function PrepareMesh(meshName) end
 
@@ -8269,8 +8842,9 @@ function PrepareMesh(meshName) end
 --- Documented as **unsupported** and not designed to be used by mods.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:796, ui/widget/lua/widget_fullscreen.lua:8777
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param renderTargetName string The name of the render target texture.
 ---@return boolean success
 function PrepareRenderTarget(renderTargetName) end
@@ -8281,8 +8855,9 @@ function PrepareRenderTarget(renderTargetName) end
 --- setting up.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/debugline.lua:114, ui/core/lua/promo.lua:164
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param textureName string The name of the texture to prepare.
 function PrepareTexture(textureName) end
 
@@ -8292,8 +8867,9 @@ function PrepareTexture(textureName) end
 --- section's base parameter passes three.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 2-3 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:1799, ui/addons/ego_detailmonitorhelper/helper.lua:1805
+-- Arity: 1-3 - X4.exe 8.00, 9.00
 ---@param nextSection string
 ---@param choiceParam? any
 ---@param baseParam? any
@@ -8303,16 +8879,18 @@ function ProceedFromMenu(nextSection, choiceParam, baseParam) end
 -- Quits the game, closing all related processes and returning to the desktop.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8125, ui/addons/ego_gameoptions/onlineupdate.lua:96
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function QuitGame() end
 
 
 -- Quits the current module or menu, returning to the previous state or the desktop.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8127
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function QuitModule() end
 
 
@@ -8333,8 +8911,9 @@ function QuitModule() end
 --- runs. A legacy `CreateInteractionDescriptor` userdata is refused outright.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:1221
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param interactionID integer An id from CreateInteractionDescriptor2, not yet released.
 function RaisePlayerInteractionEvent(interactionID) end
 
@@ -8344,8 +8923,9 @@ function RaisePlayerInteractionEvent(interactionID) end
 --- is why it only works when `IsLuaDebugInputEnabled` is true.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_debug/debug.lua:50
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return string -- The user input string.
 function ReadLuaDebugInput() end
 
@@ -8365,6 +8945,7 @@ function ReadLuaDebugInput() end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 7474 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:133, ui/addons/ego_detailmonitor/menu_crafting.lua:263
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param pageID integer The ID of the text page.
 ---@param textID integer The ID of the text entry within that page.
 ---@return string # The text content.
@@ -8397,6 +8978,7 @@ function ReadText(pageID, textID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
+-- Arity: not checked - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - thirteen calls over two runs: a known-good pair, both kinds of miss, five
 -- fallback values and four type refusals, with ReadText on the same pairs as the contrast; all
 -- fourteen rungs answered the same either side
@@ -8437,8 +9019,9 @@ function Register_Require_With_Init(module_name, response, init) end
 --- sets calls it once for each.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 17 vanilla call sites, 1-2 arguments
+-- Usage: confirmed - X4.exe count check, 17 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:607, ui/addons/ego_detailmonitor/menu_followcamera.lua:78
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 ---@param addonName string The name of the addon.
 ---@param bindingName? string The name of the binding.
 function RegisterAddonBindings(addonName, bindingName) end
@@ -8460,8 +9043,9 @@ function RegisterEvent(eventName, scriptFunction) end
 --- calls for that element.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 58 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 58 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/compass.lua:178, ui/core/lua/crosshair handling.lua:2195
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param element userdata
 function RegisterMouseInteractions(element) end
 
@@ -8470,8 +9054,9 @@ function RegisterMouseInteractions(element) end
 --- `widget_fullscreen.lua` calls it once while setting a presentation up.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:1653
+-- Arity: 0 - X4.exe 8.00, 9.00
 function RegisterWidget() end
 
 
@@ -8479,8 +9064,9 @@ function RegisterWidget() end
 --- afterwards, so the descriptor is never used again once released.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 11 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 11 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2339, ui/addons/ego_detailmonitor/menu_playerinfo.lua:4416
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param cutsceneDesc userdata
 function ReleaseCutsceneDescriptor(cutsceneDesc) end
 
@@ -8490,8 +9076,9 @@ function ReleaseCutsceneDescriptor(cutsceneDesc) end
 --- menu.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 13 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 13 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:2623, ui/addons/ego_helptext/helptext.lua:527
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param descriptor userdata
 function ReleaseDescriptor(descriptor) end
 
@@ -8510,30 +9097,35 @@ function ReleaseDescriptor(descriptor) end
 --- Without that declaration an addon can create and raise interactions but **cannot free one**.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - accepts a legacy userdata descriptor, refuses an integer id with
 -- `invalid parameters`, on both versions
 ---@param descriptor userdata A descriptor from CreateInteractionDescriptor.
 function ReleaseInteractionDescriptor(descriptor) end
 
 
---- No vanilla code calls this, so nothing here confirms what it releases or what it takes. Its
---- neighbours in the `Release*` family each free a descriptor the engine handed out, and the
---- declaration carries no parameters.
+--- No vanilla code calls this, so nothing here confirms what it releases. Its neighbours in the
+--- `Release*` family each free a descriptor the engine handed out; X4.exe's count check takes
+--- exactly one argument, and the binding reads it as a userdata. Which call hands one out is
+--- unmeasured.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
--- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
-function ReleaseListener() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+-- Probed: 8.00, 9.00 - called bare on both versions: refused with `ReleaseListener(): invalid
+-- parameters` and nothing returned
+---@param listener userdata Read as a userdata by X4.exe.
+function ReleaseListener(listener) end
 
 
 --- Releases the notification the target monitor is showing, by the id it was created with. Core
 --- code clears its own description state in the same breath.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:1884
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param notificationID any
 function ReleaseNotification(notificationID) end
 
@@ -8542,8 +9134,9 @@ function ReleaseNotification(notificationID) end
 --- descriptor cannot outlive the view it was built for.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_viewhelper/viewhelper.lua:33
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param viewDescriptor userdata
 function ReleaseViewDescriptor(viewDescriptor) end
 
@@ -8552,8 +9145,9 @@ function ReleaseViewDescriptor(viewDescriptor) end
 --- of the map menu, which passes the ware as a macro name and the amount to remove.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 5 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 5 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:4638
+-- Arity: 3-5 - X4.exe 8.00, 9.00
 ---@param component userdata
 ---@param ware string
 ---@param amount integer
@@ -8566,8 +9160,9 @@ function RemoveAmmo(component, ware, amount, fromPlayer, notify) end
 --- the map menu, next to the `RemoveAmmo` call that does the same for ammunition.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 4 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 4 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:4608
+-- Arity: 3-4 - X4.exe 8.00, 9.00
 ---@param component userdata
 ---@param ware string
 ---@param amount integer
@@ -8587,9 +9182,10 @@ function RemoveHighlightOverlay(id) end
 --- and both pass `nil` as the container - which is how the player's own inventory is addressed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:113, ui/addons/ego_detailmonitor/menu_playerinfo.lua:742
----@param container? userdata
+-- Arity: 3 - X4.exe 8.00, 9.00
+---@param container userdata
 ---@param ware string
 ---@param amount integer
 function RemoveInventory(container, ware, amount) end
@@ -8599,10 +9195,12 @@ function RemoveInventory(container, ware, amount) end
 --- carries it, not its position in a filtered list.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:4385
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param index integer
-function RemoveLogbookEntry(index) end
+---@param category? string Named by X4.exe.
+function RemoveLogbookEntry(index, category) end
 
 
 --- Removes one entry from a list-valued parameter of a queued order. The map menu empties such
@@ -8610,13 +9208,14 @@ function RemoveLogbookEntry(index) end
 --- shifts everything after it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 4 arguments
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 4 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:3046
+-- Arity: 4 - X4.exe 8.00, 9.00
 ---@param controllable userdata
 ---@param orderIndex integer
----@param paramID string
+---@param paramIndex integer
 ---@param listIndex integer
-function RemoveOrderListParam(controllable, orderIndex, paramID, listIndex) end
+function RemoveOrderListParam(controllable, orderIndex, paramIndex, listIndex) end
 
 
 --- Detaches a handler that `SetScript` attached. Vanilla calls it in both shapes: with two
@@ -8633,13 +9232,17 @@ function RemoveOrderListParam(controllable, orderIndex, paramID, listIndex) end
 function RemoveScript(widget, handleType, scriptFunction) end
 
 
---- Clears the current softtarget. Takes no arguments - the core target system calls it while
---- resetting, alongside notifying that no mission position is connected any more.
+--- Clears the current softtarget. The core target system calls it with no argument while
+--- resetting, alongside notifying that no mission position is connected any more. X4.exe
+--- accepts one more, which its `Proper syntax: RemoveSofttarget(force)` message names; no
+--- vanilla call passes it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 0 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:1747
-function RemoveSofttarget() end
+-- Arity: 0-1 - X4.exe 8.00, 9.00
+---@param force? any Named in X4.exe's syntax message; no vanilla call passes it.
+function RemoveSofttarget(force) end
 
 
 --- Releases a softtarget lock taken with `RequestSofttargetLock`. `requester` has to be the
@@ -8650,8 +9253,9 @@ function RemoveSofttarget() end
 --- their own, and the softtarget stays fixed until the last of them is gone.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/targetsystem.lua:2377
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param requester string The name that took the lock.
 ---@return boolean requesterRemoved Whether this requester's request was found, not whether the lock was lifted.
 function RemoveSofttargetLockRequest(requester) end
@@ -8686,7 +9290,8 @@ function RemoveSofttargetLockRequest(requester) end
 --- repair.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - hull and class read back per component, with an MD group listener; that
 -- arguments 2 onwards are acted on is a 9.00 reading, taken against the one-argument call as its
 -- own control in the same run
@@ -8705,8 +9310,9 @@ function RepairDestructibles(destructible, ...) end
 --- works, so the return value has to be checked rather than assumed.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/targetsystem.lua:2367
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param requester string The name holding the lock.
 ---@return boolean success
 function RequestSofttargetLock(requester) end
@@ -8716,8 +9322,9 @@ function RequestSofttargetLock(requester) end
 --- button of the extensions page, then clears its own changed flag.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8133
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function ResetAllExtensionSettings() end
 
 
@@ -8725,8 +9332,9 @@ function ResetAllExtensionSettings() end
 --- `Restore*Options` globals behind the Defaults button.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8430
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function RestoreDisplayOptions() end
 
 
@@ -8735,10 +9343,11 @@ function RestoreDisplayOptions() end
 --- `View.hasPlayerControls()`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_viewhelper/viewhelper.lua:265
+-- Arity: 1-2 - X4.exe 8.00, 9.00
 ---@param frame userdata
----@param hasPlayerControls boolean
+---@param hasPlayerControls? boolean
 function RestoreFrame(frame, hasPlayerControls) end
 
 
@@ -8747,8 +9356,9 @@ function RestoreFrame(frame, hasPlayerControls) end
 --- being rebuilt is out of the way first.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8248
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function RestoreGameOptions() end
 
 
@@ -8756,8 +9366,9 @@ function RestoreGameOptions() end
 --- Defaults button.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8431
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function RestoreGraphicOptions() end
 
 
@@ -8765,8 +9376,9 @@ function RestoreGraphicOptions() end
 --- the Defaults button.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8432
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function RestoreSoundOptions() end
 
 
@@ -8774,8 +9386,9 @@ function RestoreSoundOptions() end
 --- through `Helper.convertComponentIDs` first, which is what `Helper.closeMenuAndReturn` does.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:1795
+-- Arity: 0-1 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@param returnParam? any
 function ReturnFromMenu(returnParam) end
 
@@ -8795,8 +9408,9 @@ Rotation = {}
 --- configuration totals, an average of two ware prices.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 12 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 12 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:4142, ui/addons/ego_detailmonitor/menu_ship_configuration.lua:7640
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param price number
 ---@return integer
 function RoundTotalTradePrice(price) end
@@ -8806,8 +9420,9 @@ function RoundTotalTradePrice(price) end
 --- countdown question - the same shape as `SaveResolutionOption`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8867
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SaveFullscreenOption() end
 
 
@@ -8816,8 +9431,9 @@ function SaveFullscreenOption() end
 --- `SaveOnlineGame` instead.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9296
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param filename string
 ---@param name string
 function SaveGame(filename, name) end
@@ -8827,10 +9443,11 @@ function SaveGame(filename, name) end
 --- when it saves over a profile that exists and four when the player has just named a new one.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 3-4 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 3-4 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3404, ui/addons/ego_gameoptions/gameoptions.lua:9153
+-- Arity: 3-4 - X4.exe 8.00, 9.00
 ---@param filename string
----@param id string
+---@param id number
 ---@param customName string
 ---@param isNew? boolean
 function SaveInputProfile(filename, id, customName, isNew) end
@@ -8844,8 +9461,9 @@ function SaveInputProfile(filename, id, customName, isNew) end
 --- individual rebind rather than batching changes up.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 8 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 8 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3143
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param actions table<integer, InputBinding[]> As returned by `GetInputActionMap`.
 ---@param states table<integer, InputBinding[]> As returned by `GetInputStateMap`.
 ---@param ranges table<integer, InputBinding[]> As returned by `GetInputRangeMap`.
@@ -8856,8 +9474,9 @@ function SaveInputSettings(actions, states, ranges) end
 --- engine decides where an online save goes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:3419, ui/addons/ego_detailmonitor/menu_userquestion.lua:101
+-- Arity: 0 - X4.exe 8.00, 9.00
 function SaveOnlineGame() end
 
 
@@ -8866,8 +9485,9 @@ function SaveOnlineGame() end
 --- reads the old value back with `GetResolutionOption(true)` instead.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8984
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SaveResolutionOption() end
 
 
@@ -8875,8 +9495,9 @@ function SaveResolutionOption() end
 --- immediately before raising the error that abandons the menu.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:4266
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function ScheduleReloadUI() end
 
 
@@ -8888,7 +9509,8 @@ function ScheduleReloadUI() end
 --- is open" or something else is unmeasured. No argument is required.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - called bare on both versions with no dialog open: `false` and no engine
 -- line either side. No argument is required; what the boolean reports is unmeasured.
 ---@return boolean selected `false` in every call measured, with no dialog open.
@@ -8909,8 +9531,9 @@ function SelectColumn(tableID, column) end
 --- selection sound, calls this, and then hides itself.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/dialogmenu.lua:746
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param button userdata
 function SelectDialogOption(button) end
 
@@ -8960,8 +9583,9 @@ self = {}
 --- player chose.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8518
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param option integer
 function SetAdapterOption(option) end
 
@@ -8970,8 +9594,9 @@ function SetAdapterOption(option) end
 --- engine's own scale starts at zero.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8199
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param option number
 function SetAimAssistOption(option) end
 
@@ -8980,8 +9605,9 @@ function SetAimAssistOption(option) end
 --- game settings checkboxes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8204
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetAutorollOption() end
 
 
@@ -8989,8 +9615,9 @@ function SetAutorollOption() end
 --- changes what else the page shows.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8208
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetAutosaveOption() end
 
 
@@ -8999,8 +9626,9 @@ function SetAutosaveOption() end
 --- and its callback passes nothing.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8223
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetBoostToggleOption() end
 
 
@@ -9008,8 +9636,9 @@ function SetBoostToggleOption() end
 --- values.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 5 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 5 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:1486, ui/addons/ego_detailmonitorhelper/helper.lua:2655
+-- Arity: 5 - X4.exe 8.00, 9.00
 ---@param buttonID string
 ---@param r number
 ---@param g number
@@ -9022,8 +9651,9 @@ function SetButtonColor(buttonID, r, g, b, a) end
 --- sits in.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 26 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 26 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:1215, ui/addons/ego_detailmonitorhelper/helper.lua:4336
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param buttonID string
 ---@param text string
 function SetButtonText(buttonID, text) end
@@ -9033,8 +9663,9 @@ function SetButtonText(buttonID, text) end
 --- toggles.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8537
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetCaptureHQOption() end
 
 
@@ -9043,8 +9674,9 @@ function SetCaptureHQOption() end
 --- told to keep it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 4 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 4 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:2621
+-- Arity: 4 - X4.exe 8.00, 9.00
 ---@param tableID string
 ---@param descriptor userdata
 ---@param row integer
@@ -9070,7 +9702,8 @@ function SetCellContent(tableID, descriptor, row, column) end
 --- representable `1.5` or `0.5` reads back unchanged. Never compare a read-back for equality.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - 0.5 -> 0.8 -> 1.5 -> 0.5, each value read back through
 -- GetCharacterDensityOption, confirmed in config.xml between steps, and read back a third
 -- time from MD as player.chardensity - which reported 1.5 unclamped on the script side
@@ -9081,8 +9714,9 @@ function SetCharacterDensityOption(density) end
 --- Toggles the collision avoidance assist. Argument-less, like the other flight assist toggles.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8233
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetCollisionAvoidanceAssistOption() end
 
 
@@ -9091,8 +9725,9 @@ function SetCollisionAvoidanceAssistOption() end
 --- renamed by passing the player component itself.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:25037, ui/addons/ego_detailmonitor/menu_mapeditor.lua:971
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param component userdata
 ---@param name string
 function SetComponentName(component, name) end
@@ -9102,8 +9737,9 @@ function SetComponentName(component, name) end
 --- other input option toggles.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9121
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetConfineMouseOption() end
 
 
@@ -9111,8 +9747,9 @@ function SetConfineMouseOption() end
 --- keep. Vanilla clamps the value to at least 1.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:12502
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param container userdata
 ---@param ware string
 ---@param limit integer
@@ -9125,8 +9762,9 @@ function SetContainerStockLimitOverride(container, ware, limit) end
 --- -1 alongside it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 7 vanilla call sites, 4 arguments
+-- Usage: confirmed - X4.exe count check, 7 vanilla call sites, 4 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:4684, ui/addons/ego_detailmonitor/menu_station_configuration.lua:1487
+-- Arity: 4 - X4.exe 8.00, 9.00
 ---@param container userdata
 ---@param ware string
 ---@param isBuy boolean
@@ -9138,16 +9776,18 @@ function SetContainerWarePriceOverride(container, ware, isBuy, price) end
 --- privacy page calls.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9283
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetCrashReportOption() end
 
 
 --- Sets the controller deadzone from the slider value the options menu passes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9112
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param value number
 function SetDeadzoneOption(value) end
 
@@ -9157,8 +9797,9 @@ function SetDeadzoneOption(value) end
 --- rather than part of the material colour.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 125 vanilla call sites, 4 arguments
+-- Usage: confirmed - X4.exe count check, 125 vanilla call sites, 4 arguments
 -- Seen at: ui/core/lua/compass.lua:481, ui/core/lua/crosshair handling.lua:2628
+-- Arity: 4 - X4.exe 8.00, 9.00
 ---@param material userdata
 ---@param r number
 ---@param g number
@@ -9170,8 +9811,9 @@ function SetDiffuseColor(material, r, g, b) end
 --- `SetGfxQualityOption(0)`, which is the custom quality level.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8563
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetDistortionOption() end
 
 
@@ -9180,8 +9822,9 @@ function SetDistortionOption() end
 --- to Custom.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8686
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param distance number The effect distance.
 function SetEffectDistanceOption(distance) end
 
@@ -9202,8 +9845,9 @@ function SetEGOGlobals(env) end
 --- sync flag.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 4 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 4 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3370
+-- Arity: 4 - X4.exe 8.00, 9.00
 ---@param id string The ID of the extension.
 ---@param personal boolean `true` if the setting is personal.
 ---@param settingName string The name of the setting to set.
@@ -9215,8 +9859,9 @@ function SetExtensionSettings(id, personal, settingName, value) end
 --- is a factor around 1 rather than an angle in degrees.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8706
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param value number The FOV value to set.
 function SetFOVOption(value) end
 
@@ -9228,6 +9873,7 @@ function SetFOVOption(value) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:940
+-- Arity: not checked - X4.exe 8.00, 9.00
 function SetFullScreenOneToOne() end
 
 
@@ -9235,8 +9881,9 @@ function SetFullScreenOneToOne() end
 --- borderless, depending on where the entry sits in the list.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8850
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param setting integer The setting value (e.g., 0 for windowed, 1 for fullscreen).
 function SetFullscreenOption(setting) end
 
@@ -9247,6 +9894,7 @@ function SetFullscreenOption(setting) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 1 vanilla call site, 0 arguments
 -- Seen at: ui/core/lua/monitors.lua:818
+-- Arity: not checked - X4.exe 8.00, 9.00
 function SetFullScreenWorldSpace() end
 
 
@@ -9254,8 +9902,9 @@ function SetFullScreenWorldSpace() end
 --- dropdowns use.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9094
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param option integer The gamepad mode to set.
 function SetGamepadModeOption(option) end
 
@@ -9264,8 +9913,9 @@ function SetGamepadModeOption(option) end
 --- own range is 0 to 1.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8891
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param value number The gamma value to set.
 function SetGammaOption(value) end
 
@@ -9275,8 +9925,9 @@ function SetGammaOption(value) end
 --- out of Low, Medium or High.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 18 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 18 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8541
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param option integer The graphics quality option to set.
 function SetGfxQualityOption(option) end
 
@@ -9286,21 +9937,25 @@ function SetGfxQualityOption(option) end
 --- Custom.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8899
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param option integer The glow option to set.
 function SetGlowOption(option) end
 
 
---- Sets the height of a widget. No vanilla code calls it, and the declaration carries no
---- parameters, so what it would take is unverified - `SetWidth` next to it takes the widget and
---- a pixel width.
+--- Sets the height of a widget. No vanilla code calls it. X4.exe's count check takes exactly
+--- two arguments, and the binding reads both as integers and looks the first up as a widget,
+--- exactly as `SetWidth` next to it does with the widget and a pixel width.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
--- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
-function SetHeight() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
+-- Probed: 8.00, 9.00 - called bare on both versions: refused with `SetHeight(): invalid
+-- parameters` and nothing returned
+---@param widgetID integer The widget ID.
+---@param height integer The height, in the units `SetWidth` takes.
+function SetHeight(widgetID, height) end
 
 
 --- Puts an icon into an Anark material or texture element. Colour and size are optional: core
@@ -9308,8 +9963,9 @@ function SetHeight() end
 --- 255` tint, and adds width and height only where the icon has to be scaled to a panel.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 44 vanilla call sites, 6-8 arguments
+-- Usage: confirmed - X4.exe count check, 44 vanilla call sites, 6-8 arguments
 -- Seen at: ui/core/lua/crosshair handling.lua:988, ui/core/lua/crosshair handling.lua:2226
+-- Arity: 2 or more - X4.exe 8.00, 9.00
 ---@param material userdata The material to set the icon for.
 ---@param iconID string The ID of the icon to set.
 ---@param r? number Optional red color value.
@@ -9321,25 +9977,26 @@ function SetHeight() end
 function SetIcon(material, iconID, r, g, b, useTextureColor, width, height) end
 
 
---- Inverts one axis of a control range, by range ID and parameter name. Vanilla passes two
---- arguments, so the value is optional and the call toggles the setting - the same shape as the
---- argument-less option toggles.
+--- Inverts one axis of a control range, by range ID and parameter name. X4.exe's count check
+--- takes exactly those two, and vanilla passes two, so the call toggles the setting - the same
+--- shape as the argument-less option toggles.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9103
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param uiRangeID number The ID of the UI range.
 ---@param parameterName string The name of the parameter to set.
----@param value? boolean The value to set (true/false).
-function SetInversionSetting(uiRangeID, parameterName, value) end
+function SetInversionSetting(uiRangeID, parameterName) end
 
 
 --- Assigns a joystick to a slot, by slot number and device GUID. The options menu refreshes
 --- afterwards, because the other slots' choices change with it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9227
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param slot integer The slot number to set.
 ---@param guid string The GUID of the joystick.
 function SetJoysticksOption(slot, guid) end
@@ -9349,7 +10006,8 @@ function SetJoysticksOption(slot, guid) end
 --- read - so the option is shown but set somewhere else.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
 -- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function SetLegacyShadersOption() end
@@ -9359,8 +10017,9 @@ function SetLegacyShadersOption() end
 --- by 100 - preceded by `SetGfxQualityOption(0)` to drop the preset to Custom.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8930
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param value number The LOD value to set.
 function SetLODOption(value) end
 
@@ -9369,8 +10028,9 @@ function SetLODOption(value) end
 --- `loadstring` of what the player typed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_debug/debug.lua:55
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param message string The debug message to set.
 function SetLuaDebugOutput(message) end
 
@@ -9387,7 +10047,8 @@ function SetLuaDebugOutput(message) end
 --- rather than measured - parked on Egosoft's own word, not for want of a way to call it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - one bare call on each version, both printing the same real name and
 -- syntax, `SetPriorityMissionTargetMessage(posid, messageid)`; parked there
 ---@param posid any Position id. Named by the engine, type unmeasured.
@@ -9400,8 +10061,9 @@ function SetMainMissiontargetMessage(posid, messageid) end
 --- the minimum and hold up to the maximum.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 8 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 8 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:17772, ui/addons/ego_detailmonitor/menu_playerinfo.lua:963
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param station userdata The station to set the budget for.
 ---@param budget integer The budget amount.
 function SetMaxBudget(station, budget) end
@@ -9409,26 +10071,28 @@ function SetMaxBudget(station, budget) end
 
 --- Sets the menu position. No vanilla code calls it.
 ---
---- **It does take arguments, and the declaration does not name them.** A bare call is not
---- refused on arity - there is no `expected N` line - but it returns `false` and the engine
---- writes `(from presentation '...') SetMenuPosition(): invalid parameters`, so the check is the
---- presentation's rather than the engine's argument counter. What it wants is unmeasured; the
---- `false` is the refusal, not a position.
+--- X4.exe's count check takes exactly one argument, and the binding reads it as a string. A
+--- bare call returns `false` and the engine writes `(from presentation '...')
+--- SetMenuPosition(): invalid parameters`: that message is the engine's count check, the one
+--- that names no count. What the string selects is unmeasured.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - called bare on both versions: `false` and the same `invalid parameters`
--- line either side. The parameters it wants are unmeasured.
+-- line either side
+---@param arg1 string Unidentified; X4.exe reads it as a string.
 ---@return boolean positioned `false` when the parameters are rejected.
-function SetMenuPosition() end
+function SetMenuPosition(arg1) end
 
 
 --- Sets a station's minimum budget, the amount its manager keeps back. Always set with
 --- `SetMaxBudget`, which vanilla puts at one and a half times this value.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 8 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 8 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:17773, ui/addons/ego_detailmonitor/menu_playerinfo.lua:964
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param station userdata The station to set the budget for.
 ---@param budget integer The budget amount.
 function SetMinBudget(station, budget) end
@@ -9448,8 +10112,9 @@ function SetMouseCursorOverride(cursorIcon) end
 --- toggles.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8278
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetMouseLookToggleOption() end
 
 
@@ -9470,6 +10135,7 @@ function SetMouseOverOverride(widgetID, override, forceHide) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
+-- Arity: not checked (a no-op stub) on 8.00, not checked on 9.00 - X4.exe
 -- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
 -- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
 function SetMouseSleeping() end
@@ -9483,8 +10149,9 @@ function SetMouseSleeping() end
 --- `GetNPCBlackboard` as `number 1` and MD's own `typeof` calls it `integer`, not `bool`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_trader_inventory.lua:538
+-- Arity: 3 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - a station and a ship defence entity, read back in Lua and in MD, on both
 -- versions
 ---@param entity userdata The NPC entity to set the blackboard for.
@@ -9516,7 +10183,8 @@ function SetNPCBlackboard(entity, key, value) end
 --- and MD's `skill.{$skilltype}` all track it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 3 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - a ship's pilot, every skill read back either side of every call, MD as a
 -- second witness; the 0-15 scale, the truncated fraction and the clamp reproduced on both versions
 ---@param entityID any The NPC entity whose skill is written. Not a controllable, not a seed person.
@@ -9532,12 +10200,13 @@ function SetNPCSkill(entityID, skill, value) end
 --- first.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 90 vanilla call sites, 5 arguments
+-- Usage: confirmed - X4.exe count check, 90 vanilla call sites, 5 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:2975, ui/addons/ego_detailmonitor/menu_ship_configuration.lua:1761
+-- Arity: 5 - X4.exe 8.00, 9.00
 ---@param controllable userdata The controllable object (e.g., ship).
 ---@param orderIndex integer|"default"|"planneddefault" The order to modify: queue index, or the default/planned-default slot.
 ---@param paramID integer The 1-based index of the parameter to set.
----@param listIndex? integer Optional index for list parameters.
+---@param listIndex integer|nil The entry of a list-valued parameter, or nil for a plain one; it must still be passed.
 ---@param value any The value to set for the parameter.
 function SetOrderParam(controllable, orderIndex, paramID, listIndex, value) end
 
@@ -9546,8 +10215,9 @@ function SetOrderParam(controllable, orderIndex, paramID, listIndex, value) end
 --- privacy toggles.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9287
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetPersonalizedCrashReportsOption() end
 
 
@@ -9556,8 +10226,9 @@ function SetPersonalizedCrashReportsOption() end
 --- elements it has just registered for mouse interaction.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 9 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 9 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/monitors.lua:2297, ui/core/lua/targetsystem.lua:4249
+-- Arity: 2 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param element userdata The UI element to override the pointer for.
 ---@param pointerID string The ID of the pointer to set.
 function SetPointerOverride(element, pointerID) end
@@ -9567,22 +10238,24 @@ function SetPointerOverride(element, pointerID) end
 --- The monitor code uses it to park the plain message ticker at position 3.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/monitors.lua:1325
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param position integer The position to set.
 ---@param id string The ID of the presentation element.
 function SetPresentationPosition(position, id) end
 
 
 --- Marks one message as the priority mission target, by position ID and message ID, so the HUD
---- gives it the guidance treatment. Both are optional: the core target system calls it with the
---- current target's pair, and with nothing when there is no priority target left.
+--- gives it the guidance treatment. Both may be nil: the core target system calls it with the
+--- current target's pair, and with `nil, nil` when there is no priority target left.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:2004
----@param posID? any Optional position ID.
----@param messageID? any Optional message ID.
+-- Arity: 2 - X4.exe 8.00, 9.00
+---@param posID any The position ID, or nil.
+---@param messageID any The message ID, or nil.
 function SetPriorityMissionTargetMessage(posID, messageID) end
 
 
@@ -9590,8 +10263,9 @@ function SetPriorityMissionTargetMessage(posID, messageID) end
 --- `SetGfxQualityOption(0)` to drop the preset to Custom.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8960
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param option integer The radar option to set.
 function SetRadarOption(option) end
 
@@ -9610,8 +10284,9 @@ function SetRenderTargetNoise(renderTargetID, active) end
 --- widget ID. `widget_fullscreen.lua` scales the noise overlay to match in the same breath.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:13951
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param textureString string The texture string of the render target.
 ---@param width number The width to set.
 ---@param height number The height to set.
@@ -9623,8 +10298,9 @@ function SetRenderTargetSize(textureString, width, height) end
 --- `SaveResolutionOption` confirms it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8967
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param width number The width of the resolution.
 ---@param height number The height of the resolution.
 function SetResolutionOption(width, height) end
@@ -9634,8 +10310,9 @@ function SetResolutionOption(width, height) end
 --- the engine's range is 0 to 1.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8353
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param value number The rumble value to set.
 function SetRumbleOption(value) end
 
@@ -9672,9 +10349,10 @@ function SetSelectedRows(tableID, rows, curRow) end
 --- is 0 to 1.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9166
----@param rangeID string The ID of the range to set.
+-- Arity: 3 - X4.exe 8.00, 9.00
+---@param rangeID number The ID of the range to set.
 ---@param configName string The name of the configuration to set.
 ---@param value number The value to set.
 function SetSensitivitySetting(rangeID, configName, value) end
@@ -9684,8 +10362,9 @@ function SetSensitivitySetting(rangeID, configName, value) end
 --- `SetGfxQualityOption(0)` to drop the preset to Custom.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9005
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param option integer The shader quality option to set.
 function SetShaderQualityOption(option) end
 
@@ -9695,8 +10374,9 @@ function SetShaderQualityOption(option) end
 --- one.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9013
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param option integer The shadow option to set.
 function SetShadowOption(option) end
 
@@ -9717,32 +10397,36 @@ function SetSliderCellValue(sliderCellID, value, newMaxSelect) end
 --- Custom. Argument-less, like the other toggles.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9019
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetSoftShadowsOption() end
 
 
 --- Sets the softtarget and returns whether it worked. The core target system passes a **message
 --- ID**, not a component - the ID of the target element it is connecting - a boolean for
---- instant interaction or first person mode, and true to force the set, so the parameter names
---- this declaration carries do not match how vanilla calls it.
+--- instant interaction or first person mode, and whether to lock the target; the engine's own
+--- `Proper syntax` message names the three `messageid, instantInteract, locktarget`. The FFI
+--- `C.SetSofttarget(componentid, connectionname)` is a different function.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 3 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:1316
----@param componentid userdata The ID of the component.
----@param connectionname? string Optional connection name.
----@param forceSet? boolean Optional flag to force the set action.
+-- Arity: 3 - X4.exe 8.00, 9.00
+---@param messageid any The message ID of the target element.
+---@param instantInteract boolean Whether to interact with the target at once.
+---@param locktarget boolean Whether to lock the target; vanilla passes true on a mouse click.
 ---@return boolean, boolean
-function SetSofttarget(componentid, connectionname, forceSet) end
+function SetSofttarget(messageid, instantInteract, locktarget) end
 
 
 --- Toggles sound output as a whole. Argument-less, like the other option toggles; the options
 --- menu refreshes afterwards because the rest of the sound page depends on it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9338
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetSoundOption() end
 
 
@@ -9750,8 +10434,9 @@ function SetSoundOption() end
 --- `SetGfxQualityOption(0)` to drop the preset to Custom.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9026
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param option integer The SSAO option to set.
 function SetSSAOOption(option) end
 
@@ -9774,7 +10459,8 @@ function SetSSAOOption(option) end
 --- write from a plain statistic into them. Reloading a save does not undo such a write.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 2 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - set and read back exactly, and witnessed from MD as stat.<id>, on both
 -- versions
 ---@param statID string The ID of the statistic to set.
@@ -9786,8 +10472,9 @@ function SetStatValue(statID, value) end
 --- toggles.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8237
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetSteeringNoteOption() end
 
 
@@ -9795,17 +10482,19 @@ function SetSteeringNoteOption() end
 --- game option toggles.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8379
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function SetStopShipInMenuOption() end
 
 
 --- Sets the subtitle mode from the dropdown entry the player chose, passed unchanged.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:8385
----@param option any
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param option string
 function SetSubtitleOption(option) end
 
 
@@ -9814,8 +10503,9 @@ function SetSubtitleOption(option) end
 --- background colour is a function that has just returned something new.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 7 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 7 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:4283
+-- Arity: 7 - X4.exe 8.00, 9.00
 ---@param tableID number The ID of the table.
 ---@param rowIndex number The index of the row.
 ---@param cellIndex number The index of the cell.
@@ -9833,8 +10523,9 @@ function SetTableCellColor(tableID, rowIndex, cellIndex, r, g, b, a) end
 --- empty string does not clear the text, so it passes a single space instead.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 9 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 9 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:1276, ui/addons/ego_detailmonitorhelper/helper.lua:2646
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param widgetID any The ID of the text widget or table cell.
 ---@param text string The text to set.
 function SetText(widgetID, text) end
@@ -9845,8 +10536,9 @@ function SetText(widgetID, text) end
 --- handed it the widget.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 5 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 5 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:2648
+-- Arity: 5 - X4.exe 8.00, 9.00
 ---@param elementID number The ID of the text element.
 ---@param r number The red color value.
 ---@param g number The green color value.
@@ -9874,8 +10566,9 @@ function setTextLine(lefttext, righttext, component, connection, isoverlay) end
 --- so both states behave the same way.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 3 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 3 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:2993
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param element number The ID of the element.
 ---@param useColor boolean `true` to use the color, `false` to use the texture.
 function SetTextureColorMode(element, useColor) end
@@ -9907,7 +10600,8 @@ function SetTopRow(tableID, row) end
 --- The value is **not save state**; it persists to `config.xml` and outlives the session.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - 0.5 -> 0.8 -> 1.5 -> 0.5 alongside SetCharacterDensityOption, read back
 -- through GetTrafficDensityOption and confirmed in config.xml between steps
 ---@param density number Traffic density. 0 to 1 by convention; not clamped.
@@ -9919,22 +10613,28 @@ function SetTrafficDensityOption(density) end
 --- option toggles itself after the menu is out of the way.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3380
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param enable boolean `true` to enable safe mode, `false` to disable.
 function SetUISafeModeOption(enable) end
 
 
---- Writes a value into an Anark data table.
---- Part of the data-port API around AKDataPort. No vanilla code calls it; unverified.
+--- Writes a value into an Anark data table: in the row whose `keyColumn` holds `keyValue`,
+--- sets `valueColumn` to `value`. Tables and columns are addressed by name. `keyValue` and
+--- `value` are each checked as a number or a string, whichever their column holds, so X4.exe's
+--- unconditional check covers only four of the five arguments.
+--- Part of the data-port API around AKDataPort. No vanilla code calls it.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: unverified - no vanilla call site
----@param table any The data table, as returned by getTable.
----@param row number Row index.
----@param column any Column name or index.
----@param value any The value to store.
-function setValue(table, row, column, value) end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 4 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
+---@param tableName string The data table's name.
+---@param keyColumn string The name of the column that identifies the row.
+---@param keyValue number|string The value that identifies the row.
+---@param valueColumn string The name of the column to write.
+---@param value number|string The value to store.
+function setValue(tableName, keyColumn, keyValue, valueColumn, value) end
 
 
 --- Puts a ship into virtual cargo mode, where the trade dialogue can show a cargo state that
@@ -9943,8 +10643,9 @@ function setValue(table, row, column, value) end
 --- or -1 for all of them.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 8 vanilla call sites, 2-3 arguments
+-- Usage: confirmed - X4.exe count check, 8 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:2027, ui/addons/ego_detailmonitor/menu_map.lua:21335
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param componentID number The ID of the component.
 ---@param enable boolean `true` to enable virtual cargo mode, `false` to disable.
 ---@param tradeCount? number The number of trade computer orders to account for, or -1 for all of them. Omitted when disabling.
@@ -9969,13 +10670,15 @@ function ShowHighlightOverlay(id, style) end
 --- `ConvertStringToLuaID` first.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 15 vanilla call sites, 2-4 arguments
+-- Usage: confirmed - X4.exe count check, 15 vanilla call sites, 2-4 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:3656, ui/addons/ego_detailmonitor/menu_map.lua:4155
+-- Arity: 1-5 - X4.exe 8.00, 9.00
 ---@param objectID any The ID of the object to signal.
----@param param string The parameter to send with the signal (commonly SignalID)
+---@param param? string The parameter to send with the signal (commonly SignalID)
 ---@param param2? any Optional second signal parameter (commonly a luaID).
 ---@param param3? any Optional third signal parameter.
-function SignalObject(objectID, param, param2, param3) end
+---@param arg5? any Unidentified; X4.exe accepts it.
+function SignalObject(objectID, param, param2, param3, arg5) end
 
 
 --- Flies **the player's own ship** to the given object under autopilot. The argument is the
@@ -9994,7 +10697,8 @@ function SignalObject(objectID, param, param2, param3) end
 --- code calls either one; the menus drive the autopilot through the player activity instead.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - read back through GetAutoPilotTarget, before, after and after
 -- StopAutoPilot. On 9.00 the engaged autopilot was also left standing between two clicks rather
 -- than cancelled in the same frame, which is the only way the order and the route are visible at
@@ -10008,11 +10712,12 @@ function StartAutoPilot(targetID) end
 --- it runs as the menu closes rather than while it is still up.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:1828
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param conversationName string The name of the conversation to start.
 ---@param actorID any The ID of the actor to converse with.
----@param conversationParam? any Conversation parameters, component IDs already converted.
+---@param conversationParam any Conversation parameters, component IDs already converted.
 function StartConversationFromMenu(conversationName, actorID, conversationParam) end
 
 
@@ -10021,10 +10726,11 @@ function StartConversationFromMenu(conversationName, actorID, conversationParam)
 --- passes two arguments, so the cinematic-mode flag is optional.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 15 vanilla call sites, 2-3 arguments
+-- Usage: confirmed - X4.exe count check, 15 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2390, ui/addons/ego_detailmonitor/menu_playerinfo.lua:4475
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param descriptor table The cutscene descriptor.
----@param renderTarget? any The render target texture to play the cutscene into.
+---@param renderTarget any The render target texture to play the cutscene into.
 ---@param interruptCinematicMode? boolean Whether starting the cutscene interrupts cinematic mode.
 ---@return any cutsceneHandle The handle for the started cutscene.
 function StartCutscene(descriptor, renderTarget, interruptCinematicMode) end
@@ -10035,8 +10741,9 @@ function StartCutscene(descriptor, renderTarget, interruptCinematicMode) end
 --- `PlaySound` instead, which returns nothing.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 11 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 11 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:6108
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param soundName string The name of the sound to play.
 ---@return any soundHandle The handle for the playing sound.
 function StartPlayingSound(soundName) end
@@ -10047,13 +10754,15 @@ function StartPlayingSound(soundName) end
 --- through `Helper.convertComponentIDs`, and the call runs as the menu closes.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 4 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 4 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:1815
+-- Arity: 4-5 - X4.exe 8.00, 9.00
 ---@param conversationName string The name of the sub-conversation to start.
----@param actorID? any The actor to converse with.
----@param conversationParam? any Conversation parameters, component IDs already converted.
----@param baseParam? any Base conversation parameters, component IDs already converted.
-function StartSubConversationFromMenu(conversationName, actorID, conversationParam, baseParam) end
+---@param actorID any The actor to converse with.
+---@param conversationParam any Conversation parameters, component IDs already converted.
+---@param baseParam any Base conversation parameters, component IDs already converted.
+---@param arg5? any Unidentified; X4.exe accepts it.
+function StartSubConversationFromMenu(conversationName, actorID, conversationParam, baseParam, arg5) end
 
 
 --- Stops the autopilot started by `StartAutoPilot`, after which `GetAutoPilotTarget` reads
@@ -10064,6 +10773,7 @@ function StartSubConversationFromMenu(conversationName, actorID, conversationPar
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - in-game probe, no vanilla call site
+-- Arity: not checked - X4.exe 8.00, 9.00
 -- Probed: 8.00, 9.00 - read back through GetAutoPilotTarget; on 9.00 also against an autopilot
 -- that had been running for a while rather than one started in the same frame, and it cancelled
 -- that one the same way
@@ -10074,8 +10784,9 @@ function StopAutoPilot() end
 --- straight afterwards and releases the descriptor with `ReleaseCutsceneDescriptor`.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 18 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 18 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_encyclopedia.lua:2335, ui/addons/ego_detailmonitor/menu_playerinfo.lua:4412
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param cutsceneID number The ID of the cutscene to stop.
 function StopCutscene(cutsceneID) end
 
@@ -10084,8 +10795,9 @@ function StopCutscene(cutsceneID) end
 --- on the menu (`menu.sound_ambient`) and nils it after stopping.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 14 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 14 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:2206, ui/addons/ego_detailmonitor/menu_mapeditor.lua:1429
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param soundHandle number The handle of the sound to stop.
 function StopPlayingSound(soundHandle) end
 
@@ -10096,20 +10808,26 @@ function StopPlayingSound(soundHandle) end
 ---
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:5480
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return number newWidgetID # The ID of the new interactive widget.
 function SwitchInteractiveObject() end
 
 
---- Tells the game that the target monitor's interaction has gone. No vanilla code calls it, nor
---- its counterpart `TargetMonitorInteractionShown`.
+--- Tells the game that the target monitor's interaction has gone, for a legacy descriptor. No
+--- vanilla code calls it, nor its counterpart `TargetMonitorInteractionShown`. X4.exe's count
+--- check takes exactly one argument, and the binding reads it as a userdata, which is what the
+--- legacy `CreateInteractionDescriptor` returns; `TargetMonitorInteractionHidden2` takes the
+--- integer id instead.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
--- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
-function TargetMonitorInteractionHidden() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 1 - X4.exe 8.00, 9.00
+-- Probed: 8.00, 9.00 - called bare on both versions: refused with
+-- `TargetMonitorInteractionHidden(): invalid parameters` and nothing returned
+---@param descriptor userdata Read as a userdata by X4.exe.
+function TargetMonitorInteractionHidden(descriptor) end
 
 
 --- Takes the interaction off the target monitor. Argument 1 is the **integer id** from
@@ -10119,32 +10837,41 @@ function TargetMonitorInteractionHidden() end
 --- interaction that was never shown still raises its event.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/monitors.lua:1770
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param interactionID integer The id of the interaction to hide.
 function TargetMonitorInteractionHidden2(interactionID) end
 
 
---- Tells the game that the target monitor's interaction is up. No vanilla code calls it, nor
---- its counterpart `TargetMonitorInteractionHidden`.
+--- Tells the game that the target monitor's interaction is up, for a legacy descriptor. No
+--- vanilla code calls it, nor its counterpart `TargetMonitorInteractionHidden`. X4.exe's count
+--- check takes exactly three arguments, and the binding reads them as a userdata, a string and
+--- a boolean: the shape of `TargetMonitorInteractionShown2`, with the userdata the legacy
+--- `CreateInteractionDescriptor` returns in place of the integer id.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - in-game probe, no vanilla call site
--- Probed: 8.00, 9.00 - called bare on both versions: accepted with no arity complaint and
--- nothing returned, so no argument is required. Whether it takes an optional one is unmeasured.
-function TargetMonitorInteractionShown() end
+-- Usage: confirmed - X4.exe count check, no vanilla call site
+-- Arity: 3 - X4.exe 8.00, 9.00
+-- Probed: 8.00, 9.00 - called bare on both versions: refused with
+-- `TargetMonitorInteractionShown(): invalid parameters` and nothing returned
+---@param descriptor userdata Read as a userdata by X4.exe.
+---@param interactionText string The text of the interaction.
+---@param isNotification boolean Whether the interaction is a notification.
+function TargetMonitorInteractionShown(descriptor, interactionText, isNotification) end
 
 
 --- Tells the game that a target monitor interaction is on screen, with its ID, its text and
---- whether it is a notification - the version the monitor code actually calls, unlike the
---- argument-less `TargetMonitorInteractionShown`. Argument 1 is the **integer id** from
+--- whether it is a notification - the version the monitor code actually calls, unlike
+--- `TargetMonitorInteractionShown`, which takes a legacy userdata. Argument 1 is the **integer id** from
 --- `CreateInteractionDescriptor2`; a legacy userdata descriptor is refused with `invalid
 --- parameters`. Calling it is **not** what makes an interaction raisable -
 --- `RaisePlayerInteractionEvent` works on a descriptor that was never shown.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/core/lua/monitors.lua:2770
+-- Arity: 3 - X4.exe 8.00, 9.00
 ---@param interactionID integer The id from CreateInteractionDescriptor2.
 ---@param interactionText string The text of the interaction.
 ---@param isNotification boolean Whether the interaction is a notification.
@@ -10156,6 +10883,7 @@ function TargetMonitorInteractionShown2(interactionID, interactionText, isNotifi
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: not checked (deprecated) - X4.exe 8.00, 9.00
 ---@param factionID string The ID of the faction.
 ---@param restrictionID string The ID of the trade restriction to toggle.
 function ToggleFactionTradeRestriction(factionID, restrictionID) end
@@ -10166,6 +10894,7 @@ function ToggleFactionTradeRestriction(factionID, restrictionID) end
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: unverified - no vanilla call site
+-- Arity: not checked (deprecated) - X4.exe 8.00, 9.00
 ---@param factionID string The ID of the faction.
 ---@param wareID string The ID of the ware to toggle the override for.
 function ToggleFactionTradeWareOverride(factionID, wareID) end
@@ -10196,6 +10925,7 @@ function ToReprString(value, recursiondepth, indent) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 10 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:3544, ui/core/lua/compass.lua:61
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return string # The stack traceback.
 function TraceBack() end
 
@@ -10204,9 +10934,10 @@ function TraceBack() end
 ---
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_trader_inventory.lua:505
----@param wareID any The ware to transfer.
+-- Arity: 3 - X4.exe 8.00, 9.00
+---@param wareID string The ware to transfer.
 ---@param amount number The amount to transfer.
 ---@param container any The source container.
 function TransferInventoryToPlayer(wareID, amount, container) end
@@ -10216,8 +10947,9 @@ function TransferInventoryToPlayer(wareID, amount, container) end
 ---
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 10 vanilla call sites, 2-3 arguments
+-- Usage: confirmed - X4.exe count check, 10 vanilla call sites, 2-3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:3853, ui/addons/ego_detailmonitor/menu_map.lua:17780
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param amount number The amount of money to transfer.
 ---@param sourceComponent any The source component to transfer money from.
 ---@param reason? string Transaction category, e.g. "sellship".
@@ -10229,9 +10961,10 @@ function TransferMoneyToPlayer(amount, sourceComponent, reason) end
 --- which direction the trade went.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_trader_inventory.lua:507
----@param wareID any The ware to transfer.
+-- Arity: 3 - X4.exe 8.00, 9.00
+---@param wareID string The ware to transfer.
 ---@param amount number The amount to transfer (negative in vanilla usage).
 ---@param container any The destination container.
 function TransferPlayerInventoryTo(wareID, amount, container) end
@@ -10241,18 +10974,21 @@ function TransferPlayerInventoryTo(wareID, amount, container) end
 ---
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 18 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 18 vanilla call sites, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:3498, ui/addons/ego_detailmonitor/menu_playerinfo.lua:977
+-- Arity: 2-3 - X4.exe 8.00, 9.00
 ---@param amount number The amount of money to transfer.
 ---@param destinationComponent userdata The destination component to transfer money to.
-function TransferPlayerMoneyTo(amount, destinationComponent) end
+---@param arg3? any Unidentified; X4.exe accepts it.
+function TransferPlayerMoneyTo(amount, destinationComponent, arg3) end
 
 
 --- Truncates a text string to fit within a given width, using a specified font and font size.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 58 vanilla call sites, 4-6 arguments
+-- Usage: confirmed - X4.exe count check, 58 vanilla call sites, 4-6 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1374, ui/addons/ego_detailmonitor/menu_help.lua:416
+-- Arity: 4 or more - X4.exe 8.00, 9.00
 ---@param text string The text to truncate.
 ---@param font string The font name to use for width calculation.
 ---@param fontsize number The font size to use for width calculation.
@@ -10267,18 +11003,20 @@ function TruncateText(text, font, fontsize, width, arg5, arg6) end
 --- is installed, and installs it the other way round.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:13535
----@param dlcID string The ID of the DLC to uninstall.
-function UninstallSteamDLC(dlcID) end
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param appid number The Steam AppID of the DLC to uninstall.
+function UninstallSteamDLC(appid) end
 
 
 --- Unpauses the game. Every vanilla caller passes nothing and guards the call with its own
 --- `menu.paused` flag, so the parameter the declaration carries is unexercised.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 7 vanilla call sites, 0-1 arguments
+-- Usage: confirmed - X4.exe count check, 7 vanilla call sites, 0-1 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_scenario_debriefing.lua:75, ui/addons/ego_detailmonitor/menu_ship_configuration.lua:916
+-- Arity: 0-1 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@param arg1? boolean Unidentified in 9.00 vanilla usage; true.
 function Unpause(arg1) end
 
@@ -10287,8 +11025,9 @@ function Unpause(arg1) end
 ---
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 18 vanilla call sites, 1-2 arguments
+-- Usage: confirmed - X4.exe count check, 18 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:299, ui/addons/ego_detailmonitor/menu_encyclopedia.lua:278
+-- Arity: 1 or more - X4.exe 8.00, 9.00
 ---@param addonName string The name of the addon whose bindings should be unregistered.
 ---@param bindingName? string A single binding to unregister; omit to unregister all of the addon's bindings.
 function UnregisterAddonBindings(addonName, bindingName) end
@@ -10309,9 +11048,10 @@ function UnregisterEvent(eventName, scriptFunction) end
 --- `RegisterMouseInteractions`. Core code unregisters element by element as a panel goes away.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 1 argument
 -- Seen at: ui/core/lua/crosshair handling.lua:2205, ui/core/lua/monitors.lua:1826
----@param element? any The element whose mouse interactions are unregistered.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param element any The element whose mouse interactions are unregistered.
 function UnregisterMouseInteractions(element) end
 
 
@@ -10319,9 +11059,10 @@ function UnregisterMouseInteractions(element) end
 --- of a target and clears them one at a time when the target is dropped.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/targetsystem.lua:4382
----@param element? any The element whose pointer override is removed.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param element any The element whose pointer override is removed.
 function UnsetPointerOverride(element) end
 
 
@@ -10330,8 +11071,9 @@ function UnsetPointerOverride(element) end
 --- happen after the conversation is running again.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:1941
+-- Arity: 0 - X4.exe 8.00, 9.00
 function UnsuspendConversation() end
 
 
@@ -10341,8 +11083,9 @@ function UnsuspendConversation() end
 --- view helper is the only vanilla caller.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 10 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 10 arguments
 -- Seen at: ui/addons/ego_viewhelper/viewhelper.lua:63
+-- Arity: 1-8 on 8.00, 1-10 on 9.00 - X4.exe
 ---@param frameDesc any The frame descriptor to update.
 ---@param suppressDisplayErrors? boolean Whether display errors are suppressed.
 ---@param hasPlayerControls? boolean Whether the player has control.
@@ -10405,9 +11148,10 @@ View = {}
 --- Pair it with C.GetUIRelationName for the localised name and colour of the same value.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 13 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 13 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:1264, ui/addons/ego_detailmonitor/menu_docked.lua:426
----@param id any The faction ID.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param id string The faction ID.
 ---@return number relation Roughly -30 to +30; at or below -25 the faction is hostile.
 function GetUIRelation(id) end
 
@@ -10418,6 +11162,7 @@ function GetUIRelation(id) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 310 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:165, ui/addons/ego_detailmonitor/menu_diplomacy.lua:544
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return number seconds
 function getElapsedTime() end
 
@@ -10432,8 +11177,9 @@ function getElapsedTime() end
 --- Looks up a scene element by name, optionally relative to a parent element.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 892 vanilla call sites, 1-2 arguments
+-- Usage: confirmed - X4.exe count check, 892 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:31, ui/addons/ego_detailmonitor/menu_diplomacy.lua:297
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param name string Element name or dotted path, e.g. "Scene.UIContract".
 ---@param parent? any Parent element to search within; searches the scene root when omitted.
 ---@return any element
@@ -10446,8 +11192,9 @@ function getElement(name, parent) end
 --- addons Lua environment too, but there is nothing there to use it on.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1030 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1030 vanilla call sites, 3 arguments
 -- Seen at: ui/core/lua/billboard.lua:207, ui/core/lua/compass.lua:192
+-- Arity: 2 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@param attribute string Attribute path, e.g. "position.x", "opacity", "scale.x".
 ---@param value any The value to assign.
@@ -10459,8 +11206,9 @@ function setAttribute(element, attribute, value) end
 --- writes it back; a nil answer is how it detects an element reference that never resolved.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 90 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 90 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/billboard.lua:42, ui/core/lua/compass.lua:380
+-- Arity: 2 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@param attribute string Attribute path, e.g. "position.z".
 ---@return any value
@@ -10472,8 +11220,9 @@ function getAttribute(element, attribute) end
 --- `"button2"`, `"missilelockclone3"` - each named so it can be found again.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 48 vanilla call sites, 1-2 arguments
+-- Usage: confirmed - X4.exe count check, 48 vanilla call sites, 1-2 arguments
 -- Seen at: ui/core/lua/compass.lua:164, ui/core/lua/loading.lua:204
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param master any The element to clone.
 ---@param name? string Name for the clone.
 ---@return any element
@@ -10487,6 +11236,7 @@ function clone(master, name) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 398 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/compass.lua:345, ui/core/lua/crosshair handling.lua:1664
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@param slide string The slide name, e.g. "active".
 function goToSlide(element, slide) end
@@ -10500,6 +11250,7 @@ function goToSlide(element, slide) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 24 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/crosshair handling.lua:2499, ui/core/lua/loading.lua:515
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@param time number The target time.
 function goToTime(element, time) end
@@ -10510,8 +11261,9 @@ function goToTime(element, time) end
 --- state itself.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/core/lua/loading.lua:369
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@return any index
 ---@return string slide
@@ -10526,6 +11278,7 @@ function getCurrentSlide(element) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 480 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:31, ui/addons/ego_detailmonitor/menu_diplomacy.lua:651
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param event string The event name, e.g. "inputModeChanged".
 ---@param element any The element raising the event, commonly getElement("Scene.UIContract").
 ---@param callback function? The handler to invoke.
@@ -10539,6 +11292,7 @@ function registerForEvent(event, element, callback) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 18 vanilla call sites, 3 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:297, ui/addons/ego_detailmonitor/menu_docked.lua:248
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param event string The event name.
 ---@param element any The element raising the event.
 ---@param callback function The handler to remove.
@@ -10550,6 +11304,7 @@ function unregisterForEvent(event, element, callback) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 13 vanilla call sites, 3 arguments
 -- Seen at: ui/core/lua/counteract rotation.lua:39, ui/core/lua/propagate attribute.lua:53
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@param attribute string The attribute to watch.
 ---@param callback function The handler to invoke.
@@ -10563,6 +11318,7 @@ function registerForChange(element, attribute, callback) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 13 vanilla call sites, 3 arguments
 -- Seen at: ui/core/lua/counteract rotation.lua:44, ui/core/lua/propagate attribute.lua:59
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@param attribute string The watched attribute.
 ---@param callback function The handler to remove.
@@ -10574,8 +11330,9 @@ function unregisterForChange(element, attribute, callback) end
 --- translation out of `_41`, `_42`, `_43` to find where the camera actually is.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 8 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 8 vanilla call sites, 2 arguments
 -- Seen at: ui/core/lua/billboard.lua:107
+-- Arity: 2 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
 ---@param element any The scene element.
 ---@param matrix any The matrix to populate.
 function calculateGlobalTransform(element, matrix) end
@@ -10588,6 +11345,7 @@ function calculateGlobalTransform(element, matrix) end
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - 16 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_debuglog/debuglog.lua:802, ui/addons/ego_gameoptions/gameoptions.lua:6677
+-- Arity: not checked - X4.exe 8.00, 9.00
 ---@return number width
 ---@return number height
 function getScreenInfo() end
@@ -10661,8 +11419,9 @@ function IsFullscreenWidgetSystem() end
 --- Sets the width of a text widget in pixels, which is what makes its text wrap at that width.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 2 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 2 arguments
 -- Seen at: ui/widget/lua/widget_fullscreen.lua:13044
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param widgetID any The boxtext or fontstring widget ID.
 ---@param width number The width in pixels.
 function SetWidth(widgetID, width) end
@@ -10673,20 +11432,21 @@ function SetWidth(widgetID, width) end
 --- Creates an order on a controllable and appends it to its queue.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 32 vanilla call sites, 6-10 arguments
+-- Usage: confirmed - X4.exe count check, 32 vanilla call sites, 6-10 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:3467, ui/addons/ego_detailmonitor/menu_map.lua:3487
+-- Arity: 3-8 on 8.00, 3-10 on 9.00 - X4.exe
 ---@param controllable any The controllable object.
 ---@param orderDefinition string The order definition ID, e.g. "Attack".
----@param params table|boolean The order parameters, or false when the order takes none.
+---@param params table The order parameters.
 ---@param default? boolean Whether the order becomes the default order.
 ---@param plannedDefault? boolean Whether the order becomes the planned default order.
 ---@param priority? boolean Whether the order is queued as a priority order.
 ---@param arg7? any Unidentified in 9.00 vanilla usage; passed the same value as the caller's "immediate", or nil.
----@param arg8? any Unidentified in 9.00 vanilla usage; always nil.
+---@param errorprefix? string Named by X4.exe; always nil in 9.00 vanilla usage.
 ---@param arg9? any Unidentified in 9.00 vanilla usage; passed "immediate" or nil.
 ---@param arg10? any Unidentified in 9.00 vanilla usage; always true.
 ---@return integer orderIndex
-function CreateOrder(controllable, orderDefinition, params, default, plannedDefault, priority, arg7, arg8, arg9, arg10) end
+function CreateOrder(controllable, orderDefinition, params, default, plannedDefault, priority, arg7, errorprefix, arg9, arg10) end
 
 
 ---@meta
@@ -10712,8 +11472,9 @@ function CreateOrder(controllable, orderDefinition, params, default, plannedDefa
 --- arguments, so neither is confirmed.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 13 vanilla call sites, 1-2 arguments
+-- Usage: confirmed - X4.exe count check, 13 vanilla call sites, 1-2 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:16180, ui/addons/ego_detailmonitor/menu_map.lua:22295
+-- Arity: 1-4 - X4.exe 8.00, 9.00
 ---@param objectID any The defensible to query.
 ---@param unitType? string Unit category filter, e.g. `"transport"`.
 ---@param virtualammo? boolean Include virtual ammo; requires `SetVirtualCargoMode` first.
@@ -10726,8 +11487,9 @@ function GetUnitStorageData(objectID, unitType, virtualammo, excluderestricted) 
 --- ship with an empty list cannot transport units and is dropped from the list being offered.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:30321
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param macro string The ship macro name.
 ---@return table macros
 function GetTransportUnitMacros(macro) end
@@ -10738,8 +11500,9 @@ function GetTransportUnitMacros(macro) end
 --- to warn that base game UI files are being replaced.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 5 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 5 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:444
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function GetUISafeModeOption() end
 
@@ -10748,8 +11511,9 @@ function GetUISafeModeOption() end
 --- the options menu divides its 0-100 slider by 100 and rounds to two decimals.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9333
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param sfxType string The sound category.
 ---@param value number Volume in the 0-1 range.
 function SetVolumeOption(sfxType, value) end
@@ -10767,9 +11531,10 @@ function SetVolumeOption(sfxType, value) end
 --- planes, from 0 to 1.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 3 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 3 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:3643
----@param posID any The element position ID.
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
+---@param posID integer The element position ID.
 ---@param sizeX number Reservation width, used for the on-screen test.
 ---@param sizeY number Reservation height, used for the on-screen test.
 ---@return number x
@@ -10790,9 +11555,10 @@ function GetUIElementScreenPosition(posID, sizeX, sizeY) end
 --- towards the lower left, and z between the clipping planes from 0 to 1.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 3 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 3 arguments
 -- Seen at: ui/core/lua/targetsystem.lua:3445
----@param posID any The element position ID.
+-- Arity: 1 or more (fewer raise a Lua error) - X4.exe 8.00, 9.00
+---@param posID integer The element position ID.
 ---@param minSize number Minimum rectangle size.
 ---@param maxScale? number Maximum rectangle scale.
 ---@return number x
@@ -10807,8 +11573,9 @@ function GetUIElementRectangleScreenPosition(posID, minSize, maxScale) end
 --- Requests notification when an object becomes known to the player.
 -- Environment: addons + core
 -- Versions: 9.00 only - new in 9.00, absent from 8.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:6105
+-- Arity: 1 - X4.exe 9.00
 ---@param element any The contract element, commonly getElement("Scene.UIContract").
 function NotifyOnSetKnownToPlayer(element) end
 
@@ -10816,9 +11583,10 @@ function NotifyOnSetKnownToPlayer(element) end
 --- Returns the target parameters accepted by a diplomatic action.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:450
----@param actionID any The diplomatic action ID.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param actionID string The diplomatic action ID.
 ---@return table parameters
 function GetDiplomaticActionTargetParameters(actionID) end
 
@@ -10826,24 +11594,26 @@ function GetDiplomaticActionTargetParameters(actionID) end
 --- Returns the permitted values for a diplomacy operation parameter.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:2250
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param operationID integer The operation ID.
 ---@return table values
 function GetDiplomaticActionOperationParamValues(operationID) end
 
 
 --- Starts a diplomatic operation - an action ID, the agent who carries it out, its parameters,
---- and optionally a ware to offer as a gift - and returns a handle for the started operation,
---- which the diplomacy menu keeps to follow it.
+--- and a ware to offer as a gift - and returns a handle for the started operation, which the
+--- diplomacy menu keeps to follow it. X4.exe's count check wants all four.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 4 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 4 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_diplomacy.lua:464
----@param actionID any The diplomatic action ID.
+-- Arity: 4 - X4.exe 8.00, 9.00
+---@param actionID string The diplomatic action ID.
 ---@param agentID any The agent carrying out the operation.
 ---@param parameters table The operation parameters.
----@param giftWare? any Optional gift ware.
+---@param giftWare string The ware offered as a gift.
 function StartDiplomacyActionOperation(actionID, agentID, parameters, giftWare) end
 
 
@@ -10851,8 +11621,9 @@ function StartDiplomacyActionOperation(actionID, agentID, parameters, giftWare) 
 --- table as nothing to report, with `next(outcomes) ~= nil`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:18326
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return table outcomes
 function GetVentureOutcomes() end
 
@@ -10876,8 +11647,9 @@ function TestCallback(name) end
 --- venture pages are hidden without it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 25 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 25 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:24874, ui/addons/ego_detailmonitor/menu_playerinfo.lua:370
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function OnlineHasSession() end
 
@@ -10886,8 +11658,9 @@ function OnlineHasSession() end
 --- - `OnlineHasSession` is the question that comes first.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:11968
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function OnlineIsGameRegistered() end
 
@@ -10896,8 +11669,9 @@ function OnlineIsGameRegistered() end
 --- a wrapper around it, and that is what menu code uses.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:11197
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function OnlineIsOnlineModeActive() end
 
@@ -10906,8 +11680,9 @@ function OnlineIsOnlineModeActive() end
 --- uses to tick its Remember Me box for the player.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:11975
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return boolean
 function OnlineHasPreviousSessionToken() end
 
@@ -10917,8 +11692,9 @@ function OnlineHasPreviousSessionToken() end
 --- ticker.
 -- Environment: addons + core
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 2 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 2 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:10172, ui/core/lua/monitors.lua:1695
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function OnlineIsCurrentTeamValid() end
 
@@ -10927,8 +11703,9 @@ function OnlineIsCurrentTeamValid() end
 --- `Helper.hasVentureRewards` is a one-line wrapper around it, and that is what menu code uses.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:11209
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return boolean
 function OnlineHasVentureLogbookReward() end
 
@@ -10937,8 +11714,9 @@ function OnlineHasVentureLogbookReward() end
 --- options menu branches on it before offering anything that would need the service.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 6 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 6 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:6041, ui/addons/ego_gameoptions/onlineupdate.lua:145
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return any state
 function OnlineGetVersionIncompatibilityState() end
 
@@ -10948,8 +11726,9 @@ function OnlineGetVersionIncompatibilityState() end
 --- entry is how the UI finds the player's own row.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 11 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 11 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:255, ui/addons/ego_detailmonitor/menu_scenario_debriefing.lua:408
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 ---@return string name
 function OnlineGetUserName() end
 
@@ -10959,8 +11738,9 @@ function OnlineGetUserName() end
 --- them to decide which venture context menu to show.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 13 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 13 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:450
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param key string The configuration key, e.g. "allow_update".
 ---@return any value
 function OnlineGetVentureConfig(key) end
@@ -10971,8 +11751,9 @@ function OnlineGetVentureConfig(key) end
 --- few globals a mod is known to override - both UIX and `sn_mod_support_apis` wrap it.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 12 vanilla call sites, 0 arguments
+-- Usage: confirmed - X4.exe count check, 12 vanilla call sites, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:6517, ui/addons/ego_detailmonitor/menu_playerinfo.lua:1623
+-- Arity: 0 - X4.exe 8.00, 9.00
 ---@return table items
 function OnlineGetUserItems() end
 
@@ -10981,8 +11762,9 @@ function OnlineGetUserItems() end
 --- what is already placed to decide whether another limited module may still be added.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 4 vanilla call sites, 1 argument
+-- Usage: confirmed - X4.exe count check, 4 vanilla call sites, 1 argument
 -- Seen at: ui/addons/ego_detailmonitor/menu_station_configuration.lua:2072
+-- Arity: 1 - X4.exe 8.00, 9.00
 ---@param ware string The ware ID.
 ---@return integer amount
 function OnlineGetUserItemAmount(ware) end
@@ -10993,8 +11775,9 @@ function OnlineGetUserItemAmount(ware) end
 --- returns false.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3296
+-- Arity: 2 - X4.exe 8.00, 9.00
 ---@param username string The user name.
 ---@param remember boolean Whether to store the session token.
 function OnlineLogIn(username, remember) end
@@ -11004,8 +11787,9 @@ function OnlineLogIn(username, remember) end
 --- registration state around the call.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:3342
+-- Arity: 0 (more are logged, then ignored) - X4.exe 8.00, 9.00
 function OnlineLogOut() end
 
 
@@ -11014,8 +11798,9 @@ function OnlineLogOut() end
 --- entry means anonymous.
 -- Environment: addons only
 -- Versions: 9.00 only - new in 9.00, absent from 8.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_gameoptions/gameoptions.lua:9268
+-- Arity: 1 - X4.exe 9.00
 ---@param allow boolean Whether attribution is allowed.
 function OnlineUserAllowForumAttribution(allow) end
 
@@ -11025,8 +11810,9 @@ function OnlineUserAllowForumAttribution(allow) end
 --- last fetched.
 -- Environment: addons only
 -- Versions: 9.00 only - new in 9.00, absent from 8.00
--- Usage: confirmed - 1 vanilla call site, 0 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 0 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_map.lua:2557
+-- Arity: 0 - X4.exe 9.00
 function OnlineRequestContactList() end
 
 
@@ -11034,9 +11820,10 @@ function OnlineRequestContactList() end
 --- it and closes itself afterwards.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 2 arguments
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 2 arguments
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13627
----@param userID any The contact user ID.
+-- Arity: 2 - X4.exe 8.00, 9.00
+---@param userID number The contact user ID.
 ---@param mute boolean Whether to mute.
 function OnlineMuteContact(userID, mute) end
 
@@ -11045,17 +11832,19 @@ function OnlineMuteContact(userID, mute) end
 --- Remove Contact entry calls it and then closes the context menu.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13632
----@param userID any The contact user ID.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param userID number The contact user ID.
 function OnlineRemoveContact(userID) end
 
 
---- Imports a platform friend list as online contacts. It takes the list itself, which the
---- caller has already fetched with `OnlineGetPlatformFriendList`.
+--- Imports platform friends as online contacts. It takes the chosen friends' platform IDs as
+--- one comma-separated string, from the list `OnlineGetPlatformFriendList` returned.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
--- Usage: confirmed - 1 vanilla call site, 1 argument
+-- Usage: confirmed - X4.exe count check, 1 vanilla call site, 1 argument
 -- Seen at: ui/addons/ego_detailmonitorhelper/helper.lua:13661
----@param friends table The platform friend list.
+-- Arity: 1 - X4.exe 8.00, 9.00
+---@param friends string Platform IDs, comma-separated.
 function OnlineImportPlatformFriends(friends) end
