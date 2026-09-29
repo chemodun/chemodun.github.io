@@ -1,6 +1,19 @@
 {
-  "through": "c2a4e48d3401f7b2c2135081681bc5b8021f982a",
+  "through": "05d2b5efc319f77e6e2b0a91be89d86d9813e928",
   "days": [
+    {
+      "date": "2026-09-29",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/lua-globals/",
+          "title": "Lua Globals Reference",
+          "kind": "",
+          "lines": [
+            "argument counts read from X4.exe, with corrected signatures"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-09-28",
       "pages": [
