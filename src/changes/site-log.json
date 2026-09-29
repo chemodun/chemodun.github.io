@@ -1,6 +1,19 @@
 {
-  "through": "e2aff5c3744fe8c2f7985789773882a911163eb4",
+  "through": "c2a4e48d3401f7b2c2135081681bc5b8021f982a",
   "days": [
+    {
+      "date": "2026-09-28",
+      "pages": [
+        {
+          "path": "/x4/modding-support/running-x4-for-modding/",
+          "title": "Running X4 for modding",
+          "kind": "",
+          "lines": [
+            "improve style and wording"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-09-27",
       "pages": [
