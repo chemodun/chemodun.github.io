@@ -1,5 +1,5 @@
 {
-  "through": "05d2b5efc319f77e6e2b0a91be89d86d9813e928",
+  "through": "bede5f800e653213ff7326277df2eeeb836b0ae1",
   "days": [
     {
       "date": "2026-09-29",
@@ -9,7 +9,8 @@
           "title": "Lua Globals Reference",
           "kind": "",
           "lines": [
-            "argument counts read from X4.exe, with corrected signatures"
+            "argument counts read from X4.exe, with corrected signatures",
+            "Parameter names are normalized"
           ]
         }
       ]
