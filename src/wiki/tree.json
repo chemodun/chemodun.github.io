@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-09-22",
+  "fetched": "2026-09-30",
   "root": "X4 Foundations Wiki",
   "branch": "Modding Support",
   "pages": [
@@ -194,6 +194,13 @@
         "Multi-version extensions"
       ],
       "title": "Multi-version extensions"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Running X4 for modding"
+      ],
+      "title": "Running X4 for modding"
     },
     {
       "segs": [
