@@ -1,6 +1,27 @@
 {
-  "through": "bede5f800e653213ff7326277df2eeeb836b0ae1",
+  "through": "addaf6daf59d46af83e14689f3045c714869dbaa",
   "days": [
+    {
+      "date": "2026-10-01",
+      "pages": [
+        {
+          "path": "/x4/modding-support/god-xml/",
+          "title": "god.xml",
+          "kind": "new",
+          "lines": [
+            "introduce the god.xml article"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/running-x4-for-modding/",
+          "title": "Running X4 for modding",
+          "kind": "",
+          "lines": [
+            "correct when -godlog writes godlog.xml"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-09-29",
       "pages": [
