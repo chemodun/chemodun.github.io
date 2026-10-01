@@ -1,6 +1,6 @@
 ---
 title: god.xml
-description: How libraries/god.xml places stations, factories, ships and objects - the entry format, quotas and locations, when the game generates from it, what an extension needs to add entries, and the script actions and properties that work with them.
+description: How libraries/god.xml places stations, factories and objects (and, in some Timelines scenarios, ships) - the entry format, quotas and locations, when the game generates from it, what an extension needs to add entries, and the script actions and properties that work with them.
 order: 8
 ---
 
@@ -79,6 +79,8 @@ An entry added to `/god/stations` is therefore absent from those starts. To appe
 | `<products>` | `<station>` | a factory for one ware, built from a given construction plan, possibly in [stages](#staged-stations) | `<station constructionplan="...">`, with an optional `<stage>` |
 
 The `<station>` kind under `<products>` is new in 9.00; in 8.00 `<products>` holds only `<product>` entries.
+
+Ships in the universe come from `libraries/jobs.xml`, not from god.xml. Vanilla's only `<ship>` entries are 10 in the Timelines scenario datasets, most of them the player's ship for `shipgodentry`.
 
 In a station entry, `<select faction="argon" tags="[shipyard]"/>` picks a station from `libraries/stations.xml` whose `<category>` matches the faction and tags, and `constructionplan="..."` names a plan instead. `<loadout><level exact="0.75"/></loadout>` sets how fully the station is equipped. `<loadout useplanloadout="true"/>` takes the loadout stored in the construction plan instead of generating one; 16 vanilla station entries use it, 14 of them in the Split DLC.
 
