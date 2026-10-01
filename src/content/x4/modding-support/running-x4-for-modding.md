@@ -402,7 +402,7 @@ An argument that contains a colon is split at it and goes down a separate path i
 | `-debug <filter>` | **measured** - enable one debug filter. Repeat per filter; `all` enables everything. |
 | `-scriptlogfiles` | **measured** - enable `<debug_to_file>` output from MD and AI scripts. Takes no argument. |
 | `-nodefaultlog` | Stop copying log lines to an attached debugger (or to standard error without one). Does not affect `-logfile`. |
-| `-godlog` | Write `godlog.xml` into the personal folder when stations are generated: on a new game and on every save load, replacing the previous one. |
+| `-godlog` | Write `godlog.xml` into the personal folder with the result of a station generation pass, such as the one on a new game. |
 | `-enablexmlvalidation` | **measured** - validate XML while loading. On a heavily modded install: start menu after 337 s instead of about 140, about 20 GB peak memory, and not one `[XML]` line on a run where nothing was invalid. |
 | `-disableassertions` | Accepted and ignored: nothing in 9.00 reads it. |
 | `-notestassets` | Skip `assets\test\` and `assets\system\test\`. |
