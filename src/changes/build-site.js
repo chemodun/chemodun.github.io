@@ -89,7 +89,7 @@ two versions the references cover, is on <a href="${GAME_URL}">Game Changes</a>.
 <h2 id="log">By day</h2>
 ${siteLog(log)}
 
-<h2 id="method">How this page is built</h2>
+<h2 id="method">How this log is built</h2>
 <p>The log is drafted from this site's own repository history and then corrected by hand, so its dates
 are the commits' and its wording is a person's. It is committed as data rather than read from history
 when the site is built, because the build checks the repository out without any history to read. Every

@@ -375,7 +375,7 @@ const wikiUrl = (segs) => WIKI + segs.map(encodeURIComponent).join('/') + '/';
 // gets no box: silence is the default, so a page can never claim a depth it does not have.
 const WIKI_REF = {
   more: (link) => `For more details and additional information, check ${link} on the Egosoft wiki.`,
-  also: (link) => `This page is also published as ${link} on the Egosoft wiki.`,
+  also: (link) => `This article is also published as ${link} on the Egosoft wiki.`,
 };
 
 // The link text is the page's own wiki value - or its wikiName, where the wiki page's

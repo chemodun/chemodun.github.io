@@ -14,7 +14,7 @@ Changing a value the game already defines means editing a file that belongs to t
 
 A patch avoids that. Instead of a new file, an extension ships a list of edits to apply to whatever is there when it loads. A game update that moves something the patch does not mention changes nothing about the patch. A patch is also the only way two extensions can change the same file and both survive.
 
-This page is the reference for that format. It follows on from [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/), which covers where patch files go and when a patch is needed at all.
+This article is the reference for that format. It follows on from [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/), which covers where patch files go and when a patch is needed at all.
 
 <a id="toc"></a>
 
@@ -39,7 +39,7 @@ A patch is an ordinary XML file whose root element is `<diff>`:
 
 **The root element is the only thing that marks a file as a patch.** The same path with `<wares>` as its root is a whole file and behaves completely differently, as [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/#how-a-file-joins-the-game) describes.
 
-The format is modelled on [RFC 5261](https://datatracker.ietf.org/doc/html/rfc5261), and the game validates it against `libraries/diff.xsd`, which ships with the game data and is the authority for everything on this page.
+The format is modelled on [RFC 5261](https://datatracker.ietf.org/doc/html/rfc5261), and the game validates it against `libraries/diff.xsd`, which ships with the game data and is the authority for everything in this article.
 
 [↑ Contents](#toc)
 

@@ -12,9 +12,9 @@ wikiRef: also
 
 **X4 does not write a log file by default.** Started the way a player starts it, the game leaves nothing to read afterwards: errors caused by mods, lines printed by scripts and engine warnings about malformed files are all discarded, because no output file is open.
 
-One command-line switch turns the log on, and it is the difference between guessing at a bug and reading about it. A second switch decides how much goes in. The rest of this page covers how to pass those two, and how to make the repeated launches of a test session quicker.
+One command-line switch turns the log on, and it is the difference between guessing at a bug and reading about it. A second switch decides how much goes in. The rest of this article covers how to pass those two, and how to make the repeated launches of a test session quicker.
 
-The wiki also has a [Launch Options](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Manual%20and%20Guides/Launch%20Options/) page, which is still a work in progress. This page lists the options the game accepts, read from `X4.exe` and, where marked, tested on a running game.
+The wiki also has a [Launch Options](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Manual%20and%20Guides/Launch%20Options/) page, which is still a work in progress. This article lists the options the game accepts, read from `X4.exe` and, where marked, tested on a running game.
 
 **Asked by a mod author for a log?** [The last section](#bug-report) covers exactly that and can be read on its own.
 
@@ -24,11 +24,11 @@ The wiki also has a [Launch Options](https://wiki.egosoft.com/X4%20Foundations%2
 
 <!-- xwiki: toc start="2" depth="3" -->
 
-## How this page was checked
+## How this article was checked
 
 The option names are the ones the parser in `X4.exe` compares an argument against, read from the executable itself: **80 of them in 9.00, 79 in 8.00**, and the single addition is `-pauseonload`. The debug filter names come from the table the engine looks a `-debug` argument up in: **64 in 9.00, 63 in 8.00**, the addition being `Materials`. Both lists are taken from the builds themselves.
 
-What each option *does* is a separate question. Where this page says an option was **measured**, it was passed to a real 9.00 install and its effect read out of the log or the file system. Everywhere else the description is read from the code in the 9.00 executable that handles the option: what the parser stores, and what reads it later. That settles what an option touches and when, which is not the same as having watched it happen. For about thirty options, mostly render, sound and interface toggles, the code that reads the value was found but not followed further, and their rows give no more than the name says. The same code was compared in the 8.00 and the Steam 9.00 executables, and the rows name the few places where they differ.
+What each option *does* is a separate question. Where this article says an option was **measured**, it was passed to a real 9.00 install and its effect read out of the log or the file system. Everywhere else the description is read from the code in the 9.00 executable that handles the option: what the parser stores, and what reads it later. That settles what an option touches and when, which is not the same as having watched it happen. For about thirty options, mostly render, sound and interface toggles, the code that reads the value was found but not followed further, and their rows give no more than the name says. The same code was compared in the 8.00 and the Steam 9.00 executables, and the rows name the few places where they differ.
 
 [↑ Contents](#toc)
 
@@ -75,7 +75,7 @@ A GOG install also has a plain `X4.exe` in its folder that runs without Galaxy a
 
 ### Any other launcher
 
-Some have a per-game arguments field and some do not. Either way the install folder holds an `X4.exe` that takes the options directly, and a shortcut or a batch file pointed at it is what the rest of this page assumes.
+Some have a per-game arguments field and some do not. Either way the install folder holds an `X4.exe` that takes the options directly, and a shortcut or a batch file pointed at it is what the rest of this article assumes.
 
 ### A shortcut
 
@@ -292,7 +292,7 @@ That is the whole of the Lua side: there is no per-filter Lua logging, so a UI m
 
 ### Asking a player for a log
 
-The [last section of this page](#bug-report) is written for players and stands on its own: where the launch options go, the one line to paste, where the file ends up and what to send with it. Its anchor is fixed, so a mod description or a reply to a bug report can link straight to it:
+The [last section of this article](#bug-report) is written for players and stands on its own: where the launch options go, the one line to paste, where the file ends up and what to send with it. Its anchor is fixed, so a mod description or a reply to a bug report can link straight to it:
 
 ```none
 https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/Running%20X4%20for%20modding/#bug-report

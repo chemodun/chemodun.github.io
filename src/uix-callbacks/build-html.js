@@ -467,7 +467,7 @@ the descriptions are written by hand: ${describedCount} of ${meta.callbacks} so 
 
 <div class="dl">
 <a class="btn" href="${URL}uix-callbacks.lua" download>Download <code>uix-callbacks.lua</code></a>
-<p>${LUA_KB} KB. This page as a Lua Language Server meta file, which is also the file it is built from: one table per
+<p>${LUA_KB} KB. This reference as a Lua Language Server meta file, which is also the file it is built from: one table per
 menu, every callback with its contract above it. Point an editor at it as a library and a handler gets completion and
 signatures for what it is passed.</p>
 </div>
@@ -522,7 +522,7 @@ but a callback appears when kuertee adds it, which is what a mod author is actua
 <p>Nothing in UIX describes what a callback is for. The names carry a convention - <code>[function]_[action]</code>,
 with <code>_on_</code> and a present-tense verb for an event - and that is the whole of what exists, which is why most
 cards below say so. What descriptions there are have been written by hand into <code>uix-callbacks.lua</code> itself:
-the file offered above is both what this page is built from and where its prose lives, so a description and the hook
+the file offered above is both what this reference is built from and where its prose lives, so a description and the hook
 it belongs to are never apart.</p>
 <p>An entry takes three authored things, and nothing else in it is authored:</p>
 <pre><code>-- Menu: menu_transporter (ego_detailmonitor)

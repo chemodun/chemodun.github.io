@@ -8,7 +8,7 @@ order: 8
 
 Almost every station in a new X4 universe is placed by one part of the game, which the gamestart schema calls the **god engine**. Shipyards, wharfs, trading stations, defence platforms, faction factories, and many landmarks and anomalies all come from entries in `libraries/god.xml`. Each entry says what to create, how many, and where. The god engine places the objects, the scripts then finish them, and a script can create more objects from the same entries later.
 
-This page covers the format, what the game does with each part of an entry and when, and the script side. It describes version 9.00.
+This article covers the format, what the game does with each part of an entry and when, and the script side. It describes version 9.00.
 
 <a id="toc"></a>
 
@@ -376,7 +376,7 @@ Version 1.10 of `example_tradeposts` adds a Paranid trading post, `example_trade
 
 The `find_station_by_true_owner` check skips the creation when the station already exists, for example in a game where generation created it. The `'init station'` signal with `param3="false"` gives the station its trade wares, NPCs and AI without the starting stock of a gamestart station, as vanilla's patch does; see [Creating from an entry](#creating-from-an-entry).
 
-Both examples on this page were tested in game on version 9.00.
+Both examples in this article were tested in game on version 9.00.
 
 [↑ Contents](#toc)
 

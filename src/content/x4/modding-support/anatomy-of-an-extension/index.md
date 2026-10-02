@@ -12,7 +12,7 @@ wikiRef: also
 
 Everything the game does is described in files, and almost all of them are XML. An extension is a folder of those files that the game merges with its own. Nothing is compiled, nothing is injected, and no executable is touched. That is why a text editor is the only tool strictly required to write one.
 
-This page walks the whole shape of an extension, from an empty folder to a package that can be published. It assumes no prior modding, and builds one small example, `example_starter`, section by section.
+This article walks the whole shape of an extension, from an empty folder to a package that can be published. It assumes no prior modding, and builds one small example, `example_starter`, section by section.
 
 <a id="toc"></a>
 
@@ -32,7 +32,7 @@ X4 Foundations/
     example_starter/                        yours
 ```
 
-Three facts follow from that layout, and most of the rest of this page is a consequence of them.
+Three facts follow from that layout, and most of the rest of this article is a consequence of them.
 
 **The folder name and the extension's id are two different names, used for two different things.** The **folder name is what every path uses**: a file in this extension is addressed as `extensions/example_starter/...`, and that is the form taken by an `index/macros.xml` entry, a `subst_` catalog path and a file-not-found message alike. The **`id` attribute in `content.xml` is what dependencies use**: one extension requires another by id, never by folder name.
 
@@ -162,7 +162,7 @@ extensions/example_starter/
 
 ## How a file joins the game
 
-This is the one idea the rest of the page rests on, and the one that most often surprises people coming from games where a mod replaces files.
+This is the one idea the rest of the article rests on, and the one that most often surprises people coming from games where a mod replaces files.
 
 A file in an extension does **not** simply overwrite the game file at the same path. What happens depends on the file's root element.
 
@@ -393,7 +393,7 @@ Loose files work. An extension can be published as a folder of plain XML and it 
 
 An extension's files are packed into pairs: a `.cat` holding the index and a `.dat` holding the file bodies. There are two kinds, and picking the wrong one is a common first mistake.
 
-**`ext_01.cat` / `ext_01.dat` hold paths relative to the extension folder.** This is where everything discussed on this page belongs. An `ext_` catalog is the extension folder in packed form and nothing more: an entry in it merges or patches exactly as the same file would loose, by the rules in [How a file joins the game](#how-a-file-joins-the-game).
+**`ext_01.cat` / `ext_01.dat` hold paths relative to the extension folder.** This is where everything discussed in this article belongs. An `ext_` catalog is the extension folder in packed form and nothing more: an entry in it merges or patches exactly as the same file would loose, by the rules in [How a file joins the game](#how-a-file-joins-the-game).
 
 **`subst_01.cat` / `subst_01.dat` hold paths relative to the game root**, and stand in for the file that is already there. Nothing is merged and nothing is patched, so a substitute has to be a complete, valid file of its kind. This is the form for the cases in [When a whole file really does replace](#when-a-whole-file-really-does-replace), and it has no loose equivalent, because a file in an extension folder is addressed as `extensions/<folder>/...` and never as a game root path.
 
@@ -414,7 +414,7 @@ extensions/example_starter/
     0001-l044.xml                page 9999001, entries 101 and 102
 ```
 
-Three files, and every mechanism on this page is in one of them. A larger extension is not a different shape, only more of the same one: more folders from [the folder map](#the-folder-map), more patches, and eventually a `ui.xml` and a catalog.
+Three files, and every mechanism in this article is in one of them. A larger extension is not a different shape, only more of the same one: more folders from [the folder map](#the-folder-map), more patches, and eventually a `ui.xml` and a catalog.
 
 The next thing to read depends on what the extension needs to do. To change what the game already defines, which is most mods, it is [XML diff patching](/x4/modding-support/anatomy-of-an-extension/xml-diff-patching/). To add an interface, it is [UI Modding support](/x4/modding-support/ui-modding/). To publish it as a package rather than a folder, it is [Catalogs](/x4/modding-support/anatomy-of-an-extension/catalogs/).
 

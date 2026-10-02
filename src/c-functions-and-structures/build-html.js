@@ -407,7 +407,7 @@ The types are listed once, further down, and every card links into them.</p>
 
 <div class="dl">
 <a class="btn" href="${URL}c-functions.lua" download>Download <code>c-functions.lua</code></a>
-<p>${LUA_KB} KB. This page as a Lua Language Server meta file, which is also the file it is built from: every
+<p>${LUA_KB} KB. This reference as a Lua Language Server meta file, which is also the file it is built from: every
 declaration with its state, its environment and its versions above it. Point an editor at it as a library and
 <code>C.</code> gets completion and signatures while UI Lua is being written.</p>
 </div>
@@ -452,7 +452,7 @@ a URL that reopens that card.</td></tr>
 <details class="box"><summary>Where a description comes from, and how to write one</summary>
 <p>Nothing in the game files, and nothing anywhere else, describes a <code>C.</code> function. The names are
 self-documenting and that is the whole of what exists, which is why most cards below say so. What descriptions there
-are have been written by hand into <code>c-functions.lua</code> itself: the file offered above is both what this page
+are have been written by hand into <code>c-functions.lua</code> itself: the file offered above is both what this reference
 is built from and where its prose lives, so a description and the declaration it belongs to are never apart.</p>
 <p>An entry takes three authored things, and nothing else in it is authored:</p>
 <pre><code>--- The running game version, as the launcher shows it.

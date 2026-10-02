@@ -36,7 +36,7 @@ Three channels, each of them working in both directions:
 
 The two doorbells cannot carry structure. The mailbox carries anything but nobody notices when it changes. So the pattern almost every mod with both sides ends up on uses both at once: **park the payload in the mailbox, then ring the doorbell** - in that order, so the value is in place by the time the handler runs.
 
-Every Lua function on this page belongs to the menus environment. The HUD (`ui/core`) has none of them, apart from `AddUITriggeredEvent`, which it got in 9.00.
+Every Lua function in this article belongs to the menus environment. The HUD (`ui/core`) has none of them, apart from `AddUITriggeredEvent`, which it got in 9.00.
 
 [↑ Contents](#toc)
 

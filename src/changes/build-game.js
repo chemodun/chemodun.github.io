@@ -169,7 +169,7 @@ references on this site. Every name here links to its own row in the reference t
 What changed on the site itself is a separate clock, logged on <a href="${SITE_LOG_URL}">Changes</a>.</p>
 
 <p class="wikiref">Egosoft's <a href="${esc(BREAKING)}">Breaking Changes</a> on the wiki describes in prose
-what a game version changed and why. This page answers the narrower half of that question: which names
+what a game version changed and why. This list answers the narrower half of that question: which names
 moved, counted, each one linked to its own row over here.</p>
 
 <div class="dl">
@@ -196,9 +196,9 @@ ${changedSection()}
 ${esc(FROM)}.</p>
 ${section((g) => g.added, 'new')}
 
-<h2 id="method">How this page is built</h2>
-<p>Nothing on this page is written by hand. Each reference records, per row, which of the versions it
-covers has that row; this page is the difference between the last two of them, taken from the same
+<h2 id="method">How this list is built</h2>
+<p>Nothing in this list is written by hand. Each reference records, per row, which of the versions it
+covers has that row; this list is the difference between the last two of them, taken from the same
 committed data the references themselves are built from, through the same parsers. It is rebuilt
 whenever the site is, so it cannot fall behind a reference, and every link is checked against the
 built reference page before the build is allowed to finish.</p>

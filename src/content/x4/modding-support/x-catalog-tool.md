@@ -10,14 +10,14 @@ wikiRef: also
 
 Everything X4 ships is inside a `.cat` / `.dat` pair, and everything a mod ships may be. The X Catalog Tool is the official way in and out of that format: `XRCatTool.exe` on the command line, `XRCatToolGUI.exe` in a window. Neither has ever had more documentation than the twenty lines in its own `Readme.txt`, which leaves the parts that actually bite - how the filters combine, what a diff considers changed, what a folder import quietly swallows - to be found the hard way.
 
-This page is what those two programs do, checked against the binaries rather than the readme.
+This article is what those two programs do, checked against the binaries rather than the readme.
 
 The Steam package that carries the tool carries `WorkshopTool.exe` as well, which publishes an extension to the Steam Workshop. That one is not covered here; it is described in [Steam Workshop for X Rebirth and X4](https://steamcommunity.com/sharedfiles/filedetails/?id=245117855).
 
 **XRCatTool** is not the only way in and out of the format. **X4 Cat Suite** by z1ppeh(z1p) - [Nexus Mods](https://www.nexusmods.com/x4foundations/mods/2142), source on [GitHub](https://github.com/z1ppeh/X4CatSuite):
 
 - Is an unofficial alternative that puts both halves of the job in one window: a multi-threaded unpacker with extension and regex filters, live size estimates and a hash check that skips files already extracted, and a catalog builder with a drag-and-drop tree, an inline XML/Lua editor, atomic writes and post-write MD5 verification.
-- It is the faster route for bulk extraction, and everything this page says about the format itself holds whichever tool produced the archive.
+- It is the faster route for bulk extraction, and everything this article says about the format itself holds whichever tool produced the archive.
 
 <a id="toc"></a>
 
@@ -55,7 +55,7 @@ Nothing in the package needs installing, and `XRCatTool.exe` has no dependency o
 
 A `.cat` is a plain text index, one line per file, and the `.dat` beside it is those file bodies concatenated in index order. The two are paired by name, so `ext_01.cat` needs `ext_01.dat` next to it and renaming one without the other breaks the archive.
 
-The format in full, the kinds of catalog an extension can hold, what their paths are relative to and the order the game applies them are on [Catalogs](/x4/modding-support/anatomy-of-an-extension/catalogs/). This page is the two programs that read and write that format.
+The format in full, the kinds of catalog an extension can hold, what their paths are relative to and the order the game applies them are on [Catalogs](/x4/modding-support/anatomy-of-an-extension/catalogs/). This article is the two programs that read and write that format.
 
 [↑ Contents](#toc)
 

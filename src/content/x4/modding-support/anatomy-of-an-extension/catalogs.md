@@ -12,7 +12,7 @@ wikiRef: also
 
 An extension can be published as a folder of plain files, and the game will load it correctly. It can also be packed, and almost every published extension is, because a single archive loads faster than several hundred files and is far easier to distribute intact.
 
-This page is what that archive is, the kinds of it an extension can hold, and what the game does with them. It follows on from [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/), which covers what goes into an extension in the first place. The tool that packs and unpacks the format is [X Catalog Tool](/x4/modding-support/x-catalog-tool/), and an archive whose content depends on the game version is [Multi-version extensions](/x4/modding-support/multi-version-extensions/).
+This article is what that archive is, the kinds of it an extension can hold, and what the game does with them. It follows on from [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/), which covers what goes into an extension in the first place. The tool that packs and unpacks the format is [X Catalog Tool](/x4/modding-support/x-catalog-tool/), and an archive whose content depends on the game version is [Multi-version extensions](/x4/modding-support/multi-version-extensions/).
 
 <a id="toc"></a>
 
