@@ -6,9 +6,11 @@ order: 8
 
 # god.xml
 
-Almost every station in a new X4 universe is placed by one part of the game, which the gamestart schema calls the **god engine**. Shipyards, wharfs, trading stations, defence platforms, faction factories, and many landmarks and anomalies all come from entries in `libraries/god.xml`. Each entry says what to create, how many, and where. The god engine places the objects, the scripts then finish them, and a script can create more objects from the same entries later.
+Almost every station in a new X4 universe is placed by one part of the game, the **god engine**. Shipyards, wharfs, trading stations, defence platforms, faction factories, and many landmarks and anomalies all come from entries in `libraries/god.xml`. Each entry says what to create, how many, and where. The god engine places the objects, the scripts then finish them, and a script can create more objects from the same entries later.
 
 This article covers the format, what the game does with each part of an entry and when, and the script side. It describes version 9.00.
+
+Adding a station or factory from an extension needs [The file](#the-file), [How many: quotas](#how-many-quotas), [Where: locations](#where-locations), [Adding entries from an extension](#adding-entries-from-an-extension) and the checklist in [Traps](#traps).
 
 <a id="toc"></a>
 
@@ -16,19 +18,30 @@ This article covers the format, what the game does with each part of an entry an
 
 <!-- xwiki: toc start="2" depth="3" -->
 
+## Terms
+
+- **Entry**: one element in `god.xml` that says what to create, how many and where.
+- **Space**: the galaxy holds clusters, a cluster holds sectors, and a sector holds zones. An entry's `<location>` names one of these spaces.
+- **Kinds of entry**: object, ship, station, product and plan entries. Product and plan entries both create factories and together are the **production entries**; see [Kinds of entry](#kinds-of-entry).
+- **Construction plan**: a station layout, stored in `libraries/constructionplans.xml`. A plan can be divided into **stages** that are built one after another.
+- **Dataset**: one complete set of entries. A game uses exactly one; see [Which dataset is used](#which-dataset-is-used).
+- **God object**: anything created from an entry; a **god station** is a station created from one.
+
+Plan entries and staged construction plans are new in 9.00; in 8.00 `<products>` holds only `<product>` entries.
+
+[↑ Contents](#toc)
+
 ## How generation works
 
 On a new game, after the map is built, the god engine works through every entry once:
 
-1. **Zone entries first, then sector, cluster and galaxy.** Entries are grouped by the class of their location. Entries tied to a named zone are placed first and galaxy-wide entries last.
+1. **Zone entries first, then sector, cluster and galaxy.** Entries are grouped by the class of their [location](#where-locations). Entries tied to a named zone are placed first and galaxy-wide entries last.
 2. **Each entry creates up to its quota.** The quota sets a total for the galaxy and optional limits per cluster, sector and zone.
 3. **Each object goes to a space that passes the entry's location filters**: owner, space tags, distance from the sector core, economy and security values, sunlight, regions.
 
-The loading screen shows **station generation** while this runs. Next, the scripts take over. A `<product>` entry places only its production module, and vanilla's `md/finalisestations.xml` turns it into a working station. It adds habitation, docks, piers, defence and connection modules, then the loadout. A `<station>` entry under `<products>` builds a fixed construction plan instead, often only its first stages, and the owning faction adds the rest during play; see [Staged stations](#staged-stations). After that, `md/inituniverse.xml` gives each god station the same setup as other stations, such as its trade wares.
+The loading screen shows **station generation** while this runs. The scripts then finish what was placed. A product entry places only a production module, and vanilla's `md/finalisestations.xml` adds the habitation, dock, pier, defence and connection modules, then the loadout. A plan entry builds the construction plan it names, often only its first stages, and the owning faction builds the rest during play; see [Staged stations](#staged-stations). Last, `md/inituniverse.xml` sets up every god station like any other station, for example with its trade wares.
 
-Generation does not run again during play. On a save load it runs once more, but **only for extensions that are enabled now and not yet recorded in the save**, as described in [Loading a save](#loading-a-save). Outside of these two cases, an entry is used only when a script asks for it.
-
-A gamestart can switch the god engine off. `libraries/gamestarts.xml` does that with `<god enabled="false"/>` inside `<universe>` for the `tutorial_*` starts, `x4ep1_gamestart_tutorial2`, the test starts, `thevoid` and most Timelines scenarios. `x4ep1_gamestart_tutorial1` keeps it on and has a dataset of its own.
+During play, generation runs again only when a save is loaded, and **only for extensions that are enabled now but not yet recorded in the save**; see [Loading a save](#loading-a-save). Apart from that, an entry is used only when a script asks for it.
 
 [↑ Contents](#toc)
 
@@ -36,25 +49,27 @@ A gamestart can switch the god engine off. `libraries/gamestarts.xml` does that 
 
 ### Layout
 
-The file has no schema of its own: `god.xml` points at `libraries/libraries.xsd`, which defines it completely. The root holds one dataset, and any number of gamestart datasets can follow it:
+The root holds one dataset, and any number of gamestart datasets can follow it:
 
 ```xml
 <god>
-  <objects> ... </objects>
-  <ships> ... </ships>
+  <objects> ... </objects>                   <!-- object entries -->
+  <ships> ... </ships>                       <!-- ship entries -->
   <stations>
     <defaults> ... </defaults>
-    <station id="..."> ... </station>
+    <station id="..."> ... </station>        <!-- station entries -->
   </stations>
   <products>
-    <product id="..."> ... </product>
-    <station id="..."> ... </station>
+    <product id="..."> ... </product>        <!-- product entries -->
+    <station id="..."> ... </station>        <!-- plan entries -->
   </products>
 
   <gamestart ref="x4ep1_gamestart_tutorial1"> <!-- the same four sections --> </gamestart>
   <gamestart galaxy="timelines_map_mining_1_galaxy_macro"> ... </gamestart>
 </god>
 ```
+
+The file has no schema of its own: `god.xml` points at `libraries/libraries.xsd`, which defines it completely.
 
 ### Which dataset is used
 
@@ -64,37 +79,40 @@ Exactly one dataset is used per game:
 2. otherwise a `<gamestart galaxy="...">` whose `galaxy` is the macro of the current galaxy;
 3. otherwise the root.
 
-A matching gamestart dataset **replaces** the root dataset; the two are not merged. The schema puts it as "default god entries if no gamestart-specific god dataset found". The base game has three gamestart datasets. `x4ep1_gamestart_tutorial1` holds a single shipyard. `x4ep1_gamestart_workshop` holds two stations. The Timelines mining galaxy dataset is empty, marked "Used to patch DLC stations", and the DLCs add their entries to it. The Timelines DLC adds 16 more, one per scenario such as `scenario_tharkas_cascade`, with `<add sel="/god">`.
+A matching gamestart dataset **replaces** the root dataset; the two are not merged. **An entry in the root dataset is therefore absent from the starts that have a dataset of their own.** To appear there too, it has to be added to that dataset as well. The schema puts the rule as "default god entries if no gamestart-specific god dataset found".
 
-An entry added to `/god/stations` is therefore absent from those starts. To appear there too, it has to be added to the gamestart dataset as well.
+The base game has three gamestart datasets. `x4ep1_gamestart_tutorial1` holds a single shipyard. `x4ep1_gamestart_workshop` holds two stations. The Timelines mining galaxy dataset is empty, marked "Used to patch DLC stations", and the DLCs add their entries to it. The Timelines DLC adds 16 more, one per scenario such as `scenario_tharkas_cascade`, with `<add sel="/god">`.
+
+A gamestart can also switch the god engine off, and then no dataset is used. `libraries/gamestarts.xml` does that with `<god enabled="false"/>` inside `<universe>` for the `tutorial_*` starts, `x4ep1_gamestart_tutorial2`, the test starts, `thevoid` and most Timelines scenarios. `x4ep1_gamestart_tutorial1` keeps it on and uses its own dataset.
 
 ### Kinds of entry
 
-| Section | Entry | Creates | What to build |
+Every entry has the same shape: the outer element carries the id, owner and other attributes, `<quotas>` says how many, `<location>` and `<position>` say where, and an inner element says what to build.
+
+| Entry | Section and element | Creates | Inner element: what to build |
 | --- | --- | --- | --- |
-| `<objects>` | `<object>` | an object such as a landmark, anomaly or derelict | `<object macro="...">` |
-| `<ships>` | `<ship>` | a ship | `<ship>`, with the same content as the `create_ship` script action |
-| `<stations>` | `<station>` | a station: shipyard, wharf, trading station, defence platform, headquarters, pirate base | `<station>`: a `<select>` or `constructionplan`, plus `<loadout>` |
-| `<products>` | `<product>` | a factory for one ware, started from its production module | `<module>` with a `<select ware="..." race="...">` |
-| `<products>` | `<station>` | a factory for one ware, built from a given construction plan, possibly in [stages](#staged-stations) | `<station constructionplan="...">`, with an optional `<stage>` |
+| object entry | `<objects>`, `<object>` | an object such as a landmark, anomaly or derelict | `<object macro="...">` |
+| ship entry | `<ships>`, `<ship>` | a ship | `<ship>`, with the same content as the `create_ship` script action |
+| station entry | `<stations>`, `<station>` | a station: shipyard, wharf, trading station, defence platform, headquarters, pirate base | `<station>`: a `<select>` or `constructionplan`, plus `<loadout>` |
+| product entry | `<products>`, `<product>` | a factory for one ware, started from its production module | `<module>` with a `<select ware="..." race="...">` |
+| plan entry | `<products>`, `<station>` | a factory for one ware, built from a given construction plan, possibly in [stages](#staged-stations) | `<station constructionplan="...">`, with an optional `<stage>` |
 
-The `<station>` kind under `<products>` is new in 9.00; in 8.00 `<products>` holds only `<product>` entries.
+Product and plan entries are the **production entries**; script properties and find filters use that name, such as `isgodproductionentry`.
 
-Ships in the universe come from `libraries/jobs.xml`, not from god.xml. Vanilla's only `<ship>` entries are 10 in the Timelines scenario datasets, most of them the player's ship for `shipgodentry`.
+Ships in the universe come from `libraries/jobs.xml`, not from god.xml. Vanilla's only ship entries are 10 in the Timelines scenario datasets, most of them the player's ship for [`shipgodentry`](#player-starts-on-a-god-entry).
 
-In a station entry, `<select faction="argon" tags="[shipyard]"/>` picks a station from `libraries/stations.xml` whose `<category>` matches the faction and tags, and `constructionplan="..."` names a plan instead. `<loadout><level exact="0.75"/></loadout>` sets how fully the station is equipped. `<loadout useplanloadout="true"/>` takes the loadout stored in the construction plan instead of generating one; 16 vanilla station entries use it, 14 of them in the Split DLC.
-
-The inner `<object>` and `<ship>` also take `state`, the initial state of the object: `construction`, `operational` or `wreck`. Vanilla does not use it.
-
-A vanilla station entry:
+A vanilla station entry, with comments added. Its inner element is also named `<station>`:
 
 ```xml
 <station id="tradestation_argon_01" race="argon" owner="argon" type="tradingstation">
+  <!-- how many -->
   <quotas>
     <quota galaxy="1" zone="1" />
   </quotas>
+  <!-- where -->
   <location class="sector" macro="cluster_06_sector002_macro" />
   <position x="-48800" y="0" z="27800" pitch="0" roll="0" />
+  <!-- what to build -->
   <station>
     <select faction="argon" tags="[tradestation]" />
     <loadout>
@@ -103,6 +121,29 @@ A vanilla station entry:
   </station>
 </station>
 ```
+
+In a station entry, `<select faction="argon" tags="[shipyard]"/>` picks a station from `libraries/stations.xml` whose `<category>` matches the faction and tags, and `constructionplan="..."` names a plan instead. `<loadout><level exact="0.75"/></loadout>` sets how fully the station is equipped. `<loadout useplanloadout="true"/>` takes the loadout stored in the construction plan instead of generating one; a few vanilla station entries use it, most of them in the Split DLC.
+
+A vanilla product entry:
+
+```xml
+<product id="arg_energycells" ware="energycells" owner="argon" type="factory">
+  <quotas>
+    <quota galaxy="10" sector="6" />
+  </quotas>
+  <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
+    <economy max="0.6" maxbound="false" />
+    <sunlight min="0.5" />
+  </location>
+  <module>
+    <select ware="energycells" race="argon"/>
+  </module>
+</product>
+```
+
+`<select ware race>` picks the production module, and the finalise scripts build the rest of the station around it; see [How generation works](#how-generation-works). A plan entry is shown in [Staged stations](#staged-stations).
+
+The inner `<object>` and `<ship>` also take `state`, the initial state of the object: `construction`, `operational` or `wreck`. Vanilla does not use it.
 
 ### Attributes
 
@@ -114,7 +155,21 @@ Every entry accepts:
 - `startactive`, default `true`; generation skips an inactive entry, see [Entries that start inactive](#entries-that-start-inactive).
 - `respawnable`: whether the object may be respawned. Vanilla's faction scripts respawn a destroyed station only when this is set, and only the Boron DLC sets it.
 
-Station entries add `owner` and `race`, both required, `type`, `set` and `encyclopedia`. `encyclopedia="true"` lists the station in the encyclopedia; the default is `false`, and vanilla sets it on seven entries, most of them for stories and gamestarts. Production entries (`<product>`, and `<station>` under `<products>`) add `ware` and `owner`, both required, `type`, `set` and `friendgroup`. `set` names a module set and overrides `race` and `type` for choosing one. Production entries in the same `friendgroup` with the same owner count towards each other's quotas when they form a complex with matching productions; only the Terran DLC uses it. Objects and ships take an optional `owner`, ownerless by default.
+Each kind adds its own:
+
+| Attribute | Station entries | Production entries | Object and ship entries |
+| --- | --- | --- | --- |
+| `owner` | required | required | optional, ownerless by default |
+| `race` | required | | |
+| `ware` | | required | |
+| `type` | optional | optional | |
+| `set` | optional | optional | |
+| `encyclopedia` | optional | | |
+| `friendgroup` | | optional | |
+
+- `set` names a module set and overrides `race` and `type` for choosing one.
+- `encyclopedia="true"` lists the station in the encyclopedia; the default is `false`. Vanilla sets it on a few entries, most of them for stories and gamestarts.
+- `friendgroup`: production entries in the same group with the same owner count towards each other's quotas when they form a complex with matching productions. Only the Terran DLC uses it.
 
 The elements every entry accepts are `<quota>` or `<quotas>`, `<location>`, an optional `<position>`, and an optional `<category tags="...">`, which scripts can read back as the entry's tags.
 
@@ -166,15 +221,36 @@ The quota that applies is chosen in this order:
 
 `<modules>` limits how many modules of each kind a generated station gets: `production`, `build`, `storage`, `habitation`, `defence`, `comm`, `dock`, `pier`, `other`, `venture`, `welfare`, `processing` and `radar`. A kind left out defaults to 20, according to the schema. The `<location>` values are the defaults for entries that do not set their own.
 
+The default quota does not limit an entry's total. A station entry without a `sector` value can place more than 30 stations in one sector, and one tied to a single zone more than 3 in that zone. When an entry leaves the choice of zone to the god engine, each zone gets at most 3 of its stations, even when the entry's own quota allows more per zone.
+
 ### Scaling by gamestart
 
-A gamestart can scale quotas with `<universe><god><quotas><quota faction="..." tag="..." factor="..."/></quotas></god>` in `gamestarts.xml`. A factor of 0 disables the matching entries. Custom gamestarts have a matching property, `universegodquotafactors`, which no vanilla gamestart uses.
+A gamestart in `gamestarts.xml` can scale quotas:
+
+```xml
+<universe>
+  <god>
+    <quotas>
+      <quota faction="..." tag="..." factor="..." />
+    </quotas>
+  </god>
+</universe>
+```
+
+A factor of 0 disables the matching entries. Custom gamestarts have a matching property, `universegodquotafactors`, which no vanilla gamestart uses.
 
 [↑ Contents](#toc)
 
 ## Where: locations
 
-`<location>` names the space an entry may use and filters the places inside it:
+`<location>` names the space an entry may use, a zone, a sector, a cluster or the whole galaxy, and filters the places inside it. Common vanilla locations:
+
+- anywhere in Argon-owned space: `<location class="galaxy" macro="xu_ep2_universe_macro" faction="argon" relation="self" comparison="ge"/>`;
+- anywhere in unowned space: the same with `faction="[ownerless]"`;
+- one sector: `<location class="sector" macro="cluster_06_sector002_macro"/>`;
+- one exact spot: a sector location plus a [`<position>`](#a-fixed-position).
+
+The attributes:
 
 - `class`: `zone`, `sector`, `cluster` or `galaxy`, default `galaxy`. Together with `macro` it names the space. Vanilla's galaxy-wide entries use the main galaxy, `xu_ep2_universe_macro`.
 - `faction`, `relation`, `comparison` (`ge`, `gt`, `le`, `lt`): a relation filter against `faction`, described in the schema only as a relation range. Vanilla keeps an entry in Argon space with `faction="argon" relation="self" comparison="ge"`, and in unowned space with `faction="[ownerless]"`.
@@ -190,7 +266,11 @@ Child elements narrow the choice further. Each may appear more than once:
 - `<corerange min max>`: distance from the sector core, which is defined by gates and highways. 0 to 1 is inside the core; values above 1 place the object outside it by that factor.
 - `<economy min max maxbound>`, `<security min max maxbound>`: the space's value, from 0 to 1.
 - `<sunlight min max maxbound>`: the space's sunlight, from 0 to 20 in the schema; vanilla's filters use values from 0.4 to 7.
-- `<region>`: rules about regions. `ware` and `matchall` select regions by their wares, `min` and `max` set a distance from such a region, `hazardous` and `gravidar` place the object at a damaging or gravidar-limiting position, and `allowhazardous` and `allowgravidar` allow placement inside such a region without asking for it.
+- `<region>`: rules about regions.
+  - `ware` and `matchall` select regions by their wares.
+  - `min` and `max` set a distance from such a region.
+  - `hazardous` and `gravidar` place the object at a damaging or gravidar-limiting position.
+  - `allowhazardous` and `allowgravidar` allow placement inside such a region without asking for it.
 
 With `maxbound="false"` on `<economy>`, `<security>` or `<sunlight>`, a higher value is treated as `max` instead of ruling the space out.
 
@@ -208,14 +288,14 @@ The same holds for an entry that an extension replaces as a whole: the new entry
 - The quota has to come out at one object; a position with a larger quota is an error.
 - Location filters next to a position may contradict it, and the game logs an error about the possible conflict.
 - `pitch`, `yaw` and `roll` are in degrees. A station or other object gets a random angle where one is left out; ships ignore all three.
-- `safepos`, default `true`: "position the object with a safe position", in the schema's words. Vanilla sets `safepos="false"` on 41 base-game entries and 15 Timelines entries. A position with `safepos` on that lies in a hazardous region logs a message suggesting either `safepos="false"` or `allowhazardous` on the location's `<region>`, and placement is attempted anyway.
+- `safepos`, default `true`: "position the object with a safe position", in the schema's words. Vanilla sets `safepos="false"` on many entries, in the base game and in Timelines. A position with `safepos` on that lies in a hazardous region logs a message suggesting either `safepos="false"` or `allowhazardous` on the location's `<region>`, and placement is attempted anyway.
 - `<distance exact|min|max>` inside `<position>` sets a distance from the coordinates, which the schema says requires `safepos`. Vanilla does not use it.
 
 [↑ Contents](#toc)
 
 ## Staged stations
 
-A construction plan can be divided into stages; staged construction plans are new in 9.00. A god entry with such a plan builds the station up to a chosen stage, and the owning faction adds the remaining stages during play. Vanilla builds its prefab factories this way: the `<station>` entries under `<products>` that name a `constructionplan`.
+A construction plan can be divided into stages. An entry with such a plan builds the station up to a chosen stage, and the owning faction adds the remaining stages during play. Vanilla builds its prefab factories this way, from plan entries with ids such as `arg_advancedcomposites_prefab_04_01`.
 
 ### Stages in a construction plan
 
@@ -225,7 +305,7 @@ In `libraries/constructionplans.xml`, `bookmark="1"` on an `<entry>` closes a st
 <entry index="15" macro="pier_arg_harbor_03_macro" connection="connectionsnap003" bookmark="1">
 ```
 
-No schema describes `bookmark`; vanilla's plans are the reference. A staged plan carries its own habitation, docks and defence, as vanilla's prefab plans do: vanilla's runtime finaliser, `NewStation_GenerateFactory` in `md/finalisestations.xml`, leaves a station with a staged plan as it is.
+**A staged plan needs its own habitation, docks and defence**, as vanilla's prefab plans have, because nothing is added to it: vanilla's runtime finaliser, `NewStation_GenerateFactory` in `md/finalisestations.xml`, leaves a station with a staged plan as it is. No schema describes `bookmark`; vanilla's plans are the reference.
 
 ### The `<stage>` element
 
@@ -250,24 +330,24 @@ Inside the entry's `<station>` element, `<stage>` sets the stage the station is 
 
 Each of the two stations from this entry starts with one to four of the plan's four stages, picked for each station separately. The schema describes `<stage>` as "the construction sequence stage index to initially expand this station to (defaults to 0)". In the script actions that take the same element, stage 0 stands for the whole sequence.
 
-Vanilla uses `<stage>` in 101 entries (base game 70, Split 12, Terran 6, Boron 13), all of them `<station constructionplan>` entries under `<products>`, mostly with ranges such as `min="1" max="3"`. The schema allows it in `<stations>` entries as well, which vanilla does not use.
+Every vanilla plan entry has a `<stage>`, mostly a range such as `min="1" max="3"`. The schema allows it in station entries as well, which vanilla does not use.
 
 **A stage past the plan's last one gives an empty station.** The station is created operational, with no modules and only a generic name such as `BOR Factory`, and nothing is logged. So `exact` and `max` have to stay within the plan's stage count. Of vanilla's 101 ranges, 69 end at the plan's last stage, 31 before it, and one after it: the Boron DLC's `bor_hullparts_prefab_08_01` asks for `min="4" max="8"` on the seven-stage `bor_hullparts_prefab_08`, so a station from it can come out empty.
 
 ### Fixed plans
 
-A `<plan>` in `constructionplans.xml` can carry `fixed="1"`. No schema describes it on a plan. On a construction sequence, the property `isfixed` is true when the sequence "is flagged as fixed and cannot be adjusted", and the find actions take `hasfixedconstruction`, which matches a station whose current or planned sequence is flagged as fixed. A station built from a plan with `fixed="1"` has such a sequence.
+A `<plan>` in `constructionplans.xml` can carry `fixed="1"`. **A staged station with a fixed plan grows only stage by stage**, through the faction's regular expansion; without `fixed="1"`, the faction can also extend it for a ware it needs. See the next section. Every plan that a vanilla plan entry names is fixed, and so are the plans of the Kha'ak scrap processors in vanilla's station entries.
 
-Vanilla flags 78 plans (base game 44, Boron 14, Split 13, Terran 7). Every plan named by a `<station>` entry under `<products>` is among them; the other five are the Kha'ak scrap processors of `<stations>` entries. The faction economy leaves fixed stations out when it looks for a station to extend for a ware it needs; see the next section.
+No schema describes `fixed` on a plan. On a construction sequence, the property `isfixed` is true when the sequence "is flagged as fixed and cannot be adjusted", and the find actions take `hasfixedconstruction`, which matches a station whose current or planned sequence is flagged as fixed. A station built from a plan with `fixed="1"` has such a sequence.
 
 ### Expansion during play
 
-Vanilla's faction scripts build the remaining stages:
+The owning faction builds the remaining stages during play, one stage at a time and hours apart. Vanilla's faction scripts do it in two ways:
 
 - **`ExpandPrefabs`** in `md/factionlogic.xml` expands one station per faction at a time. It picks a random station of the faction that has a further stage, has no build in progress, has not been attacked for 30 minutes, and is in a sector that no enemy of the faction contests. It adds a build for the next stage with `add_build_to_expand_station` and waits 6 to 7 hours before the next expansion, or 2 to 3 hours when no station qualified. The candidates come from the faction's station reports in `md/factionlogic_economy.xml`: a station with a further stage is a candidate unless it reports insufficient resources, workforce or build wares, or overflowing products.
 - **A demand for a ware**: when a faction wants more production of a ware in a sector, `md/factionlogic_economy.xml` looks for one of its stations there to extend, leaving out stations with a [fixed plan](#fixed-plans). Among the rest, a staged station whose next stage contains a production module for that ware is favoured, and that stage is built. When no station is extended, the faction builds a new one: from the plan of `get_god_production_construction_plan` with `<stage exact="1"/>` when it has no staged station producing the ware in that sector and a plan is found, and as an ordinary factory otherwise.
 
-So the stations of a staged entry keep growing after generation, and the faction can also place new ones from the same entry's plan. Since vanilla's prefab plans are all fixed, its staged stations grow through `ExpandPrefabs`; a staged plan without `fixed="1"` can also be extended for a ware demand.
+So the stations of a staged entry keep growing after generation, and the faction can also place new ones from the same entry's plan. Since vanilla's prefab plans are all fixed, its staged stations grow through `ExpandPrefabs` only.
 
 ### Checking stages from a script
 
@@ -294,7 +374,7 @@ The entries of the chosen dataset are generated as described in [How generation 
 
 On every load the game compares the extensions enabled now with the extensions recorded in the save. **Only the entries supplied by extensions that are new to the save are generated**; when there are none, nothing is generated. A save records only the extensions with `save="true"` in their `content.xml` (see [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/#attributes-on-the-root-element)), and only those count here. This has a few consequences:
 
-- **Adding an extension with `save="true"` to a running game works.** Its entries are generated on the first load with the extension enabled, the same way a DLC's stations appear when the DLC is added to an existing game. They are finished as at game start: vanilla's `God_DefaultFinaliseFactory`, which handles only objects with `isgamestartgodentry`, runs for the new factories and logs `Universe generation is complete` at that load.
+- **Adding an extension with `save="true"` to a running game works.** Its entries are generated on the first load with the extension enabled, the same way a DLC's stations appear when the DLC is added to an existing game. They are finished the same way as at game start. Vanilla's `God_DefaultFinaliseFactory`, which handles only objects with `isgamestartgodentry`, runs for the new factories and logs `Universe generation is complete` at that load.
 - **An extension with `save="false"` generates nothing on a load**, not even on the first one; its entries reach new games only.
 - **Base-game entries are not generated again**, and neither are those of extensions the save already knows. The exception is an entry that an extension replaces as a whole, see [Adding entries from an extension](#adding-entries-from-an-extension).
 - **An entry added in an update of an extension is not generated** in saves that already contain the extension. A changed quota or location does not add or move objects there either; existing saves need a script for that, see [Updating an extension](#updating-an-extension). The quota checks of vanilla's economy scripts during play read the current file; see [Production quotas during play](#production-quotas-during-play).
@@ -311,7 +391,7 @@ A gamestart's player `<location>` can name a god entry with `stationgodentry` or
 
 ## Adding entries from an extension
 
-An extension patches `god.xml` with a diff file at the same path, `libraries/god.xml`, as all five DLCs do. The patch syntax is covered in [XML diff patching](/x4/modding-support/anatomy-of-an-extension/xml-diff-patching/).
+An extension patches `god.xml` with a diff file at the same path inside the extension, `extensions/<extension folder>/libraries/god.xml`, next to its `content.xml`, as all five DLCs do. The extension itself is covered in [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/), the patch syntax in [XML diff patching](/x4/modding-support/anatomy-of-an-extension/xml-diff-patching/).
 
 A complete example: an extension named `example_tradeposts` that adds one Argon trading station anywhere in Argon space.
 
@@ -339,10 +419,17 @@ Without `matchextension="false"` this entry would look for Argon space added by 
 
 Points to keep in mind:
 
-- **Ids are unique per section, and the first entry wins.** When two entries share an id, the one that comes first in the patched file is used and the log reports the other one as invalid. An entry added with a plain `<add>` lands after the vanilla one and is rejected. One added with `pos="prepend"` comes first and takes the id over: the vanilla entry is dropped, and the new one belongs to the extension, the same as a whole-entry `replace` below. An extension that wants to change a vanilla entry patches that entry's attributes or child elements in place, or replaces it as a whole.
+- **Ids are unique per section, and the first entry wins.** When two entries share an id, the one that comes first in the patched file is used and the log reports the other one as invalid. A prefix of the extension's own, such as `example_`, keeps new ids apart from vanilla's and other extensions'.
+  - An entry added with a plain `<add>` lands after the vanilla one and is rejected.
+  - One added with `pos="prepend"` comes first and takes the id over: the vanilla entry is dropped, and the new one belongs to the extension, the same as a whole-entry `replace` below.
+  - To change a vanilla entry, an extension patches that entry's attributes or child elements in place, or replaces it as a whole.
 - **Swapping one entry for another** is a `replace` of the whole entry. The Split, Terran and Boron DLCs each replace the shipyard of the first tutorial with their own, and the selector lists every id an earlier DLC may have left there: `<replace sel="/god/gamestart[@ref='x4ep1_gamestart_tutorial1']/stations/station[@id='shipyard_argon_01' or @id='shipyard_split_01']">` in the Terran DLC.
 - **A replaced entry belongs to the extension that replaced it.** Its location needs `matchextension="false"` to keep using vanilla space, even in an exact copy of the vanilla entry, as the DLCs' tutorial shipyards have. And a save the extension is new to generates the entry again with its full quota, on top of the objects the save already has from it: a quota of 2 in a save with one such station gives three. A patch of an attribute or a child element, such as `<replace sel="/god/products/product[@id='tel_engineparts']/quotas/quota/@galaxy">8</replace>` or a `replace` of the entry's whole `<location>`, leaves the entry the base game's: it keeps using vanilla space without `matchextension="false"`, and a load generates nothing from it.
-- **A second production entry for an owner and ware that already have one** can break both on a new game. When the two entries' spaces share sectors and their `faction` values are not written identically, no factory is built from either: the existing entry stops at its first failure and the new one creates nothing. Even the same factions listed in another order count as different. The log shows `FactoryGenerator: No Station generated ...` and `station was not created for zone ...` for the existing entry, nothing for the new one. Generation works when the new entry copies the existing entry's `<location>` attributes as they are, adding only `matchextension="false"`; when the two spaces share no sector; or with another owner. Raising the existing entry's quota adds more of the same factories without a second entry. A load that generates the new entry is not affected.
+- **A second production entry for an owner and ware that already have one** can break both on a new game. Raising the existing entry's quota adds more of the same factories without a second entry. The details:
+  - When the two entries' spaces share sectors and their `faction` values are not written identically, no factory is built from either: the existing entry stops at its first failure and the new one creates nothing. Even the same factions listed in another order count as different.
+  - The log shows `FactoryGenerator: No Station generated ...` and `station was not created for zone ...` for the existing entry, nothing for the new one.
+  - Generation works when the new entry copies the existing entry's `<location>` attributes as they are, adding only `matchextension="false"`; when the two spaces share no sector; or with another owner.
+  - A load that generates the new entry is not affected.
 - **Changes reach new games, and saves the extension is new to** when it has `save="true"`. A save that already contains the extension keeps what was generated at its start.
 - **Gamestart datasets are separate.** An entry meant for the tutorial, the workshop or the Timelines mining galaxy goes into that dataset's section, as the DLCs do with `<add sel="/god/gamestart[@galaxy='timelines_map_mining_1_galaxy_macro']/stations">`.
 
@@ -356,7 +443,9 @@ Version 1.10 of `example_tradeposts` adds a Paranid trading post, `example_trade
   <cues>
     <cue name="AddParanidTradePost" namespace="this">
       <conditions>
+        <!-- once per game: on a new game, or on the first load with this script -->
         <event_cue_signalled cue="md.Setup.Start" />
+        <!-- only in the main galaxy -->
         <check_value value="player.galaxy.macro == macro.xu_ep2_universe_macro" />
       </conditions>
       <delay exact="5s" />
@@ -471,7 +560,7 @@ The messages most likely to come up while writing entries:
 - **A whole-entry `replace` makes the entry the extension's.** It needs `matchextension="false"` to keep using vanilla space, and a save the extension is new to gets the entry's full quota again, on top of the objects it already has. Patching attributes or child elements avoids both.
 - **A duplicate id is an error, and the first entry wins.** An entry appended under a vanilla id is rejected and the vanilla one stays. One added with `pos="prepend"` takes the id over and becomes the extension's entry.
 - **A second production entry for the same owner and ware** in space shared with the existing one stops both from building factories on a new game, unless the new `<location>` copies the existing one's attributes, adding only `matchextension="false"`. A `faction` list in another order already counts as different.
-- **A `<product>` entry only places a production module**; the rest of the station comes from vanilla's finalise scripts. An extension that changes how stations are finished changes god factories too.
+- **A product entry only places a production module**; the rest of the station comes from vanilla's finalise scripts. An extension that changes how stations are finished changes god factories too.
 - **A staged plan gets no modules added.** Vanilla's runtime finaliser leaves it as it is, so the plan needs its own habitation, docks and defence.
 - **A staged station keeps growing.** The owning faction builds its next stages during play, so what generation creates is only its starting size.
 - **A `<stage>` past the plan's last stage builds an empty station**, and nothing is logged.
