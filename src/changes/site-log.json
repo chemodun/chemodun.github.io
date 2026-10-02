@@ -1,5 +1,5 @@
 {
-  "through": "26b20f01a677ffcc451173b867a6edadf97eca32",
+  "through": "843b537272e0a210034b784f99dab7156649ed6c",
   "days": [
     {
       "date": "2026-10-02",
@@ -9,7 +9,8 @@
           "title": "jobs.xml",
           "kind": "new",
           "lines": [
-            "introduce the jobs.xml article"
+            "introduce the jobs.xml article",
+            "Multiple small corrections after in-hame tests"
           ]
         },
         {
@@ -17,7 +18,8 @@
           "title": "god.xml",
           "kind": "",
           "lines": [
-            "reworked for readers new to god.xml"
+            "reworked for readers new to god.xml",
+            "Multiple small corrections after in-hame tests"
           ]
         }
       ]
