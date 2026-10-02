@@ -1,5 +1,5 @@
 {
-  "through": "56bd3b4ec6adeb2a4e835b8aa8d89895a8e6d8e1",
+  "through": "26b20f01a677ffcc451173b867a6edadf97eca32",
   "days": [
     {
       "date": "2026-10-02",
@@ -10,6 +10,14 @@
           "kind": "new",
           "lines": [
             "introduce the jobs.xml article"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/god-xml/",
+          "title": "god.xml",
+          "kind": "",
+          "lines": [
+            "reworked for readers new to god.xml"
           ]
         }
       ]
