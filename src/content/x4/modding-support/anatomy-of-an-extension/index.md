@@ -170,7 +170,7 @@ A file in an extension does **not** simply overwrite the game file at the same p
 
 **A file with an ordinary root element contributes its contents to a collection gathered from every source.** It does not erase what the game or another extension put there.
 
-That second rule is easy to disbelieve, so here is the proof. The Boron expansion ships `libraries/ships.xml`, exactly the path the game's own ship table occupies. Its file is 305 lines and contains only Boron ships. The game's own is 2000 lines and contains everything else. Both are in effect at once, and Argon ships are not missing from a game with the Boron DLC installed. The whole file added its entries; it did not replace anything.
+That second rule is easy to disbelieve, so here is the proof. The Boron expansion ships `libraries/ships.xml`, exactly the path the game's own ship table occupies. Its file contains only Boron ships. The game's own contains everything else. Both are in effect at once, and Argon ships are not missing from a game with the Boron DLC installed. The whole file added its entries; it did not replace anything.
 
 ### Which form to use
 
@@ -182,9 +182,9 @@ The distinction that decides it is not the folder and not the file. It is what t
 
 The shipped expansions divide almost perfectly along that line. `ships.xml`, `icons.xml`, `loadouts.xml`, `people.xml`, `constructionplans.xml` and the rest of the add-only tables are whole files in every DLC. `wares.xml`, `factions.xml`, `god.xml`, `diplomacy.xml`, `themes.xml` and the other tables that expansions must reach into are patches in every DLC.
 
-A few files appear in both forms across different expansions, and those are the ones that confirm the rule rather than muddying it. `ego_dlc_pirate` ships 40 new jobs as a whole `libraries/jobs.xml`; `ego_dlc_boron` adds two jobs with a patch. Both work, because both are only adding.
+A few files appear in both forms across different expansions, and those are the ones that confirm the rule rather than muddying it. `ego_dlc_pirate` ships its jobs as a whole `libraries/jobs.xml`; `ego_dlc_boron` adds its jobs with a patch. Both work, because both are only adding.
 
-Why `wares.xml` is always a patch shows the other half. The Boron expansion's version performs 72 `add` operations, and their targets are vanilla wares:
+Why `wares.xml` is always a patch shows the other half. The Boron expansion's version is a series of `add` operations, and almost all of them target vanilla wares:
 
 ```xml
 <add sel="/wares/ware[@id='ship_gen_m_tugboat_01_a']">
@@ -326,7 +326,7 @@ This needs a dependency to be reliable. Without one, there is no guarantee the t
 
 ### When the other extension's file is itself a patch
 
-Mirroring the path works when the file being aimed at holds data of its own, as that ship macro does. It does not work when that file is itself a `<diff>`, and that is not a rare case: 168 of the 573 XML files in the shipped expansions are patches.
+Mirroring the path works when the file being aimed at holds data of its own, as that ship macro does. It does not work when that file is itself a `<diff>`, and that is not a rare case: a large share of the XML files in the shipped expansions are patches.
 
 Keep the same expansion and move to its ware table, and this is what is waiting at `extensions/ego_dlc_split/libraries/wares.xml`:
 
