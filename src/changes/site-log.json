@@ -1,6 +1,19 @@
 {
-  "through": "addaf6daf59d46af83e14689f3045c714869dbaa",
+  "through": "56bd3b4ec6adeb2a4e835b8aa8d89895a8e6d8e1",
   "days": [
+    {
+      "date": "2026-10-02",
+      "pages": [
+        {
+          "path": "/x4/modding-support/jobs-xml/",
+          "title": "jobs.xml",
+          "kind": "new",
+          "lines": [
+            "introduce the jobs.xml article"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-10-01",
       "pages": [
