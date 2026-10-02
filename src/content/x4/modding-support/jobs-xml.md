@@ -1,0 +1,564 @@
+---
+title: jobs.xml
+description: How libraries/jobs.xml keeps the universe's NPC ships in place - the job format, quotas and locations, how the job engine populates, replaces and retires job ships, what an extension needs to add jobs, and the script actions, events and properties that work with them.
+order: 9
+---
+
+# jobs.xml
+
+Most NPC ships in X4 belong to a **job**. Traders, miners, patrols, police, carriers with their escorts, construction vessels, Xenon and Kha'ak raiders and the mass traffic around stations are all defined in `libraries/jobs.xml`. Each job says what ship to create, which orders it gets, how many of them the universe should have, and where. A part of the game called the **job engine** keeps the active jobs near their quota for the whole game: it creates the ships at the start, replaces lost ones, except for jobs with `rebuild="false"`, and retires ships when a job is above its maximum.
+
+This article covers the format, what the game does with each part of a job and when, and the script side. It describes version 9.00.
+
+<a id="toc"></a>
+
+## Contents
+
+<!-- xwiki: toc start="2" depth="3" -->
+
+## How the job engine works
+
+The job engine takes the jobs **in turn**. Every 5 seconds of game time it processes one job, the next in a fixed rotation over all jobs without `<time>`, and in the same step every job with `<time>` that is due; see [Timing and expiry](#timing-and-expiry). Inactive and mass traffic jobs take their turn in the rotation too, so with all DLCs more than 900 jobs share it, and a job without `<time>` comes up about once every 75 to 80 minutes of game time. Subordinate jobs are not in the rotation; see [Subordinates](#subordinates).
+
+When an active job comes up, the engine counts its ships in the universe and its waiting ships, compares the count with the job's quota and acts on the difference in that one pass:
+
+1. **Missing ships are created**, all of them from that one pass, in spaces that pass the job's location filters; in a running game the engine creates up to 10 of them every 5 seconds. By default they are created directly in space. A job with `buildatshipyard="true"` gets its first population in space too, but after that a missing ship is created as a **waiting** ship: a complete ship with its job, loadout and crew, but not yet in the universe. The owning faction's scripts order it from a shipyard that builds for the faction, and it enters the universe when that build is finished. See [How ships appear](#how-ships-appear).
+2. **Ships far above the quota are retired.** A job with more ships than its `maxgalaxy` quota sends some of its old ships away; see [Retiring ships](#retiring-ships).
+
+On a new game every active job without `<time>` is populated right at the start, which is why the universe is full of ships from the first minute; a job with `<time>` gets its ships at its first scheduled pass. A job with `rebuild="false"` is populated only at the start, and not refilled later; see [Modifiers](#modifiers). Loading a save processes the jobs once more; see [Loading a save](#loading-a-save).
+
+The ships of a job are ordinary ships. Each one runs the orders the job defines, usually a single default order such as `TradeRoutine`, `MiningRoutine` or `Patrol`. Commanders get their subordinates from other jobs, defined in the commander's `<subordinates>`.
+
+Scripts can also **request** a job ship for a purpose. Vanilla's faction economy asks for extra miners, traders and tugs where a ware is short, NPC shipyards, wharfs and equipment docks ask for their own traders, and stations for their own miners. A requested ship is created as a waiting ship regardless of the job's quota and state, and counts towards the quota from then on, so a job can exceed its quota this way.
+
+A gamestart can switch the job engine off with `<jobs enabled="false"/>` inside `<universe>` in `libraries/gamestarts.xml`. Vanilla does that for all `tutorial_*` starts, `x4ep1_gamestart_tutorial1` and `x4ep1_gamestart_tutorial2`, `x4ep1_gamestart_workshop`, three of the test starts and `thevoid`, and the Timelines DLC does it for all 40 of its starts, the scenarios and the hub, in its own `libraries/gamestarts.xml`. `<masstraffic enabled="false"/>` in the same place switches off mass traffic only.
+
+[↑ Contents](#toc)
+
+## The file
+
+### Layout
+
+The file has no schema of its own: `jobs.xml` points at `libraries/libraries.xsd`, which defines it completely. The root `<jobs>` holds one dataset of `<job>` elements, and any number of gamestart datasets can follow it:
+
+```xml
+<jobs>
+  <job id="..."> ... </job>
+  <job id="..."> ... </job>
+
+  <gamestart ref="some_gamestart_id"> <job id="..."> ... </job> </gamestart>
+  <gamestart galaxy="some_galaxy_macro"> ... </gamestart>
+</jobs>
+```
+
+The game reads one dataset only: the first `<gamestart ref="...">` whose `ref` matches the current gamestart, failing that a `<gamestart galaxy="...">` that matches the current galaxy macro, and failing both the root dataset; the schema calls the root "default job entries if no gamestart-specific job dataset found". **Vanilla has no gamestart datasets in any jobs.xml**: every job of the base game and the DLCs sits in the root dataset.
+
+The base game defines 604 jobs. The DLCs add their own: the Split DLC 227, the Terran DLC 171, the Boron DLC 120, the Pirate DLC 39 and the Timelines DLC 28.
+
+### A job, part by part
+
+A typical job, a frigate patrol of the base game with fighters as its escort:
+
+```xml
+<job id="argon_frigate_patrol_m_sector_exp" name="{20204,2901}" friendgroup="argon_defence">
+  <modifiers commandeerable="false"/>
+  <orders>
+    <order order="Patrol" default="true">
+      <param name="range" value="class.sector"/>
+    </order>
+  </orders>
+  <category faction="argon" tags="[military, frigate, fleetphase_1]" size="ship_m"/>
+  <quota galaxy="35" maxgalaxy="90" sector="1"/>
+  <location class="galaxy" macro="xu_ep2_universe_macro" faction="argon" relation="self" comparison="exact"/>
+  <environment buildatshipyard="true"/>
+  <ship>
+    <select faction="argon" tags="[military, frigate]" size="ship_m"/>
+    <loadout>
+      <quantity exact="1.0"/>
+      <quality exact="0.99">
+        <variation exact="0.6"/>
+      </quality>
+    </loadout>
+    <owner exact="argon" overridenpc="true"/>
+  </ship>
+  <subordinates>
+    <subordinate job="argon_fighter_escort_s_frigate"/>
+  </subordinates>
+</job>
+```
+
+The child elements can come in any order, except that `<ship>` and `<subordinates>`, or `<masstraffic>`, come last:
+
+| Element | What it sets | Details |
+| --- | --- | --- |
+| `<ship>` | the ship to create, with the same content as the `create_ship` script action | [The ship](#the-ship) |
+| `<subordinates>` | jobs whose ships serve this job's ships as subordinates | [Subordinates](#subordinates) |
+| `<masstraffic>` | a mass traffic ship instead of a real one | [Mass traffic](#mass-traffic) |
+| `<orders>`, `<order>` | the orders of a new ship | [Orders](#orders) |
+| `<quota>`, `<quotas>` | how many ships, and where at most | [How many: quotas](#how-many-quotas) |
+| `<location>` | which spaces the ships work in | [Where: locations](#where-locations) |
+| `<environment>` | how ships enter the universe | [How ships appear](#how-ships-appear) |
+| `<modifiers>` | `commandeerable`, `rebuild`, `subordinate`, `invincible` | [Modifiers](#modifiers) |
+| `<category>` | faction, tags and size by which scripts find the job | [Category tags](#category-tags) |
+| `<basket>` | the default ware basket for trading and mining | [Category tags](#category-tags) |
+| `<time>` | a schedule of its own instead of the rotation | [Timing and expiry](#timing-and-expiry) |
+| `<expirationtime>` | when a ship is retired | [Timing and expiry](#timing-and-expiry) |
+| `<encounters>` | a player encounter type | [Events](#events) |
+| `<task>`, `<tasks>` | the AI task of a mass traffic ship | [Mass traffic](#mass-traffic) |
+| `<commander>` | an object macro the ships are based at; unused in vanilla | [Where: locations](#where-locations) |
+| `<position>` | a place in the zone, used with `zone="true"`; unused in vanilla | [How ships appear](#how-ships-appear) |
+
+### Attributes
+
+| Attribute | Meaning |
+| --- | --- |
+| `id` | Unique id; scripts and saves refer to the job by it. |
+| `name` | Job name, a text reference; vanilla uses page 20204, "Jobs", such as `{20204,2901}`. Scripts read it as `jobname`. It is also part of the ship's displayed name, ahead of the ship type and variation. |
+| `startactive` | `false` makes the job start inactive; see [Inactive jobs](#inactive-jobs). Defaults to `true`. |
+| `disabled` | `true` skips the job completely, "as if commented out". Vanilla disables seven jobs this way. |
+| `friendgroup` | Jobs with the same friend group count ships of each other; see [Friend groups](#friend-groups). |
+| `activefriendsaffectquotas` | Whether ships of active jobs of the friend group count towards this job's quota. Defaults to `false`. Unused in vanilla. |
+| `fullname` | Whether the ship's name may include its ship type and variation. Defaults to `true`. Unused in vanilla. |
+| `ignorecommanderwares` | Skips the check that the job's basket wares match the production wares of the station given by `<commander>`. Defaults to `false`. Unused in vanilla. |
+| `description`, `comment` | Free text. |
+
+[↑ Contents](#toc)
+
+## The ship
+
+### Ship definition
+
+`<ship>` holds the same content as the `create_ship` script action: a `<select>` with `faction`, `tags` and `size` picks a ship macro from `libraries/ships.xml` (a `macro`, `ref` or `group` attribute on `<ship>` itself can pick it instead, as for [mass traffic](#mass-traffic); no vanilla `<ship>` job does that), `<loadout>` sets how fully it is equipped, and `<owner exact="..." overridenpc="true"/>` sets the owner. Every vanilla job uses `overridenpc="true"`. A `<cargo>` (98 vanilla jobs), `<units>` with drones (14) and a `<pilot>` (2) can follow.
+
+The `<wares>` under `<cargo>` are skipped when the job engine re-creates a ship, so a replacement starts without them. `<wares ... onjobrespawn="true"/>` processes them every time; the schema puts it as "By default cargo nodes are skipped for ships that are RE-spawned by the Job Engine".
+
+### Orders
+
+`<orders>` lists the orders a new ship gets, each `<order order="..." default="true">` with `<param name="..." value="..."/>` children. The order ids are those of the AI scripts in `aiscripts/`, and the parameters those the order declares. Every vanilla `<ship>` job gives exactly one order, as the default order; mass traffic jobs have a `<task>` instead. A single `<order>` outside `<orders>` also works, as in the Boron DLC's `argon_construction_m_boron`; when both exist, `<orders>` wins. The most used orders are `TradeRoutine` (294 jobs), `Patrol` (243), `MiningRoutine` (234), `Escort` (138), `Middleman` (48) and `DeployStaticDefenseStrategy` (44).
+
+### Subordinates
+
+A commander job lists its escorts and other subordinates in `<subordinates>`:
+
+```xml
+<subordinates>
+  <subordinate job="argon_destroyer_escort_l_phase2" assignment="defence"/>
+  <subordinate job="argon_resupplier_escort_xl" assignment="supplyfleet" group="10"/>
+</subordinates>
+```
+
+- **`job`** names the subordinate job. That job carries `<modifiers subordinate="true"/>`, a `wing` quota and `startactive="false"`:
+
+  ```xml
+  <job id="argon_fighter_escort_s_frigate" name="{20204,2901}" startactive="false">
+    <orders>
+      <order order="Escort" default="true">
+        <param name="formation" value="formationshape.pointguard"/>
+        <param name="overrideformationskill" value="true"/>
+      </order>
+    </orders>
+    <quota wing="4"/>
+    <category faction="argon" tags="[military, fighter]" size="ship_s"/>
+    <location class="galaxy" macro="xu_ep2_universe_macro"/>
+    <environment buildatshipyard="true"/>
+    <modifiers subordinate="true"/>
+    <ship> ... </ship>
+  </job>
+  ```
+
+  Its `<quota wing="...">` is the number of ships of that job per commander. `variation` in the same `<quota>` (allowed only with `wing`) varies it from commander to commander, from `wing` minus `variation` to `wing` plus `variation` minus one: `wing="3" variation="1"` gives two or three ships.
+- **`assignment`** is the subordinate assignment: vanilla uses `attack`, `defence` and `supplyfleet`; the schema lists 15, among them `interception`, `positiondefence`, `mining` and `trade`.
+- **`group`** is the subordinate group, 1 to 10. Subordinates of the same group need the same assignment; without `group` the game picks a free one.
+- **`rebuild`** decides whether lost subordinates of that entry are replaced. Defaults to `true`.
+
+A subordinate job is not processed on its own. Its ships are created when the engine creates a commander directly in space: it then fills every `<subordinate>` entry of that commander at once, next to the commander, in space. Lost subordinates are replaced by scripts: vanilla's `RestockSubordinates` order (`aiscripts/order.restock.subordinates.xml`) has the missing ones built at a shipyard; see [Waiting ships](#waiting-ships). A commander built at a shipyard gets its subordinates the same way: in a test, the escorts of two new frigates left the same shipyard two minutes after them. Subordinates that lost their commander joined a new commander of the same job about a minute after it entered the universe. Until then, the `Escort` order gives an escort whose commander was destroyed two hours before it expires, and `RestockSubordinates` clears that when a commander takes the escort over.
+
+A subordinate job can list subordinates of its own: the destroyers that escort an Argon carrier have frigates as their own escort, or in fleet phase 2 another destroyer. Every vanilla subordinate job starts inactive; the schema says `startactive` "should not be true when defining wing quota", and the log warns that an active job with a `wing` quota "may result in double the ships!". In a test, an active job with `wing="2"` under one commander got its two escorts, and two more ships of its own with no commander, which did not run the job's `Escort` order.
+
+[↑ Contents](#toc)
+
+## How many: quotas
+
+`<quota>` sets the numbers the job engine works towards:
+
+| Attribute | Meaning |
+| --- | --- |
+| `galaxy` | Ships in the whole galaxy; the number the job engine fills for a job whose location is the galaxy. Requested ships may exceed it. |
+| `maxgalaxy` | Above this number the engine retires old ships; see [Retiring ships](#retiring-ships). Defaults to twice `galaxy`, and is not lower than `galaxy`. |
+| `cluster`, `sector`, `zone` | At most this many ships per cluster, sector or zone when the engine picks where to create a ship. |
+| `station` | Mass traffic ships per station. |
+| `wing` | Ships per commander, for a subordinate job. |
+| `variation` | Variation of the `wing` count. |
+
+The number the engine fills depends on the class of the job's `<location>`: `galaxy` for the galaxy; `cluster` for a cluster, or `galaxy` without it; `sector` for a sector, or else `cluster`, or else `galaxy`; for a zone `zone`, then `sector`, `cluster` and `galaxy` in that order. A job whose location is the galaxy therefore needs a `galaxy` quota: vanilla's `loanshark_police_common`, with `<quota sector="1"/>` and a galaxy location, gets no ships.
+
+`<quota galaxy="35" maxgalaxy="90" sector="1"/>` fills up to 35 frigates, at most one per sector. The sectors that count are those that pass the location filters: base-game sectors, as `matchextension` defaults to `true`, owned by Argon or by a player at +30 with Argon; see [Where: locations](#where-locations). With 35 such sectors available, every one gets a frigate; with fewer, the job stays below its quota until the faction holds more sectors. That is the design described at the top of vanilla's file: the galaxy quota is the absolute limit, and a job whose galaxy quota exceeds the faction's starting space lets the faction cover more space as it expands. Vanilla marks such jobs with `_exp` in the id.
+
+`<quotas>` holds several `<quota>` elements, each with an optional `gamestart` attribute, for numbers that depend on the gamestart; no vanilla job uses it.
+
+### Friend groups
+
+Jobs with the same `friendgroup` count each other's ships. A job counts the ships, live and waiting, of every **inactive** job of its group as its own. Ships of **active** jobs of the group count only when the job has `activefriendsaffectquotas="true"`. Vanilla groups jobs that do the same work for a faction, such as `argon_defence` or `argon_factionlogic`, 44 groups over 121 jobs.
+
+### Retiring ships
+
+When a pass finds a job with more ships than its `maxgalaxy` quota, the engine retires some of the job's ships that are older than `minage`. It picks one at random, cancels its orders and gives it the `MoveDie` order, so the ship leaves and is removed, and repeats while more than `maxgalaxy` times `maxfactor` such old ships remain. Both values sit in `libraries/parameters.xml`: `<jobs><cleanup maxfactor="1.5" minage="10800"/>`, so only ships older than three hours are retired. A job gets above `maxgalaxy` through requested ships, through ships of inactive jobs of its [friend group](#friend-groups), or when an update lowers its quota.
+
+A job located in a cluster, sector or zone without a `galaxy` or `maxgalaxy` quota has a `maxgalaxy` of 0: once it reaches its quota, every pass retires its ships older than three hours.
+
+### Scaling
+
+`libraries/parameters.xml` also holds a commented-out `<factor galaxy="2.0" cluster="2.0" sector="2.0" zone="2.0" />` in `<jobs>`, which `libraries/parameters.xsd` describes as a factor of job quotas. A gamestart can scale the quotas per faction or tag with `<jobs><quotas><quota faction="..." tag="..." factor="..."/></quotas></jobs>` in its `<universe>`; no vanilla gamestart does.
+
+[↑ Contents](#toc)
+
+## Where: locations
+
+`<location>` describes the spaces the job's ships work in. Each new ship gets a **main sector** and **main zone** in the space the engine picked for it, and its orders read them, for example as the patrol or mining range.
+
+```xml
+<location class="galaxy" macro="xu_ep2_universe_macro" faction="argon" relation="self" comparison="exact"/>
+```
+
+- **`class` and `macro`** set the space to look in. 1060 vanilla jobs have `class="galaxy"`, all but one with the galaxy macro `xu_ep2_universe_macro` (the Timelines DLC's `xenon_terraformer_patrol_l_matrix` names `cluster_708_macro`); others name one sector, cluster or zone by macro. Mass traffic uses station classes and `sector`; see [Mass traffic](#mass-traffic).
+- **`faction`, `relation` and `comparison`** filter the spaces by the relation of their owner to the faction: `relation="self" comparison="exact"` means space owned by the faction, or by a faction at the same top relation level with it, `relation="ally" comparison="ge"` adds space owned by its allies. **A player at +30 with the faction is at that top level**: in a save where the player stood at +30 with Argon, two of the three patrols of the [example](#adding-jobs-from-an-extension) were created in player-owned sectors. `negatefaction="true"` turns the faction filter around.
+- **`tags` and `excludedtags`**: space tags that must all match, and tags to avoid, such as `excludedtags="boronborder"`.
+- **`regionbasket`**: only spaces with a region yielding the wares of that basket, such as `minerals`, `gases` or `ice`; vanilla's miners use it.
+- **`hasgravidarregion`**: only sectors with a region that obscures the gravidar.
+- **`policefaction`, `stationfaction`, `factionrace`, `stationfactionrace`**, each with a `negate...` twin, filter by police faction, by the owners of stations in the space, and by primary race. **`stationtype`**, such as `[wharf, shipyard]`, works together with `stationfaction` and `stationfactionrace` and narrows the stations they look at; vanilla uses it only beside `stationfaction`. Child elements `<factions>`, `<policefactions>`, `<stationfactions>`, `<factionraces>`, `<stationfactionraces>` add further conditions of the same kinds.
+- **`<factionlicences>`**: `<factionlicence faction="..." licence="..." negatefactionlicence="true"/>` keeps the ships out of space that requires a licence. The Terran DLC adds this to 13 jobs to keep them out of the Terran core, 10 of the base game and 3 of the Split DLC: "Disable galaxy-wide jobs in terran space (added by base game)".
+- **`<economy>`, `<security>`, `<sunlight>`**: value ranges of the space.
+
+`<commander macro="..."/>`, unused in vanilla, limits the job to zones with an object of that macro and bases each new ship there. With a `<basket>`, that object has to share a ware with the basket, unless the job has `ignorecommanderwares="true"`.
+
+### `matchextension`
+
+`matchextension` defaults to `true`: a base-game job uses only base-game space, and a job added by an extension only space added by that same extension. 45 vanilla jobs set `matchextension="false"` to work everywhere, among them the scouts, police and construction vessels of the base game and some Xenon patrols; the Terran DLC keeps the scouts and Xenon patrols among them out of its core sectors with the licence filters above. **An extension job meant for vanilla space needs `matchextension="false"`.**
+
+### Allowing or blocking a space
+
+A space can be closed to jobs in the map: `<area jobs="false">` in `libraries/mapdefaults.xml`. The Timelines DLC closes seven of its sectors this way and opens them with `set_space_jobs_allowed allow="true"` as the story progresses. `reset_space_jobs_allowed` resets a space to the default. A job whose location names one sector (`class="sector"` with a `macro`) is not affected by this setting. A space can also be reserved for the jobs of its own extension with `<area extensionexclusivejobs="true">` in the map; the Boron DLC reserves nine of its spaces this way in its `libraries/mapdefaults.xml`, so jobs of the base game and other extensions do not use them, even with `matchextension="false"`. `set_space_job_exclusivity` does the same from a script, for a space and its children; vanilla does not use it.
+
+[↑ Contents](#toc)
+
+## How ships appear
+
+`<environment>` decides how the job's ships enter the universe:
+
+| Attribute | Meaning |
+| --- | --- |
+| `buildatshipyard` | `true`: after the job's first population, missing ships are built at a shipyard that builds for the owner. Defaults to `false`: every ship is created directly in space. Vanilla sets it on 1119 jobs, `true` on 1081 and `false` on 38. |
+| `preferbuilding` | With `buildatshipyard="true"`: the first population is built at shipyards too, instead of being created in space. 59 vanilla jobs. |
+| `gate` | The ship is created at a random point in its zone, not at a station. Vanilla sets it on all 38 jobs with `buildatshipyard="false"`: jobs of the Kha'ak, the Scale Plate Pact, the Buccaneers and the Hatikvah, among them Hatikvah's free miners. The last three also have jobs with `buildatshipyard="true"`, 24 in all, such as Buccaneer patrols and Hatikvah mining fleets. |
+| `chancedocked` | Chance in percent that a ship without a commander starts docked at a station in its zone that is not hostile to it. An order that leaves the dock, such as `Patrol`, undocks it within seconds. No effect with `gate` or `zone`. Unused in vanilla. |
+| `spawninsector`, `spawnoutofsector` | Create the ship only in zones near the player, or only in zones away from the player. Away includes the far part of the player's own sector: in a test, `spawninsector` ships were created about 30 to 60 km from the player, `spawnoutofsector` ships 150 to 200 km away in the same sector. Setting both logs a warning, and the job gets no ships. Unused in vanilla. |
+| `zone` | The ship is created at the job's `<position>` in its zone, or at a random point without one. Unused in vanilla. |
+
+Without `gate` or `zone`, an L or XL ship created after the first two minutes of a game tries to start at a station dock; other ships start at a random point in the zone. Subordinates start next to their commander.
+
+**The schema misspells `spawnoutofsector` as `spwanoutofsector`.** The game reads `spawnoutofsector`; an attribute written as the schema has it is ignored, and the log reports `The key name "spwanoutofsector" is not recognized in lookup JobDBXML`.
+
+Building at a shipyard runs through the scripts. `Job_Helper` in `md/job_helper.xml` runs for every faction with faction logic, the 23 factions with a manager in `md/factionlogic.xml` (not the Kha'ak), every 20 to 40 seconds. It finds the faction's waiting ships, finds shipyards that can build for the faction and have free build slots, ranks them by price and by distance to the ship's future area, that is the cluster of its commander or of its main sector, and adds a build order to one picked at random, weighted towards the best. The build is free, unless the shipyard belongs to the player: then the faction pays the shipyard's price. When the build is finished, the shipyard's ship trader script (`aiscripts/build.shiptrader.xml`) hands the ship to the job engine with `activate_waiting_job_ship`. A faction without a shipyard that can build the ship gets no replacement, and waiting ships of a faction without faction logic are not built this way.
+
+[↑ Contents](#toc)
+
+## Modifiers
+
+`<modifiers>` holds four flags:
+
+- **`commandeerable`**: vanilla's faction scripts and missions may take the ship away from its job with `commandeer_object`: for a faction goal such as an attack or the defence of a sector, to carry a ware a sector lacks, or as a station's miner; see [Category tags](#category-tags). They find such ships with `find_ship_by_true_owner ... commandeerable="true"` or `find_ship ... commandeerable="true"`, some filtered by job tags and some not; `get_suitable_job ... onlycommandeerable="true"` limits the jobs they request new ships from to commandeerable ones. Defaults to `false`.
+- **`rebuild`**: defaults to `true`. With `false` the job is populated only at the start: on a new game, or on the first load of a save with the job's extension. A `rebuild="false"` job with `<time>` is populated on a new game only if its first scheduled time has already come at the start, as with `start="0"`; without `start` it gets no ships. One added by an update of an extension that the save already knows gets none on the load. After that the engine does not refill it, and activating it with `set_job_active` creates no ships either; new ships come only from requests. Vanilla sets it on 322 jobs: 274 traders and miners of the faction economy (tagged `factionlogic` and `freighter`, among them the Boron DLC's `argon_construction_m_boron`), 46 station traders and miners that stations request, `trinity_refinedgas_trader_l` and `dummy_job`. A `<subordinate>` entry that names a `rebuild="false"` job needs `rebuild="false"` itself, or the log reports an error.
+- **`subordinate`**: the job's ships are subordinates of other job ships, and the job is not processed on its own; see [Subordinates](#subordinates). A job listed in another job's `<subordinates>` needs it; the log asks "Missing 'subordinate' modifier flag?" otherwise.
+- **`invincible`**: has no effect on the ships of a `<ship>` job. Unused in vanilla.
+
+[↑ Contents](#toc)
+
+## Timing and expiry
+
+`<time interval="..." start="..."/>` takes a job out of the rotation and gives it a schedule of its own, in seconds of game time. The engine processes the job first when the game time reaches `start`, then each time 75 % to 125 % of `interval` has passed since the last time. Without `start`, the first time is a random game time between 0 and `interval`; the schema says the interval without variation is used, but in a test six jobs with `interval="600"` and no `start` were first processed between 60 and 577 seconds into a new game. Both are game times, so a timed job added to a game that is already older is processed within seconds. Timed jobs are checked every 5 seconds, so a shorter interval acts as 5 seconds.
+
+Vanilla uses it on 79 jobs. 60 of them are the deep-space free miners, with `interval="1"` for the single miners, `600` for small groups and `3600` for large groups. The other 19 are patrols, scavengers, raiders, plunderers and intervention fleets: Scale Plate Pact and Buccaneer jobs of the base game, Scale Plate Pact jobs and a Boron scout of the Boron DLC, Court of Curbs destroyers and Fallen Split raiders of the Split DLC, and Terran intervention fleets and Yaki raiders of the Terran DLC, such as `yaki_raider_m_sector` with `start="3600" interval="60"`: no ships in the first hour of a game, then a pass every minute.
+
+`<expirationtime min="..." max="..."/>` gives each new ship of the job a limited life, a random time between `min` and `max` seconds. After it, the ship's `jobexpired` property is true. Vanilla's routine orders check it, `TradeRoutine`, `MiningRoutine`, `Patrol`, `Escort`, `ProtectShip`, `Middleman`, `Recon` and `Plunder`, as do the idle and enemy search scripts, and give an expired ship the `MoveDie` order; `SalvageRoutine` gives it the `RecycleDefault` order instead. They check only between their own steps, so an expired `Patrol` ship can go on patrolling for 10 minutes or more. Away from the player, `MoveDie` removes the ship at once, without an explosion; near the player, the ship flies on until the player moves away. The job engine replaces it like any lost ship. In vanilla only `dummy_job` uses it; see [Removing a job](#removing-a-job).
+
+[↑ Contents](#toc)
+
+## Category tags
+
+`<category faction="..." tags="[...]" size="..."/>` is how scripts find jobs. `get_suitable_job` returns the jobs that match a faction, tags, a ship size and a ware, and vanilla's scripts request or activate job ships through it. **The tags decide which vanilla scripts use a job**:
+
+| Tags | Used by |
+| --- | --- |
+| `factionlogic` with `miner`, `trader` or `tug` | The faction economy (`md/factionlogic_economy.xml`) requests a ship from such a job for a sector that lacks a ware the job's `<basket>` contains. |
+| `factionlogic` with `freighter` | The faction economy takes a commandeerable ship of such a job away from its job to carry a ware that a sector lacks, for 1.5 hours, or 3 hours for a priority ware. |
+| `stationtrader` | The ship trader of an NPC shipyard, wharf or equipment dock (`aiscripts/build.shiptrader.xml`) requests station traders of the size it needs. |
+| `stationminerliquid`, `stationminersolid` | A station's trade script (`aiscripts/trade.station.xml`) takes a free commandeerable miner of such a job nearby as its own, or requests one. |
+| `staticdefense` | The faction's static defence script (`md/factionlogic_staticdefense.xml`) requests ships of such a job for a sector. Vanilla's 44 such jobs have `galaxy="0"`, so they get ships only by request. |
+| `fleetphase_1`, `fleetphase_2` | Fleet evolution in `md/job_helper.xml` swaps a faction's phase 1 jobs for its phase 2 jobs; see [Inactive jobs](#inactive-jobs). |
+| `military` or `scout` with `factionlogic` | Faction goals request ships from such jobs by size, and take commandeerable ships of them for an attack or the defence of a sector. |
+
+Some faction goals and missions also take commandeerable ships of a faction without looking at their tags, by size or purpose only; see [Modifiers](#modifiers). A job with none of these tags that is not commandeerable runs on its quota only. DLC stories pick their own factions' jobs by further tags, such as `colonial`, `colonialpolice` and `terrandefence`.
+
+`<basket basket="..."/>` names a ware basket from `libraries/baskets.xml`. It is the default for the ship's cargo, the ship's `warebasket` property returns it, `TradeRoutine` takes it as the default list of wares to trade, and `get_suitable_job ware="..."` matches against it.
+
+[↑ Contents](#toc)
+
+## Mass traffic
+
+The small craft around stations, the police and the criminals in station traffic are mass traffic: lightweight objects rather than full ships. A mass traffic job has `<masstraffic>` in place of `<ship>`:
+
+```xml
+<job id="masstraffic_argon_police">
+  <task task="masstraffic.police"/>
+  <location class="station" policefaction="argon"/>
+  <quota station="5"/>
+  <masstraffic ref="masstraffic_argon_police"/>
+</job>
+```
+
+- `<masstraffic>` takes a `ref`, `group` or `macro` like `<ship>`; with more than one, `ref` wins over `group`, and `group` over `macro`. `relaunchdelay` and `respawndelay` set the minimum delay in seconds after a ship arrives or is destroyed before a new one appears (vanilla: 60 and 300 on 8 jobs); both default to 0.
+- `<task>` names the AI task the craft performs, `masstraffic.generic` or `masstraffic.police` in vanilla. The schema also lists `entitytype` on `<task>` and `<commander>`; the game does not read it, and the log reports `The key name "entitytype" is not recognized in lookup JobDBXML`.
+- The location classes are station parts: `station`, `habitation`, `dockarea`, `pier`, `storage`, `production`, `buildmodule` and `defencemodule`, plus `class="sector"` for the seven civilian traffic jobs of whole sectors, with `<quota sector="1000"/>`, and one effect zone job with `class="zone"`. The quota is per station (`station`), per sector (`sector`) or per zone (`zone`).
+
+Mass traffic jobs take their turn in the rotation, but the craft come from the game's separate mass traffic system, which reads their quotas. `add_mass_traffic_quota` adds a quota to a zone's mass traffic from a script: an `amount` of craft from a `job`, a `macro` or a ship `group`, optionally between a `start` and an `end` station and from `starttime` to `endtime`; without an end time it runs until `stop_mass_traffic_quota`. A gamestart switches mass traffic off with `<masstraffic enabled="false"/>`.
+
+[↑ Contents](#toc)
+
+## When jobs are used
+
+### New game
+
+Every active job of the chosen dataset without `<time>` is populated at the start, in space, or as waiting ships for jobs with `preferbuilding="true"`. A job with `<time>` is populated at its first scheduled pass, the same way: in space, or as waiting ships with `preferbuilding="true"`; with `interval="60"` and no `start`, that came about a minute in. The start is the only population a `rebuild="false"` job gets in a new game, so one with `<time>` gets none unless its first scheduled time has already come by then: with `start="0"` it is populated at the start.
+
+### Loading a save
+
+A save stores the state of every job: whether it is active, where that differs from its `startactive`; whether its first population is still pending; for a job with `<time>`, when it was last processed; its waiting ships and its open requests. **The definitions themselves are read from the files on every start.** So:
+
+- **Every load processes the jobs once.** Missing ships of jobs without `<time>` are created during the load, without waiting for their turn in the rotation.
+- **The first load with a new extension** populates the extension's active jobs at once, `rebuild="false"` jobs included, and those with `<time>` once the save's game time has passed their first scheduled time.
+- **A job added in a later version of an extension the save already knows** is populated during the load, in space, or as waiting ships with `preferbuilding="true"`. A `rebuild="false"` job added this way gets no ships.
+- **Changed quotas, orders and locations apply to running games.** The engine works towards the current quota from the load on, so a raised quota leads to more ships, built at shipyards for a job with `buildatshipyard="true"`. Ships that already exist keep the orders and loadout they were created with. A lowered quota does not replace losses until the job is below the new quota. It removes ships only when the count ends up above the new `maxgalaxy`: then ships older than three hours are retired; see [Retiring ships](#retiring-ships).
+- **A changed `startactive`** applies to running games wherever the job's state still matches its old `startactive`.
+
+### Removing a job
+
+A job disappears from a running game when an update of its extension drops it, or when its extension is removed or disabled. On the next load the job's saved state is dropped. Its ships stay, moved to vanilla's `dummy_job`, an inactive job with `<expirationtime min="60" max="3600"/>`: each ship expires within one hour and is removed the next time its order script checks `jobexpired`; see [Timing and expiry](#timing-and-expiry).
+
+### Inactive jobs
+
+`startactive="false"` makes a job start inactive. An inactive job is not populated, and its ships are not replaced. 408 vanilla jobs start inactive, among them all subordinate jobs, the `fleetphase_2` jobs, and jobs that the story activates.
+
+The MD action `set_job_active job="'...'" activate="true"`, which AI scripts do not have, activates a job and processes it at the job engine's next step, within seconds: a job that has not been populated yet gets its ships at once, in space, or as waiting ships with `preferbuilding="true"`. A `rebuild="false"` job gets none. `activate="false"` deactivates a job: its ships stay and keep their orders, but are no longer replaced. The optional `successor` names a job that takes over the deactivated job's ships, waiting ships and open requests, with `updatemainzone` deciding whether they get new main zones. The successor is not activated by this; it needs a `set_job_active` of its own. `check_job_active` reads the state.
+
+Vanilla activates jobs from story scripts, such as `md/setup.xml` and the DLCs' setup and story files, and through **fleet evolution**. `Fleet_Evolution` in `md/job_helper.xml` waits until the game is 20 hours old, the faction's evolution cue has existed for 2 hours (which delays it in a save that gets the cue from an update), and the player's military value reaches 425,340,968 credits. Then it deactivates the faction's jobs tagged `fleetphase_1` and activates those tagged `fleetphase_2`, which add larger ships such as destroyers with escorts. The phase 1 ships stay until they are lost.
+
+The Paranid story's unification in `md/story_paranid.xml` deactivates vanilla's Paranid and Holy Order jobs by id, with Trinity jobs as successors, and then logs an error for every Paranid or Holy Order job that is still active. An extension's job for those factions stays active unless the extension deactivates it itself, for example on `event_cue_signalled cue="md.Story_Paranid.Unification_Stage_3_FactionMerge_Complete"`.
+
+[↑ Contents](#toc)
+
+## Adding jobs from an extension
+
+An extension adds jobs with a diff file at the same path, `libraries/jobs.xml`, as the Boron, Terran and Timelines DLCs do. The patch syntax is covered in [XML diff patching](/x4/modding-support/anatomy-of-an-extension/xml-diff-patching/). A file with a `<jobs>` root works too: its jobs are added to the vanilla ones, which is how the Pirate and Split DLCs ship theirs.
+
+A complete example: an extension named `example_patrols` that adds frigate patrols with two fighters each to three Argon sectors. Its folder holds a `content.xml` with `id="example_patrols"` and `save="true"` (see [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/)), and this file as `libraries/jobs.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <add sel="/jobs">
+    <job id="example_argon_frigate_patrol" name="{20204,2901}">
+      <modifiers commandeerable="false" />
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.sector" />
+        </order>
+      </orders>
+      <category faction="argon" tags="[military, frigate]" size="ship_m" />
+      <quota galaxy="3" sector="1" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="argon" relation="self" comparison="exact" matchextension="false" />
+      <environment buildatshipyard="true" />
+      <ship>
+        <select faction="argon" tags="[military, frigate]" size="ship_m" />
+        <loadout>
+          <quantity exact="1.0" />
+          <quality exact="0.9">
+            <variation exact="0.5" />
+          </quality>
+        </loadout>
+        <owner exact="argon" overridenpc="true" />
+      </ship>
+      <subordinates>
+        <subordinate job="example_argon_frigate_escort" assignment="defence" />
+      </subordinates>
+    </job>
+
+    <job id="example_argon_frigate_escort" name="{20204,2901}" startactive="false">
+      <orders>
+        <order order="Escort" default="true">
+          <param name="formation" value="formationshape.pointguard" />
+        </order>
+      </orders>
+      <category faction="argon" tags="[military, fighter]" size="ship_s" />
+      <quota wing="2" />
+      <location class="galaxy" macro="xu_ep2_universe_macro" matchextension="false" />
+      <environment buildatshipyard="true" />
+      <modifiers subordinate="true" />
+      <ship>
+        <select faction="argon" tags="[military, fighter]" size="ship_s" />
+        <loadout>
+          <quantity exact="1.0" />
+          <quality exact="0.9">
+            <variation exact="0.5" />
+          </quality>
+        </loadout>
+        <owner exact="argon" overridenpc="true" />
+      </ship>
+    </job>
+  </add>
+</diff>
+```
+
+Without `matchextension="false"` the patrol job would look for Argon space added by `example_patrols` itself and create nothing. The escort job is inactive, flagged as a subordinate and counted per commander with `wing`. Neither job has the `factionlogic` tag or is commandeerable, so no faction script requests their ships or takes them away. On a new game, or on the first load of a save with the extension, the three frigates appear at once, each with its two fighters. Lost frigates are built at Argon shipyards.
+
+Points to keep in mind:
+
+- **Ids are unique.** Of several jobs with the same id, the first in the file is used, and each later one is dropped with an error in the log. An `<add sel="/jobs">` appends at the end, so a job with a vanilla id is dropped and the vanilla one stays. To change a vanilla job, patch its attributes or child elements in place. Added with `pos="prepend"`, the extension's copy comes first and replaces the vanilla job, and the log reports the duplicate on every start.
+- **`buildatshipyard` defaults to `false`.** Without `buildatshipyard="true"`, lost ships are created again in space at the job's next turn, without a shipyard. Vanilla sets `true` on 1081 jobs; the 38 with `false` belong to the Kha'ak, the Scale Plate Pact, the Buccaneers and the Hatikvah.
+- **Tags pull a job into vanilla's scripts.** A trader or miner job with `factionlogic` and a basket gets requested by the faction economy on top of its quota; one without it runs on its quota alone. See [Category tags](#category-tags).
+- **Subordinate jobs start inactive,** as all of vanilla's do; an active job with a `wing` quota logs a warning.
+- **The faction needs a shipyard that can build the ship** when the job has `buildatshipyard="true"`, and faction logic in `md/factionlogic.xml`, which runs the build script; the Kha'ak have none. A job whose faction has none, or none with a blueprint for the macro, does not get its lost ships back.
+- **Changes reach running games.** Unlike god.xml, jobs are not generated once: the job engine works from the current definitions every time, see [Loading a save](#loading-a-save).
+
+### Updating an extension
+
+Version 1.10 of `example_patrols` raises the patrol's quota to five sectors:
+
+```xml
+<quota galaxy="5" sector="1" />
+```
+
+No script is needed. Saves made with 1.00 keep their three patrols, and the first load with 1.10 adds two waiting frigates, which Argon shipyards build. New games, and saves new to the extension, get five at the start.
+
+While a game runs, a job without `<time>` waits for its turn in the rotation before it replaces a lost ship. `set_job_active job="'example_argon_frigate_patrol'" activate="true"` from an MD cue processes the job within seconds, active or not.
+
+[↑ Contents](#toc)
+
+## The script side
+
+### Activating and deactivating
+
+`set_job_active` and `check_job_active`, see [Inactive jobs](#inactive-jobs).
+
+### Requesting ships
+
+`request_job_ship job="..." requester="..." zone="..." ware="..." name="$Ship"` requests a new ship from a job for a purpose. The requester is an object or a space, `zone` becomes the ship's main zone, and `ware` the ware it is meant to transport. The result is a waiting ship that a shipyard still has to build, created regardless of the job's quota and state; it counts towards the job's quota. `set_requested_job_ship_timeout` sets when the request lapses: once it has, a requested ship that is still not in the universe is removed with its request at the job's next turn. Without a timeout, a request lapses 30 minutes after it was made: in a test, a requested ship that no shipyard could build was removed within half a minute after the 30 minutes had passed. Vanilla sets one to four hours, or `player.age` to let a request lapse at once. `remove_job_ship_request` cancels a request (a ship that is not in the universe yet is removed), and `find_requested_job_ship` finds requested ships by `requester` and `ware`, with `includeexisting` and `includewaiting`.
+
+`get_suitable_job` finds the jobs to request from: `faction`, `tags`, `size` and `ware` (matched against the job's basket) filter them; `includeinactive` and `exceedquota` include inactive jobs and jobs above their `maxgalaxy` quota; `onlycommandeerable` keeps commandeerable jobs only; `force` searches even with the job engine off.
+
+### Waiting ships
+
+`find_waiting_job_ship` and `find_waiting_subordinate` find ships that wait to be built. `spawn_waiting_job_ship` puts one into the universe directly, in a dock, a zone or a sector position, instead of having it built; `activate_waiting_job_ship` tells the job engine that a waiting ship is ready, as the shipyard script does after the build. `activate_job_ship_orders` cancels a ship's orders and gives it the default order of its job: in a test, a ship with a `Wait` default and a queued `Wait` was back on its job's `Patrol` with an empty queue.
+
+For commanders: `get_subordinate_jobs` returns the subordinate jobs and the number of ships missing for a commander or a job, `get_subordinate_macro` the macros they may use, `create_replacement_subordinates` creates the missing ones as waiting ships that a given shipyard can build, and `organise_job_ship_subordinates` sorts a commander's subordinates according to its job. Vanilla's `RestockSubordinates` order (`aiscripts/order.restock.subordinates.xml`) uses them.
+
+### Other actions
+
+`release_job_ship` releases a ship from its job. `set_job_ship_mainsector` and `set_job_ship_mainzone` move a ship's main sector or zone. `set_ship_expiration_time` sets the game time at which a ship counts as expired, such as `player.age + 2h`; vanilla's `RestockSubordinates` sets `-1s` on an orphaned escort it takes over.
+
+### Events
+
+`event_job_ship_activated` fires when a job ship enters the galaxy, "either spawned directly in space or when being finished at a shipyard"; `event.param` is the ship. Vanilla's `md/encounters.xml` uses it for player encounters: it reads the new ship's `encounterid`, the `<encounters id="..."/>` of its job, and starts the matching encounter, such as `lone_miner`, `mining_group_small` or `khaak_s_lone`. The DLC setup and story scripts wait for ships of particular jobs the same way.
+
+### Properties
+
+| Property | Result |
+| --- | --- |
+| `job` | the job id |
+| `jobname` | the job name |
+| `isjobship` | a ship of a job |
+| `iswaitingjobship` | a job ship not yet in the universe |
+| `isrequestedjobship` | a requested job ship |
+| `isvalidjobship` | a job ship whose place in its command hierarchy matches its job |
+| `jobexpired` | a job ship, not commandeered, past its expiration time |
+| `iscommandeerable`, `iscommandeered` | the ship may be commandeered, or is commandeered now |
+| `jobcommander` | the commander the ship was created for |
+| `jobmainsector`, `jobmainzone` | the ship's main sector and zone |
+| `isvalidjobspace.{$space}` | whether a space is valid for the ship's job |
+| `jobsubordinates.valid`, `jobsubordinates.invalid` | subordinates whose place does or does not match the job |
+| `jobloadoutfaction` | the faction the loadout was generated for |
+| `encounterid` | the job's encounter id |
+| `warebasket` | the wares of the job's basket |
+
+On a space: `jobs` (whether jobs may use it), `isexclusiveforextensionjobs`, `freejobquota.{$jobid}` (free quota for the job in that space, without checking the location filters) and `issuitableforjob.{$jobid}` (whether the space passes the job's location filters).
+
+### Finding job ships
+
+`find_ship` takes `job` (an id or a list of ids) and `jobtags` (compared with the job's category tags); `hasjob`, `validjobship`, `requestedjobship` and `subordinatejobship` filter by those states, and `encounterid` by the job's encounter id. `find_sector` and the other space finders take `jobspacefor`, a job ship or a job id, for spaces a job ship can be based in.
+
+[↑ Contents](#toc)
+
+## Checking the result
+
+- **The debug log** carries the errors about jobs at load time and the job engine's messages during play. Every one of them is written as an error, between two lines of `=` signs, so it shows in the log without any `-debug` filter. See [The debug log](/x4/modding-support/running-x4-for-modding/#the-debug-log).
+- **Counting ships from a script**: `find_ship job="'...'" space="player.galaxy" multiple="true" recursive="true"` gives the ships a job has in the universe, and `find_waiting_job_ship` those waiting to be built. Without `recursive="true"` the search misses ships docked at a station.
+- **Watching ships arrive**: `event_job_ship_activated` fires for every job ship that enters the universe, created in space or finished at a shipyard, with the ship as `event.param`.
+
+The messages that come up while writing jobs and the scripts that use them:
+
+| Log message | Meaning |
+| --- | --- |
+| `JobDB::Import(): File '...' is an invalid job XML file` | The file's root element is not `<jobs>`. |
+| `LookupKeyName::LookupName(): The key name "..." is not recognized in lookup JobDBXML.` | A name the job parser does not know, such as the schema's `spwanoutofsector`; it is ignored. |
+| `[JobDB] Error: JobID: '...' is invalid because the ID is not unique - an job with that ID already exists.` | Duplicate id; this later job is dropped and the first one kept. |
+| `[JobDB] Error: JobID: '...' is invalid because neither <quota> or <quotas> is defined.` | The job has no quota. |
+| `[JobDB] Error: JobID: '...' is invalid because total quota is zero.` | All quota values are zero. |
+| `[JobDB] Error: JobID: '...' is invalid because <quotas> is empty.` | A `<quotas>` element with no `<quota>` in it. |
+| `[JobDB] Error: JobID: '...' is invalid because <ship> or <masstraffic> definition is missing.` | Nothing to create. |
+| `[JobDB] Warning: JobID: '...' has both a <ship> node and a <masstraffic> node. Results may be undesirable.` | Only one of them belongs in a job. |
+| `[JobDB] Warning: JobID: '...' has multiple macro selection definitions (e.g. macro="", group="", ref="") defined in it's <ship> node. Ref will always be preferred (followed by group)!` | More than one of `ref`, `group` and `macro` on `<ship>`; the same exists for `<masstraffic>`. |
+| `[JobDB] Warning: JobID: '...' is defining a 'wing' quota but is not set to startactive="false", this may result in double the ships!` | A subordinate job that is active. |
+| `[JobDB] Warning: JobID: '...' is defining a quota variation which is only support for 'wing' quotas!` | `variation` without `wing`. |
+| `[JobDB] Warning: JobID: '...' has a defined sector location but a sector quota of 0.` | A mass traffic job whose location class has no quota of the same name; the same message exists for cluster, zone and station. |
+| `[JobDB] Warning: JobID: '...' has a defined commander '...' but a zone quota of 0.` | A job with `<commander>` and a zone location, but no `zone` quota. |
+| `[JobDB] Warning: JobID: '...' definition prefers building but is not flagged to allow building at shipyards` | `preferbuilding` without `buildatshipyard="true"`; the ships are created in space. |
+| `[JobDB] Warning: JobID: '...' is defined to spawn only in sector and only out of sector.` | `spawninsector` and `spawnoutofsector` both set. |
+| `[JobDB] Warning: JobID: '...' has invalid region basket ...` | Unknown `regionbasket`. |
+| `Job ... has invalid tag or taglist in node <category>` | A tag in `<category>` that does not exist. |
+| `Error in context class: Property lookup failed: ...` | A misspelt keyword in a value, such as `size="ship_q"` in `<category>`. |
+| `Faction list in job '...' has invalid entry: ...` | An unknown faction in a location filter; the same message exists for race, police faction, station faction, station faction race and station type lists, and `Faction licence in job '...' has invalid faction or licence: ...` for a licence. |
+| `Unable to resolve subordinate job ID: '...'` | A `<subordinate job>` that names no job. |
+| `JobClass::ResolveReferences(): job ... references non-subordinate job ... as a subordinate. Missing 'subordinate' modifier flag?` | The subordinate job lacks `<modifiers subordinate="true"/>`. |
+| `Subordinate for job '...' has a clashing group ID of '...'` | Two subordinate entries share a group but not the assignment. |
+| `Subordinate for job '...' has an invalid group range of '...' (maximum is 10)` | A `<subordinate group>` outside 1 to 10. |
+| `Subordinate for job '...' has invalid assignment '...'` | An `assignment` that does not exist. |
+| `Subordinate for job '...' with assignment '...' does not have a defined group ID and there are too many other groups to assign a free one` | An entry without `group` when all ten groups are taken. |
+| `Job ... has subordinate job ... set to rebuild, which the subordinate definition does not allow` | A `<subordinate>` entry without `rebuild="false"` for a job with `rebuild="false"`. |
+| `[JobEngine] No ship generated for JobID: '...'. Probably invalid ship macro/group/ref definition.` | The `<select>` found no ship macro. |
+| `[JobEngine] No homebase found for JobID: '...'. Probably invalid macro definition ('...') or wrong location ('...').` | No object of the `<commander>` macro in the zone picked for a new ship, or none sharing a ware with the job's basket. |
+| `[JobEngine] JobID: '...' could not find sector '...'.` | The location's `macro` names no such sector; the same exists for zones and clusters. |
+| `[JobEngine] The corresponding AI task (script) '...' for JobID: '...' does not exist.` | A mass traffic `<task>` that does not exist. |
+| `Job ... can not find suitable mainzone for ship ...` | No main zone could be picked for a ship, such as one moved to a successor job with `updatemainzone`. |
+| `Tried to activate state for job ID ..., which is not valid!` | `set_job_active` names no job; deactivating logs `Tried to deactivate job ID ..., which is not valid!`, and `Tried to deactivate job ID ... with successor ..., which is not valid!` when the `successor` names no job. |
+| `Tried to request ship from job ... which is not valid!` | `request_job_ship` names no job; `... when the job engine is not enabled!` when the gamestart has the job engine off. |
+| `Ship ... does not have a job spawn source. Main zone cannot be set.` | `set_job_ship_mainzone` on a ship that is not a job ship; the same for the main sector. |
+| `Waiting job ship ... is not in a state to be spawned in the universe. Check if it is already set to be spawned by another means.` | `spawn_waiting_job_ship` on a ship that is already in the universe, job ship or not. |
+| `No valid zone, sector or dock was provided.` | `spawn_waiting_job_ship` without `zone`, `sector` or `dock`. |
+
+[↑ Contents](#toc)
+
+## Traps
+
+- **`matchextension` defaults to `true`.** An extension job aimed at vanilla space needs `matchextension="false"`, or it finds no space.
+- **`buildatshipyard` defaults to `false`.** Lost ships of a job without it come back in space, with no shipyard involved.
+- **In a running game, a job without `<time>` waits for its turn.** A lost ship is replaced, or ordered from a shipyard, up to about 75 to 80 minutes of game time later. Loading a save processes every job at once, and `set_job_active` processes one within seconds.
+- **`rebuild="false"` populates once, if at all.** Such a job is not refilled, and `set_job_active` does not populate it. With `<time>` it gets no ships on a new game unless its first scheduled time has already come at the start, as with `start="0"`.
+- **A `<ship>` job that is not a subordinate needs a `galaxy` quota.** A galaxy-wide job without one gets no ships; a job in a cluster, sector or zone without a `galaxy` or `maxgalaxy` quota retires its ships older than three hours at every pass once it is full.
+- **A subordinate job has to start inactive.** An active job with a `wing` quota logs a warning that it may double the ships.
+- **The schema spells `spwanoutofsector`; the game reads `spawnoutofsector`.**
+- **`find_ship` misses docked ships** unless it has `recursive="true"`.
+- **Tags pull a job into vanilla's scripts.** `factionlogic` with `trader`, `miner` or `tug` and a basket makes the faction economy request ships of the job on top of its quota.
+- **Lost ships of a `buildatshipyard="true"` job come back only from a shipyard.** A faction with no shipyard that builds for it gets no replacements.
+- **Cargo is skipped on re-created ships** unless its `<wares>` has `onjobrespawn="true"`.
+- **Fleet evolution swaps jobs late in a game.** A job tagged `fleetphase_1` is deactivated after 20 hours once the player's fleet is strong enough.
+
+[↑ Contents](#toc)
