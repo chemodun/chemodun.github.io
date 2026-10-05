@@ -384,7 +384,7 @@ A first population is created in space, or as waiting ships for a job with `pref
 
 ### New game
 
-Every active job of the chosen dataset without `<time>` is populated at the start. A job with `<time>` is populated at its first scheduled pass; with `interval="60"` and no `start`, that came about a minute in. The start is the only population a `rebuild="false"` job gets; for one with `<time>`, see `rebuild` in [Modifiers](#modifiers).
+Every active job of the chosen dataset without `<time>` is populated at the start. A job with `<time>` is populated at its first scheduled pass; with `interval="60"` and no `start`, that came about a minute in. The start is the only population a `rebuild="false"` job gets; for one with `<time>`, see `rebuild` in [Modifiers](#modifiers). The `save` attribute of an extension's `content.xml` plays no part on a new game; it matters only on a load.
 
 ### Loading a save
 
