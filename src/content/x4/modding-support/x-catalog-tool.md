@@ -35,12 +35,12 @@ The tool is free to anyone who owns the game, and both routes to it need the sam
 
 <figure>
   <img src="/x-catalog-tool/steam-library-tools.png" alt="The Steam library filter dropdown, labelled Games and Tools, with both the Games and the Tools boxes ticked">
-  <figcaption>Steam, Library, the dropdown above the list. With <strong>Tools</strong> ticked, X Tools shows up in the search.</figcaption>
+  <figcaption>Steam, Library, the dropdown above the list. With Tools ticked, X Tools shows up in the search.</figcaption>
 </figure>
 
 <figure>
   <img src="/x-catalog-tool/steam-library-x-tools.png" alt="X Tools selected under the Tools group of the Steam library, its page showing an Install button and 4.24 MB of space required">
-  <figcaption>X Tools under the <strong>Tools</strong> group of the library. <strong>Install</strong> fetches it like any game.</figcaption>
+  <figcaption>X Tools under the Tools group of the library. Install fetches it like any game.</figcaption>
 </figure>
 
 It installs to `steamapps\common\X Tools`. That is the larger of the two, since it carries the Workshop tool as well, and the folder is:
