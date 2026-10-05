@@ -1,6 +1,43 @@
 {
-  "through": "843b537272e0a210034b784f99dab7156649ed6c",
+  "through": "bac67d9c4d6dfe48fd8f2d6c03b4c88ae30fab9b",
   "days": [
+    {
+      "date": "2026-10-05",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/top-menu-entries/",
+          "title": "Adding an entry to the top menu",
+          "kind": "new",
+          "lines": [
+            "introduce the top menu entries article"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-an-extension/",
+          "title": "Anatomy of an extension",
+          "kind": "",
+          "lines": [
+            "describe what the save attribute records"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/god-xml/",
+          "title": "god.xml",
+          "kind": "",
+          "lines": [
+            "stage loop skips the last entry; save flag has no effect on a new game"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/jobs-xml/",
+          "title": "jobs.xml",
+          "kind": "",
+          "lines": [
+            "save flag has no effect on a new game"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-10-02",
       "pages": [
