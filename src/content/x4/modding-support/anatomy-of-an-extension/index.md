@@ -87,7 +87,7 @@ If it is not listed, the cause is almost always one of three things: the folder 
 | `author` | Shown beside the name. |
 | `version` | An **integer**, not a dotted string. Three digits, so `100` is version 1.00 and `205` is 2.05. The game compares these numerically when resolving dependencies. |
 | `date` | `YYYY-MM-DD`. Displayed only. |
-| `save` | Whether the extension is recorded as affecting saved games. |
+| `save` | Whether the extension is recorded in the saves made while it is enabled. With `true`, a save lists the extension and warns when it is missing later, and the first load of a save that does not list it generates the extension's `god.xml` entries and populates its `rebuild="false"` jobs. With `false`, nothing of the extension is recorded, and those entries reach new games only. The flag has no effect on a new game itself: in a test, the same extension generated the same factories with either value. See [god.xml](/x4/modding-support/god-xml/#loading-a-save) and [jobs.xml](/x4/modding-support/jobs-xml/#loading-a-save). |
 | `enabled` | Whether it is active. The game writes this when the player toggles the extension, so it is not something to maintain by hand. |
 
 Boolean attributes accept either spelling: `true`/`false` and `1`/`0` both appear across shipped DLCs and published mods, and both work.
