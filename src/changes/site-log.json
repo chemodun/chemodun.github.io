@@ -1,5 +1,5 @@
 {
-  "through": "bac67d9c4d6dfe48fd8f2d6c03b4c88ae30fab9b",
+  "through": "905555d1644c7757295dc85b70d3cf4bfeb3f807",
   "days": [
     {
       "date": "2026-10-05",
@@ -34,6 +34,14 @@
           "kind": "",
           "lines": [
             "save flag has no effect on a new game"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/x-catalog-tool/",
+          "title": "X Catalog Tool",
+          "kind": "",
+          "lines": [
+            "update Steam installation instructions and add images"
           ]
         }
       ]
