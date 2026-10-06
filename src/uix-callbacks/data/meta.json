@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-20",
+ "generated": "2026-10-06",
  "repo": "kuertee/x4-mod-ui-extensions",
  "floor": "8.0.0.1",
  "floorLabel": "pre-8.0",
@@ -43,9 +43,10 @@
     "9.0.0.9",
     "9.0.0.12",
     "9.0.0.13",
-    "9.0.0.14"
+    "9.0.0.14",
+    "9.0.0.16"
    ],
-   "head": "9.0.0.14"
+   "head": "9.0.0.16"
   }
  },
  "versions": [
@@ -1009,6 +1010,36 @@
      "Helper": 16
     }
    }
+  },
+  {
+   "version": "9.0.0.16",
+   "line": "9.x",
+   "name": "9.0.0.16",
+   "published": "2026-10-06",
+   "prerelease": false,
+   "source": "kuertee/x4-mod-ui-extensions@9.0.0.16",
+   "counts": {
+    "files": 21,
+    "sites": 312,
+    "callbacks": 293,
+    "byAggregation": {
+     "none": 175,
+     "chained": 23,
+     "short-circuit": 15,
+     "last-wins": 65,
+     "multi-value": 14,
+     "unanimous": 1
+    },
+    "byKind": {
+     "event": 175,
+     "override": 118
+    },
+    "byHolder": {
+     "menu": 276,
+     "uix_menu": 1,
+     "Helper": 16
+    }
+   }
   }
  ],
  "callbacks": 295,
@@ -1016,6 +1047,6 @@
  "cover": [
   "8.0.1.0",
   "9.0.0.6",
-  "9.0.0.14"
+  "9.0.0.16"
  ]
 }

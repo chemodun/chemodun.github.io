@@ -1,6 +1,19 @@
 {
-  "through": "905555d1644c7757295dc85b70d3cf4bfeb3f807",
+  "through": "31bcb62aef6565d77babebaa0f855ece40a918ab",
   "days": [
+    {
+      "date": "2026-10-06",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/uix-callbacks/",
+          "title": "UIX callbacks",
+          "kind": "",
+          "lines": [
+            "cover UIX 9.0.0.16"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-10-05",
       "pages": [
