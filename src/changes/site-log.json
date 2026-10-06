@@ -1,5 +1,5 @@
 {
-  "through": "31bcb62aef6565d77babebaa0f855ece40a918ab",
+  "through": "81e4007fc0472812ea019e9b10fbcf86e9509ead",
   "days": [
     {
       "date": "2026-10-06",
@@ -10,6 +10,14 @@
           "kind": "",
           "lines": [
             "cover UIX 9.0.0.16"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/resource-areas/",
+          "title": "Resource areas",
+          "kind": "new",
+          "lines": [
+            "how 9.00 defines mineable resources, tested in game"
           ]
         }
       ]
