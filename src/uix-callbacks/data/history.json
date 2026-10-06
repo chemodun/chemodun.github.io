@@ -1,7 +1,7 @@
 {
  "repo": "kuertee/x4-mod-ui-extensions",
  "floor": "8.0.0.1",
- "generated": "2026-09-20",
+ "generated": "2026-10-06",
  "lines": {
   "8.x": [
    {
@@ -941,6 +941,36 @@
     "tag": "9.0.0.14",
     "name": "9.0.0.14",
     "published": "2026-09-11",
+    "prerelease": false,
+    "counts": {
+     "files": 21,
+     "sites": 312,
+     "callbacks": 293,
+     "byAggregation": {
+      "none": 175,
+      "chained": 23,
+      "short-circuit": 15,
+      "last-wins": 65,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 175,
+      "override": 118
+     },
+     "byHolder": {
+      "menu": 276,
+      "uix_menu": 1,
+      "Helper": 16
+     }
+    },
+    "added": [],
+    "removed": []
+   },
+   {
+    "tag": "9.0.0.16",
+    "name": "9.0.0.16",
+    "published": "2026-10-06",
     "prerelease": false,
     "counts": {
      "files": 21,
