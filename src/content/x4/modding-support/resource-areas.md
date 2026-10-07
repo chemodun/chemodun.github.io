@@ -71,7 +71,7 @@ Three questions, three places:
 2. **How many of each does a sector get?** The sector's dataset in `libraries/mapdefaults.xml` lists yield definitions with an amount each, and a box, `<resourcebounds>`, that the areas stay in.
 3. **Where do they go?** Regions from `libraries/region_definitions.xml`, placed in `clusters.xml`, are where the areas of a ware are placed: at regions whose asteroids carry that ware, or whose nebula fields name it in `resources`. They also provide the asteroid fields and gas clouds that ships see and fly through.
 
-So an area of a ware lands both inside the sector's resource bounds and where it overlaps a region that holds the ware. A sector that lists hydrogen areas needs a region with a hydrogen field, and a sector that lists ore areas needs a region with ore asteroids.
+So an area of a ware lands both inside the sector's resource bounds and where it overlaps a region that holds the ware. A sector that lists ore areas needs a region with ore asteroids, or its ore areas cannot be mined. A sector that lists hydrogen areas needs a region with a hydrogen field to put them at its gas clouds; without one they are still mined, but all at one fixed spot; see below.
 
 [↑ Contents](#toc)
 
@@ -85,9 +85,11 @@ In a running game, the areas of a sector show the pattern clearly:
 
 Area centres stay inside `<resourcebounds>`, give or take about 10 km.
 
+When no region in the sector holds the ware, the game still creates every area the sector lists, at one fixed spot: the centre of the sector, or the centre of its `<resourcebounds>`. All areas of one ware in a sector share that spot, so they sit on top of each other. Which of the two centres a ware gets differed between sectors in testing; within one sector it stayed the same.
+
 ### Solid wares need an overlapping region
 
-An area of ore, silicon, ice or nividium is mineable only where its sphere overlaps a region that has asteroids of that ware. The overlap is with the region's actual volume, rotation included, not with a box around it. The game places its own areas so that they do. An area that does not, such as one a script creates in empty space, still exists, but it holds nothing a ship can mine: a mining order there ends at once with an empty hold.
+An area of ore, silicon, ice or nividium is mineable only where its sphere overlaps a region that has asteroids of that ware. The overlap is with the region's actual volume, rotation included, not with a box around it. An area that does not overlap such a region still exists, but it holds nothing a ship can mine: a mining order there ends at once with an empty hold. That happens to an area a script creates in empty space, to the areas the game places in a sector without a region for their ware, and now and then even to a vanilla area: in Saturn 2, one `sphere_huge_silicon_veryhigh_slow` area failed this way in two of four new games, each time at a different spot.
 
 The game reports such an area in its log when the area is created:
 
@@ -96,15 +98,15 @@ No overlap between <definition> resource area at Pos(...) and any compatible reg
 No yield density in overlap between <definition> resource area at Pos(...) and any compatible region in <sector>
 ```
 
-The first means no region of the ware reaches the area at all. The second means the overlapping region names the ware but has no rocks of it, for example a field that only carries `resources="ore"`. Inside a region with the right asteroids, an area created by a script is mined just like the ones the game places.
+The first means the game found no region of the ware overlapping the area. The second means the overlapping region names the ware but has no rocks of it, for example a field that only carries `resources="ore"`. Inside a region with the right asteroids, an area created by a script is mined just like the ones the game places.
 
 ### Gases do not
 
-An area of hydrogen, helium or methane needs no region to be mined. A gas area that a script creates hundreds of kilometres from any region logs nothing and fills a miner's hold normally, and a methane area in Saturn 2 is mined although no region there carries methane. The game still places its own gas areas at regions that carry the gas, so a sector with gas areas still needs those regions.
+An area of hydrogen, helium or methane needs no region to be mined. A gas area that a script creates hundreds of kilometres from any region logs nothing and fills a miner's hold normally, and a methane area in Saturn 2 is mined although no region there carries methane. The game places its own gas areas, and moves them when they respawn, onto regions that carry the gas. Without such a region they land at the fixed spot described in [Where areas are placed](#where-areas-are-placed), log nothing there either, and are mined normally. The regions are what puts the gas areas at the sector's gas clouds.
 
 ### Checking a sector
 
-The log lines above are the quickest check of a new or changed sector: a solid area the game cannot fill shows up there, while the area itself still appears to scripts and to mining orders looking for resources. Since miners go where the areas overlap the asteroids, the visible asteroid fields are also where they work.
+The log lines above are the quickest check of a new or changed sector: a solid area the game cannot fill shows up there, while the area itself still appears to scripts and to mining orders looking for resources. Gas areas never show up there; one placed without a region is found only by its position, at the sector centre or the centre of the resource bounds. Since miners go where the areas overlap the asteroids, the visible asteroid fields are also where they work.
 
 [↑ Contents](#toc)
 
@@ -300,7 +302,7 @@ Once the yield is gone:
 - mining orders looking for resources no longer find it (they also pass it over while the reservations of other miners cover what is left);
 - a collecting ship whose area no longer exists stops with the result `noresourcearea`.
 
-After the yield level's `respawndelay`, in game minutes, the same area comes back, full, at a new random position, again inside the resource bounds and overlapping a region that holds the ware. It keeps its definition: the same size, total yield and gather speed. It does not refill where it was, and the game logs nothing when it comes back. A script that kept the area in a variable sees the area at its new position. Because the same area returns rather than a new one being made, a sector keeps the number of areas it had.
+After the yield level's `respawndelay`, in game minutes, the same area comes back, full, at a new position: a random one inside the resource bounds and overlapping a region that holds the ware, or, in a sector without such a region, the same fixed spot as when it was placed (see [Where areas are placed](#where-areas-are-placed)). This applies to an area a script created too, so a gas area created far from the sector's gas field comes back on that field. The area keeps its definition: the same size, total yield and gather speed. Its position changes as soon as it is emptied, it does not refill where it was, and the game logs nothing when it comes back. A script that kept the area in a variable sees the area at its new position. Because the same area returns rather than a new one being made, a sector keeps the number of areas it had.
 
 [↑ Contents](#toc)
 
@@ -352,7 +354,7 @@ A new sector's dataset carries its own `<resourceareas>`, and `<resourcebounds>`
 </defaults>
 ```
 
-Each ware listed needs a region in the sector that provides it, inside the resource bounds: asteroids of that ware for a solid, a nebula field with `resources` naming it for a gas. The regions are placed in the cluster's macro; see [Where areas are placed](#where-areas-are-placed).
+Each solid ware listed needs a region in the sector with asteroids of that ware, inside the resource bounds; without one, its areas cannot be mined. Each gas listed needs a nebula field with `resources` naming it for its areas to sit at that field; without one, they are placed at the sector centre or the centre of the resource bounds and are still mined there. The regions are placed in the cluster's macro; see [Where areas are placed](#where-areas-are-placed).
 
 ### A new kind of area
 
