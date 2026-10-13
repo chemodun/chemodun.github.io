@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-06",
+ "generated": "2026-10-13",
  "repo": "kuertee/x4-mod-ui-extensions",
  "floor": "8.0.0.1",
  "floorLabel": "pre-8.0",
@@ -44,9 +44,10 @@
     "9.0.0.12",
     "9.0.0.13",
     "9.0.0.14",
-    "9.0.0.16"
+    "9.0.0.16",
+    "9.0.0.17"
    ],
-   "head": "9.0.0.16"
+   "head": "9.0.0.17"
   }
  },
  "versions": [
@@ -1040,13 +1041,43 @@
      "Helper": 16
     }
    }
+  },
+  {
+   "version": "9.0.0.17",
+   "line": "9.x",
+   "name": "9.0.0.17",
+   "published": "2026-10-11",
+   "prerelease": false,
+   "source": "kuertee/x4-mod-ui-extensions@9.0.0.17",
+   "counts": {
+    "files": 22,
+    "sites": 321,
+    "callbacks": 300,
+    "byAggregation": {
+     "none": 178,
+     "chained": 23,
+     "short-circuit": 15,
+     "last-wins": 69,
+     "multi-value": 14,
+     "unanimous": 1
+    },
+    "byKind": {
+     "event": 178,
+     "override": 122
+    },
+    "byHolder": {
+     "menu": 283,
+     "uix_menu": 1,
+     "Helper": 16
+    }
+   }
   }
  ],
- "callbacks": 295,
- "menus": 19,
+ "callbacks": 302,
+ "menus": 20,
  "cover": [
   "8.0.1.0",
   "9.0.0.6",
-  "9.0.0.16"
+  "9.0.0.17"
  ]
 }
