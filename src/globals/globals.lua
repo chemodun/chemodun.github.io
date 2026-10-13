@@ -2618,9 +2618,12 @@ function GetCommanderEntity(controllableID) end
 --- booleans. Vanilla asks for anything from one property to fifteen at a time, and one call for
 --- several is cheaper than several calls for one.
 ---
---- The 193 keys below are the ones 9.00 vanilla actually passes, in order of how often it asks
---- for them. It is not necessarily the whole set the engine accepts, but every one of them is
---- confirmed in use, which no published list of keys is:
+--- The engine accepts 240 keys on 9.00, read from `X4.exe`: the binding hashes the name (64-bit
+--- FNV-1) and looks it up in a fixed table. Keys are case sensitive. An unknown key logs `Invalid
+--- argument N, got unknown key '<name>'` and returns `nil` in its own slot; the other values still
+--- come back.
+---
+--- The 193 that 9.00 vanilla passes, in order of how often it asks for them:
 ---
 --- `isplayerowned`, `name`, `macro`, `assignedpilot`, `classid`, `isdeployable`, `owner`,
 --- `money`, `primarypurpose`, `idcode`, `isdocked`, `hullpercent`, `sector`, `shiptype`, `icon`,
@@ -2658,6 +2661,26 @@ function GetCommanderEntity(controllableID) end
 --- `resourcedetectionrange`, `revealpercent`, `rolename`, `roomtype`, `scrapbuffer`, `shield`,
 --- `tradercommissions`, `traderdiscounts`, `typeicon`, `venturetransactionid`, `ventureuserid`,
 --- `width`, `workforcebonus`.
+---
+--- The other 46, accepted by the engine but never passed by vanilla, so their values are not
+--- measured:
+---
+--- `aicommandparam2`, `aicommandraw`, `assignedcontrolentity`, `buildingmodule`, `commissions`,
+--- `controlentity`, `currentventurename`, `efficiencybonus`, `efficiencyfactor`,
+--- `efficiencythreshold`, `engines`, `exitgate`, `experienceprogress`, `galaxyid`, `hasmarines`,
+--- `hasownaccount`, `iscontrolentity`, `isfixed`, `iskill`, `isproducing`, `isremotecommable`,
+--- `makericon`, `makerrace`, `makerracename`, `maxforwardspeed`, `maxunboostedforwardspeed`,
+--- `neededexperience`, `ownerprefixname`, `populationtype`, `posticon`, `prestige`,
+--- `primarypurposeicon`, `primarypurposename`, `radarrange`, `repairqueue`, `requireddocksize`,
+--- `requiresbuilder`, `roleicon`, `rolestring`, `shadyguy`, `shieldgenerators`, `skillsvisible`,
+--- `tradeoffers`, `uiname`, `ventureid`, `zone`.
+---
+--- `islocked`, `isreallyenemy`, `isshowroommodule` and `isstorageallowed` are new in 9.00;
+--- `maxyield` exists on 8.00 only.
+---
+--- One more key exists whose name has not been found. It answers only on a processing module (a
+--- scrap processor), with `true` while the module's resource buffer holds scrap, and `nil` on any
+--- other component.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, 832 vanilla call sites, 2-16 arguments
@@ -4407,12 +4430,19 @@ function GetLogbook(startIndex, numQuery, category) end
 --- an instance of the thing existing anywhere in the game.
 ---
 --- `infolibrary` is the key worth knowing: it names the library the macro belongs to, which is
---- what the map feeds straight into `GetLibraryEntry`. The 55 keys 9.00 vanilla passes, most
---- used first:
+--- what the map feeds straight into `GetLibraryEntry`.
+---
+--- The engine accepts 64 keys on 9.00, read from `X4.exe`: the binding hashes the name (64-bit
+--- FNV-1) and looks it up in a fixed table. Keys are case sensitive. An unknown key logs `Invalid
+--- argument N, got unknown key '<name>'` and returns `nil` in its own slot; the other values still
+--- come back. `macro` is not a key here: vanilla's `GetMacroData(GetComponentData(id, "macro"),
+--- "name")` asks `GetComponentData` for it.
+---
+--- The 54 that 9.00 vanilla passes, most used first:
 ---
 --- `name`, `infolibrary`, `ware`, `makerraceid`, `shortname`, `islasertower`, `primarypurpose`,
 --- `entityfemale`, `makerrace`, `makerracename`, `shiptype`, `icon`, `sectors`, `compatibility`,
---- `entityrace`, `image`, `macro`, `ammoicon`, `basemacro`, `compatibilityinfo`,
+--- `entityrace`, `image`, `ammoicon`, `basemacro`, `compatibilityinfo`,
 --- `entityracename`, `hasinfoalias`, `isventuremodule`, `mk`, `size`, `isminingweapon`, `isunit`,
 --- `isvirtual`, `prestigename`, `sectorcomponent`, `shieldcapacitymodifier`,
 --- `shieldrechargedelaymodifier`, `shieldrechargeratemodifier`, `shiptypename`, `spacesuitmacro`,
@@ -4421,6 +4451,16 @@ function GetLogbook(startIndex, numQuery, category) end
 --- `isintegrated`, `isshowroomdock`, `isshowroommodule`, `makericon`, `maxradarrange`,
 --- `maxtraveldrivestabilityvalue`, `maxworkforce`, `primarypurposeicon`,
 --- `resourcedetectionrange`, `waregroupicon`, `workforcecapacity`.
+---
+--- The other 10, accepted by the engine but never passed by vanilla, so their values are not
+--- measured:
+---
+--- `basename`, `efficiencybonus`, `efficiencyfactor`, `prestige`, `primarypurposename`, `rawname`,
+--- `scanlevel`, `storagecapacity`, `storagenames`, `tiername`.
+---
+--- New in 9.00: `defaultmaxtraveldrivestabilityvalue`, `isshowroomdock`, `isshowroommodule`,
+--- `maxtraveldrivestabilityvalue`, `shieldcapacitymodifier`, `shieldrechargedelaymodifier`,
+--- `shieldrechargeratemodifier`, `weaponheatmodifier`.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, 251 vanilla call sites, 2-9 arguments
@@ -6398,7 +6438,12 @@ function GetWareCapacity(componentID, wareID, arg3) end
 --- Vanilla calls it more often than almost anything else in the file, usually for `name` alone
 --- but frequently for a handful at once.
 ---
---- The 67 keys 9.00 vanilla passes, most used first:
+--- The engine accepts 85 keys on 9.00, read from `X4.exe`: the binding hashes the name (64-bit
+--- FNV-1) and looks it up in a fixed table. Keys are case sensitive. An unknown key logs `Invalid
+--- argument N, got unknown key '<name>'` and returns `nil` in its own slot; the other values still
+--- come back.
+---
+--- The 67 that 9.00 vanilla passes, most used first:
 ---
 --- `name`, `component`, `avgprice`, `islimited`, `transport`, `volume`, `ismissiononly`,
 --- `resources`, `ispaintmod`, `maxprice`, `ispersonalupgrade`, `isprimarymodpart`, `minprice`,
@@ -6413,6 +6458,17 @@ function GetWareCapacity(componentID, wareID, arg3) end
 --- `isblueprintsaleonly`, `iscargo`, `isexplorationchart`, `isminable`, `ismodule`, `isship`,
 --- `istransmutable`, `miningmapcolor`, `productionamount`, `productionmethods`, `productiontime`,
 --- `storagename`, `tags`.
+---
+--- The other 18, accepted by the engine but never passed by vanilla, so their values are not
+--- measured:
+---
+--- `gift`, `groupID`, `groupIcon`, `groupName`, `illegal`, `isammo`, `isclothingmod`, `iseconomy`,
+--- `isequipmentmod`, `isnoupload`, `isnpc`, `isresearchtech`, `issoftware`, `npcskill`,
+--- `npcskilllevel`, `paintmodquality`, `pricerange`, `rawname`.
+---
+--- `groupID`, `groupName` and `groupIcon` read the ware's group from `libraries/waregroups.xml`
+--- (`GetWareData("hullparts", "groupIcon")` is `be_upgrade_hightech`), and they are the only
+--- camelCase keys. `isexplorationchart`, `istransmutable` and `miningmapcolor` are new in 9.00.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, 338 vanilla call sites, 2-8 arguments
