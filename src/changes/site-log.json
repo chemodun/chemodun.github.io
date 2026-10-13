@@ -1,5 +1,5 @@
 {
-  "through": "ecf8c9ab215810faf3b143f18013a37bfd50fcf7",
+  "through": "10a13a0ba0ae9fc72b677e70c397ca82e5fee374",
   "days": [
     {
       "date": "2026-10-13",
@@ -10,6 +10,14 @@
           "kind": "",
           "lines": [
             "cover UIX 9.0.0.17"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/lua-globals/",
+          "title": "Lua Globals Reference",
+          "kind": "",
+          "lines": [
+            "full property key lists for GetComponentData,"
           ]
         }
       ]
