@@ -61,7 +61,8 @@ function uniqueNames(exprs) {
 function emitEntry(e, authored) {
   const a = authored || {};
   const out = [];
-  const gen = (k, v) => { if (v !== null && v !== undefined && v !== '') out.push(`-- ${k}: ${v}`); };
+  // A key is one line: a multi-line arg (a table literal) would end the comment block.
+  const gen = (k, v) => { if (v !== null && v !== undefined && v !== '') out.push(`-- ${k}: ${String(v).replace(/\s*\n\s*/g, ' ')}`); };
 
   gen('Menu', e.addon ? `${e.menu} (${e.addon})` : e.menu);
   gen('Menu name', e.menuName);
