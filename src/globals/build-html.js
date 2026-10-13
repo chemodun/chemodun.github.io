@@ -30,7 +30,14 @@ const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // Prose is plain text with backticked code spans.
-const x = (s) => esc(s).replace(/`([^`]+)`/g, (_, t) => `<code>${t}</code>`);
+// Backtick code, then **bold** and *italic*; code spans are parked so a `*` inside one stays literal.
+const x = (s) => {
+  const code = [];
+  return esc(s).replace(/`([^`]+)`/g, (_, t) => `\0${code.push(t) - 1}\0`)
+    .replace(/\*\*(\S(?:[^*]*?\S)?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^\w*])\*(\S(?:[^*]*?\S)?)\*(?![\w*])/g, '$1<em>$2</em>')
+    .replace(/\0(\d+)\0/g, (_, i) => `<code>${code[i]}</code>`);
+};
 const mono = (s) => `<code>${esc(s)}</code>`;
 const badge = (tone, label) => `<b class="t-${tone}">${esc(label)}</b>`;
 const tint = (tone, html) => `<span class="t-${tone}">${html}</span>`;
@@ -233,7 +240,7 @@ function signature(n) {
 // index row by position, so repeating 436 KB of haystack on the rows buys nothing.
 function facets(n) {
   const e = DATA[n];
-  const hay = [n, (docs[n] && docs[n].prose) || '', e.note || ''].join(' ').toLowerCase();
+  const hay = [n, (docs[n] && docs[n].prose) || '', e.note || ''].join(' ').replace(/\*/g, '').toLowerCase();
   return `data-o="${e.origin}" data-a="${e.scope}" data-k="${e.group}" data-v="${vtokens(n).join(' ')}"` +
     ` data-u="${sigKey(n)}" data-h="${esc(hay)}"`;
 }
@@ -304,7 +311,7 @@ function card(n) {
   const body = `<p class="badges">${head.join(' ')}</p>
 <pre><code>${esc(signature(n) + overloads)}</code></pre>
 ${e.note ? `<p>${tint('gone', '⚠ ' + x(e.note))}</p>` : ''}
-${d && d.prose ? `<p>${x(d.prose)}</p>` : ''}
+${d && d.prose ? d.prose.split('\n\n').map((p) => `<p>${x(p)}</p>`).join('\n') : ''}
 <table>${rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>`;
 
   return `<details class="card" id="${anchorOf(n)}" ${facets(n)}>

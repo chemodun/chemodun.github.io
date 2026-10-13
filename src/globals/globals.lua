@@ -2618,10 +2618,9 @@ function GetCommanderEntity(controllableID) end
 --- booleans. Vanilla asks for anything from one property to fifteen at a time, and one call for
 --- several is cheaper than several calls for one.
 ---
---- The engine accepts 240 keys on 9.00, read from `X4.exe`: the binding hashes the name (64-bit
---- FNV-1) and looks it up in a fixed table. Keys are case sensitive. An unknown key logs `Invalid
---- argument N, got unknown key '<name>'` and returns `nil` in its own slot; the other values still
---- come back.
+--- The engine accepts 240 keys on 9.00, read from `X4.exe`. Keys are case sensitive. An unknown
+--- key logs `Invalid argument N, got unknown key '<name>'` and returns `nil` in its own slot; the
+--- other values still come back.
 ---
 --- The 193 that 9.00 vanilla passes, in order of how often it asks for them:
 ---
@@ -2662,8 +2661,8 @@ function GetCommanderEntity(controllableID) end
 --- `tradercommissions`, `traderdiscounts`, `typeicon`, `venturetransactionid`, `ventureuserid`,
 --- `width`, `workforcebonus`.
 ---
---- The other 47, accepted by the engine but never passed by vanilla, so their values are not
---- measured:
+--- The other 47, never passed by vanilla. Each was read live on 9.00 and the engine accepted it,
+--- so all are real keys:
 ---
 --- `aicommandparam2`, `aicommandraw`, `areresourcesbuffered`, `assignedcontrolentity`,
 --- `buildingmodule`, `commissions`, `controlentity`, `currentventurename`, `efficiencybonus`,
@@ -2683,6 +2682,7 @@ function GetCommanderEntity(controllableID) end
 -- Usage: confirmed - X4.exe count check, 832 vanilla call sites, 2-16 arguments
 -- Seen at: ui/addons/ego_chatwindow/chatwindow.lua:488, ui/addons/ego_detailmonitor/menu_crafting.lua:228
 -- Arity: 1 or more - X4.exe 8.00, 9.00
+-- Probed: 9.00 - every engine-only key accepted, none logged `got unknown key`
 ---@param component any
 ---@param ... string One or more property names.
 ---@return ... any One value per name, in the order asked.
@@ -4429,11 +4429,10 @@ function GetLogbook(startIndex, numQuery, category) end
 --- `infolibrary` is the key worth knowing: it names the library the macro belongs to, which is
 --- what the map feeds straight into `GetLibraryEntry`.
 ---
---- The engine accepts 64 keys on 9.00, read from `X4.exe`: the binding hashes the name (64-bit
---- FNV-1) and looks it up in a fixed table. Keys are case sensitive. An unknown key logs `Invalid
---- argument N, got unknown key '<name>'` and returns `nil` in its own slot; the other values still
---- come back. `macro` is not a key here: vanilla's `GetMacroData(GetComponentData(id, "macro"),
---- "name")` asks `GetComponentData` for it.
+--- The engine accepts 64 keys on 9.00, read from `X4.exe`. Keys are case sensitive. An unknown
+--- key logs `Invalid argument N, got unknown key '<name>'` and returns `nil` in its own slot; the
+--- other values still come back. `macro` is not a key here: vanilla's
+--- `GetMacroData(GetComponentData(id, "macro"), "name")` asks `GetComponentData` for it.
 ---
 --- The 54 that 9.00 vanilla passes, most used first:
 ---
@@ -4449,8 +4448,8 @@ function GetLogbook(startIndex, numQuery, category) end
 --- `maxtraveldrivestabilityvalue`, `maxworkforce`, `primarypurposeicon`,
 --- `resourcedetectionrange`, `waregroupicon`, `workforcecapacity`.
 ---
---- The other 10, accepted by the engine but never passed by vanilla, so their values are not
---- measured:
+--- The other 10, never passed by vanilla. Each was read live on 9.00 and the engine accepted it,
+--- so all are real keys:
 ---
 --- `basename`, `efficiencybonus`, `efficiencyfactor`, `prestige`, `primarypurposename`, `rawname`,
 --- `scanlevel`, `storagecapacity`, `storagenames`, `tiername`.
@@ -4463,6 +4462,7 @@ function GetLogbook(startIndex, numQuery, category) end
 -- Usage: confirmed - X4.exe count check, 251 vanilla call sites, 2-9 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_docked.lua:509, ui/addons/ego_detailmonitor/menu_encyclopedia.lua:574
 -- Arity: 1 or more - X4.exe 8.00, 9.00
+-- Probed: 9.00 - every engine-only key accepted, none logged `got unknown key`
 ---@param macro string The name of the macro.
 ---@param ... string One or more property names.
 ---@return ... any One value per name, in the order asked.
@@ -6435,18 +6435,17 @@ function GetWareCapacity(componentID, wareID, arg3) end
 --- Vanilla calls it more often than almost anything else in the file, usually for `name` alone
 --- but frequently for a handful at once.
 ---
---- The engine accepts 85 keys on 9.00, read from `X4.exe`: the binding hashes the name (64-bit
---- FNV-1) and looks it up in a fixed table. Keys are case sensitive. An unknown key logs `Invalid
---- argument N, got unknown key '<name>'` and returns `nil` in its own slot; the other values still
---- come back.
+--- The engine accepts 85 keys on 9.00, read from `X4.exe`. Keys are case sensitive. An unknown
+--- key logs `Invalid argument N, got unknown key '<name>'` and returns `nil` in its own slot; the
+--- other values still come back.
 ---
---- The 67 that 9.00 vanilla passes, most used first:
+--- The 69 that 9.00 vanilla passes, most used first:
 ---
 --- `name`, `component`, `avgprice`, `islimited`, `transport`, `volume`, `ismissiononly`,
 --- `resources`, `ispaintmod`, `maxprice`, `ispersonalupgrade`, `isprimarymodpart`, `minprice`,
 --- `researchprecursors`, `tradelicence`, `volatile`, `buyprice`, `description`, `isunbundleammo`,
---- `sortorder`, `allowdrop`, `hasblueprint`, `iscraftingresource`, `isequipment`,
---- `ishiddenwithoutlicence`, `ismodpart`, `isbraneitem`, `video`, `blueprintsowners`,
+--- `sortorder`, `groupName`, `allowdrop`, `hasblueprint`, `iscraftingresource`, `isequipment`,
+--- `ishiddenwithoutlicence`, `ismodpart`, `isbraneitem`, `video`, `groupID`, `blueprintsowners`,
 --- `iscrafting`, `isdeprecated`, `isoperationvolatile`, `isplayerblueprintallowed`,
 --- `isseasonvolatile`, `nocustomgamestart`, `productionresearchprecursors`, `products`,
 --- `researchtime`, `tradeonly`, `hasproductionmethod`, `icon`, `inventory`, `iscraftable`,
@@ -6456,12 +6455,12 @@ function GetWareCapacity(componentID, wareID, arg3) end
 --- `istransmutable`, `miningmapcolor`, `productionamount`, `productionmethods`, `productiontime`,
 --- `storagename`, `tags`.
 ---
---- The other 18, accepted by the engine but never passed by vanilla, so their values are not
---- measured:
+--- The other 16, never passed by vanilla. Each was read live on 9.00 and the engine accepted it,
+--- so all are real keys:
 ---
---- `gift`, `groupID`, `groupIcon`, `groupName`, `illegal`, `isammo`, `isclothingmod`, `iseconomy`,
---- `isequipmentmod`, `isnoupload`, `isnpc`, `isresearchtech`, `issoftware`, `npcskill`,
---- `npcskilllevel`, `paintmodquality`, `pricerange`, `rawname`.
+--- `gift`, `groupIcon`, `illegal`, `isammo`, `isclothingmod`, `iseconomy`, `isequipmentmod`,
+--- `isnoupload`, `isnpc`, `isresearchtech`, `issoftware`, `npcskill`, `npcskilllevel`,
+--- `paintmodquality`, `pricerange`, `rawname`.
 ---
 --- `groupID`, `groupName` and `groupIcon` read the ware's group from `libraries/waregroups.xml`
 --- (`GetWareData("hullparts", "groupIcon")` is `be_upgrade_hightech`), and they are the only
@@ -6471,6 +6470,7 @@ function GetWareCapacity(componentID, wareID, arg3) end
 -- Usage: confirmed - X4.exe count check, 338 vanilla call sites, 2-8 arguments
 -- Seen at: ui/addons/ego_detailmonitor/menu_crafting.lua:102, ui/addons/ego_detailmonitor/menu_crafting.lua:238
 -- Arity: 1 or more - X4.exe 8.00, 9.00
+-- Probed: 9.00 - every engine-only key accepted, none logged `got unknown key`
 ---@param wareID string The ID of the ware.
 ---@param ... string One or more property names.
 ---@return ... any One value per name, in the order asked.

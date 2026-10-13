@@ -77,6 +77,16 @@ function parseReturn(rest) {
   return { type, name, desc: dashed || toks.join(' ') };
 }
 
+// Prose lines with '' marking a blank "---" line -> paragraphs joined by "\n\n".
+function paragraphs(lines) {
+  const out = [[]];
+  for (const l of lines) {
+    if (l === '') out.push([]);
+    else out[out.length - 1].push(l);
+  }
+  return out.filter((p) => p.length).map((p) => p.join(' ')).join('\n\n');
+}
+
 function parse() {
   const lines = fs.readFileSync(SRC, 'utf8').replace(/^﻿/, '').split(/\r?\n/);
   const docs = {};
@@ -112,7 +122,12 @@ function parse() {
 
     if (line.startsWith('--')) {
       const text = line.replace(/^-{2,}\s?/, '').trim();
-      if (!text) { lastMeta = null; continue; }
+      if (!text) {
+        lastMeta = null;
+        // a blank "---" line separates paragraphs
+        if (b.prose.length && b.prose[b.prose.length - 1] !== '') b.prose.push('');
+        continue;
+      }
       const hit = META.find(([re]) => re.test(text));
       if (hit) { b.meta[hit[1]] = text.match(hit[0])[1].trim(); lastMeta = hit[2] ? hit[1] : null; }
       else if (lastMeta) b.meta[lastMeta] += ' ' + text;
@@ -131,7 +146,7 @@ function parse() {
         name,
         signature: fn ? `${name}(${args.join(', ')})` : `${name} = ${va[2].replace(/\s*$/, '')}`,
         args,
-        prose: b.prose.join(' '),
+        prose: paragraphs(b.prose),
         params: b.params,
         returns: b.returns.filter(r => r.type !== 'nil' || r.desc),
         overloads: b.overloads,

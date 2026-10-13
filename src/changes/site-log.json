@@ -17,7 +17,7 @@
           "title": "Lua Globals Reference",
           "kind": "",
           "lines": [
-            "full property key lists for GetComponentData,"
+            "full property key lists for GetComponentData, GetMacroData, GetWareData"
           ]
         }
       ]
