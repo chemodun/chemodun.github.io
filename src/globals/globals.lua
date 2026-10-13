@@ -2662,13 +2662,14 @@ function GetCommanderEntity(controllableID) end
 --- `tradercommissions`, `traderdiscounts`, `typeicon`, `venturetransactionid`, `ventureuserid`,
 --- `width`, `workforcebonus`.
 ---
---- The other 46, accepted by the engine but never passed by vanilla, so their values are not
+--- The other 47, accepted by the engine but never passed by vanilla, so their values are not
 --- measured:
 ---
---- `aicommandparam2`, `aicommandraw`, `assignedcontrolentity`, `buildingmodule`, `commissions`,
---- `controlentity`, `currentventurename`, `efficiencybonus`, `efficiencyfactor`,
---- `efficiencythreshold`, `engines`, `exitgate`, `experienceprogress`, `galaxyid`, `hasmarines`,
---- `hasownaccount`, `iscontrolentity`, `isfixed`, `iskill`, `isproducing`, `isremotecommable`,
+--- `aicommandparam2`, `aicommandraw`, `areresourcesbuffered`, `assignedcontrolentity`,
+--- `buildingmodule`, `commissions`, `controlentity`, `currentventurename`, `efficiencybonus`,
+--- `efficiencyfactor`, `efficiencythreshold`, `engines`, `exitgate`, `experienceprogress`,
+--- `galaxyid`, `hasmarines`, `hasownaccount`, `iscontrolentity`, `isfixed`, `iskill`,
+--- `isproducing`, `isremotecommable`,
 --- `makericon`, `makerrace`, `makerracename`, `maxforwardspeed`, `maxunboostedforwardspeed`,
 --- `neededexperience`, `ownerprefixname`, `populationtype`, `posticon`, `prestige`,
 --- `primarypurposeicon`, `primarypurposename`, `radarrange`, `repairqueue`, `requireddocksize`,
@@ -2677,10 +2678,6 @@ function GetCommanderEntity(controllableID) end
 ---
 --- `islocked`, `isreallyenemy`, `isshowroommodule` and `isstorageallowed` are new in 9.00;
 --- `maxyield` exists on 8.00 only.
----
---- One more key exists whose name has not been found. It answers only on a processing module (a
---- scrap processor), with `true` while the module's resource buffer holds scrap, and `nil` on any
---- other component.
 -- Environment: addons only
 -- Versions: 8.00, 9.00
 -- Usage: confirmed - X4.exe count check, 832 vanilla call sites, 2-16 arguments
