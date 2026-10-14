@@ -68,7 +68,7 @@ An `ext_` catalog is where everything an extension normally ships belongs. `libr
 
 The two prefixes look like a matched pair, and they are not. The difference is worth stating on its own, because it decides what can go in each.
 
-**An `ext_` catalog is the extension folder in packed form and nothing more.** An entry in it behaves exactly as the same file would loose in the extension folder, merging into a collection or patching as a `<diff>` by the rules in [How a file joins the game](/x4/modding-support/anatomy-of-an-extension/#how-a-file-joins-the-game). Packing changes how the file is stored and nothing about how it is applied. Unpack an `ext_` catalog back into the folder and the extension behaves identically.
+**An `ext_` catalog is the extension folder in packed form and nothing more.** An entry in it behaves exactly as the same file would loose in the extension folder, merging into a collection or patching as a `<diff>` by the rules in [How a file joins the game](/x4/modding-support/anatomy-of-an-extension/#how-a-file-joins-the-game). Packing changes how the file is stored and nothing about how it is applied. Unpack an `ext_` catalog back into the folder, remove the `.cat` and `.dat`, and the extension behaves identically.
 
 **A `subst_` catalog is not a packed folder at all.** Its entries stand in for a file that already exists: `ui/core/lua/monitors.xpl` in a `subst_` catalog is handed to the game in place of the original. Nothing is merged and nothing is patched, so a substitute has to be a complete, valid file of its kind. This is the form for the cases in [When a whole file really does replace](/x4/modding-support/anatomy-of-an-extension/#when-a-whole-file-really-does-replace): an interface Lua file, a texture, a model.
 
@@ -119,6 +119,8 @@ The `_sig` pairs and the `.sig` file are Egosoft signatures, and are not somethi
 ## While developing
 
 An extension's own files are comfortable left loose. Nothing has to be packed for the game to load it, and editing a file in place beats repacking after every change.
+
+**When a catalog and a loose file hold the same path, the packed copy wins.** Otherwise the two mix freely: the game reads the extension folder on disk whether or not it holds catalogs, so a loose file is loaded as long as no catalog holds the same path. That makes an old `ext_01.cat` left in the folder a trap: every loose file it also contains is silently ignored, and edits to them never show. The `-prefersinglefiles` command-line switch reverses the order for testing, see [Running X4 for modding](/x4/modding-support/running-x4-for-modding/).
 
 Substitutions are the exception to that, with one exception of their own: an interface Lua file left at its game root path inside the extension folder, as `ui/core/lua/<name>.lua`, does take effect. A substitution of one can be edited and reloaded without a catalog, which leaves packing as a release step rather than a working requirement.
 

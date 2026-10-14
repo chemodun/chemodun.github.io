@@ -40,7 +40,7 @@ The two may differ, and on anything published through the Steam Workshop they do
 
 **The contents are laid out as if the folder were the game root.** An extension's `libraries/wares.xml` lines up with the game's own `libraries/wares.xml`. There is no manifest listing files, and no registration step: position in the tree is what connects a file to the thing it affects.
 
-**Loose files and packed catalogs are read the same way.** The game looks inside `.cat` archives and at plain files on disk without distinguishing them. An extension can therefore be developed entirely as loose files and packed only when it is published, which is what [Packing it up](#packing-it-up) covers.
+**Loose files and packed catalogs are read the same way.** The game looks inside `.cat` archives and at plain files on disk for every path, and a loose file beside the catalogs is loaded as long as no catalog holds the same path. **When a catalog and a loose file hold the same path, the packed copy wins** and the loose one is ignored. An extension can therefore be developed entirely as loose files and packed only when it is published, which is what [Packing it up](#packing-it-up) covers.
 
 A DLC is an ordinary extension by these rules. Nothing an official expansion does is unavailable to a mod, which makes the shipped DLCs the most reliable examples to learn from. Several of the rules below were established by reading them.
 
