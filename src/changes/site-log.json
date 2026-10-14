@@ -1,6 +1,51 @@
 {
-  "through": "10a13a0ba0ae9fc72b677e70c397ca82e5fee374",
+  "through": "c101f58bbdf349f464b2dff6e4be01cff37f5a4f",
   "days": [
+    {
+      "date": "2026-10-15",
+      "pages": [
+        {
+          "path": "/x4/modding-support/anatomy-of-an-extension/",
+          "title": "Anatomy of an extension",
+          "kind": "",
+          "lines": [
+            "introduce the Anatomy of game data section with the libraries article"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/",
+          "title": "Anatomy of game data",
+          "kind": "new",
+          "lines": [
+            "introduce the Anatomy of game data section with the libraries article"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/",
+          "title": "libraries",
+          "kind": "new",
+          "lines": [
+            "introduce the Anatomy of game data section with the libraries article"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/god-xml/",
+          "title": "god.xml",
+          "kind": "gone",
+          "lines": [
+            "move jobs.xml and god.xml under Anatomy of game data, libraries"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/jobs-xml/",
+          "title": "jobs.xml",
+          "kind": "gone",
+          "lines": [
+            "move jobs.xml and god.xml under Anatomy of game data, libraries"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-10-13",
       "pages": [
