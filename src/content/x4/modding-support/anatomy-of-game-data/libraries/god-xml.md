@@ -1,7 +1,8 @@
 ---
 title: god.xml
 description: How libraries/god.xml places stations, factories and objects (and, in some Timelines scenarios, ships) - the entry format, quotas and locations, when the game generates from it, what an extension needs to add entries, and the script actions and properties that work with them.
-order: 8
+order: 1
+movedFrom: /x4/modding-support/god-xml/
 ---
 
 # god.xml
@@ -102,7 +103,7 @@ Every entry has the same shape: the outer element carries the id, owner and othe
 
 Product and plan entries are the **production entries**; script properties and find filters use that name, such as `isgodproductionentry`. `<select>` and `<loadout>` are shown in the first example below; script actions and find filters are covered in [The script side](#the-script-side).
 
-Ships in the universe come from [`libraries/jobs.xml`](/x4/modding-support/jobs-xml/), not from god.xml. Vanilla's only ship entries are 10 in the Timelines scenario datasets, most of them the player's ship for [`shipgodentry`](#player-starts-on-a-god-entry).
+Ships in the universe come from [`libraries/jobs.xml`](/x4/modding-support/anatomy-of-game-data/libraries/jobs-xml/), not from god.xml. Vanilla's only ship entries are 10 in the Timelines scenario datasets, most of them the player's ship for [`shipgodentry`](#player-starts-on-a-god-entry).
 
 A vanilla station entry, with comments added. Its inner element is also named `<station>`:
 

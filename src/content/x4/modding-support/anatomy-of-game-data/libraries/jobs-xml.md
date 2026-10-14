@@ -1,7 +1,8 @@
 ---
 title: jobs.xml
 description: How libraries/jobs.xml keeps the universe's NPC ships in place - the job format, quotas and locations, how the job engine populates, replaces and retires job ships, what an extension needs to add jobs, and the script actions, events and properties that work with them.
-order: 9
+order: 2
+movedFrom: /x4/modding-support/jobs-xml/
 ---
 
 # jobs.xml
@@ -485,7 +486,7 @@ Points to keep in mind:
 
 - **Ids are unique.** To change a vanilla job, patch its attributes or child elements in place; see [Changing a vanilla job](#changing-a-vanilla-job). Of several jobs with the same id, the first in the file is used, and each later one is dropped with an error in the log. An `<add sel="/jobs">` appends at the end, so a job with a vanilla id is dropped and the vanilla one stays. Added with `pos="prepend"`, the extension's copy comes first and replaces the vanilla job, and the log reports the duplicate on every start.
 - **Jobs of a DLC.** The Pirate and Split DLCs ship their jobs as files of their own, so a patch to one of those jobs mirrors the DLC's path inside the extension's folder, such as `extensions/ego_dlc_split/libraries/jobs.xml`. The Boron, Terran and Timelines DLCs add their jobs to the base game's file with patches, so a patch to one of their jobs goes into the extension's own `libraries/jobs.xml`. Either way the extension needs a dependency on the DLC with `optional="true"`; see [Patching a DLC or another extension](/x4/modding-support/anatomy-of-an-extension/#patching-a-dlc-or-another-extension).
-- **Changes reach running games.** Unlike [god.xml](/x4/modding-support/god-xml/), jobs are not generated once: the job engine works from the current definitions every time, see [Loading a save](#loading-a-save).
+- **Changes reach running games.** Unlike [god.xml](/x4/modding-support/anatomy-of-game-data/libraries/god-xml/), jobs are not generated once: the job engine works from the current definitions every time, see [Loading a save](#loading-a-save).
 
 The defaults and requirements that most often go wrong, such as `buildatshipyard`, tags and subordinate jobs, are in [Traps](#traps).
 
