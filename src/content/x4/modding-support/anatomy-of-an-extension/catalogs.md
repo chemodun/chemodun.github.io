@@ -88,7 +88,7 @@ Within an extension, four rules decide what beats what:
 
 - **The number is load order within the kind.** `ext_02` is applied after `ext_01`, and the same for `subst_`.
 - **A version catalog is applied after every numbered catalog of its kind.** `ext_v900` beats both `ext_01` and `ext_02` on 9.00.
-- **A diff catalog is applied after the numbered catalog it names**, on the version in its name and on every version above it. `ext_01_diff_v900` follows `ext_01` from 9.00 onward.
+- **A diff catalog, new in 9.00, is applied after the numbered catalog it names**, on the version in its name and on every version above it. `ext_01_diff_v900` follows `ext_01` from 9.00 onward. Several diff catalogs of one numbered catalog apply lowest version first, and a version catalog still comes after all of them.
 - **The two kinds rank only among themselves.** A `subst_` catalog is never in competition with an `ext_` one, because the two are not addressing the same paths.
 
 Neither kind is required, and neither requires the other. An extension can ship a single `subst_` pair and leave the rest of its files loose, or a single version catalog with no numbered catalog at all.

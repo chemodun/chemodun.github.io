@@ -29,7 +29,7 @@ The Steam package that carries the tool carries `WorkshopTool.exe` as well, whic
 
 The tool is free to anyone who owns the game, and both routes to it need the same two things: an **Egosoft account**, logged in, and **X Rebirth or X4: Foundations owned and registered to that account**.
 
-**From Egosoft** it comes with the bonus material, at <https://www.egosoft.com/download/x4/bonus_en.php>. That download is the catalog tool by itself.
+**From Egosoft** it comes with the bonus material, on the [X4 bonus downloads page](https://www.egosoft.com/download/x4/bonus_en.php). That download is the catalog tool by itself.
 
 **On Steam** it is **X Tools**, found in the **Library**, not the Store, which has no page for it. The library hides tools by default: in the dropdown above the list (**Games** by default), tick **Tools**, then search for `X Tools` and install it like a game.
 

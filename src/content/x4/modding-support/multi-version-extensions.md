@@ -87,9 +87,11 @@ The name is the numbered catalog it belongs to, then `_diff_v`, then the version
 Two things separate it from `ext_v###`:
 
 - **It applies on its own version and on every version above it.** `ext_01_diff_v900` answers on 9.00, on 9.10 and on anything later, where `ext_v900` answers on 9.00 and nowhere else. That is what removes the failure mode rule 1 creates, in which a version nobody built a catalog for quietly gets the numbered catalogs alone.
-- **Several apply at once.** Every diff catalog whose version is at or below the running version is loaded, so a package can gain one small layer for each game version that has needed a change, with the bulk of it still sitting in `ext_01`.
+- **Several apply at once.** Every diff catalog whose version is at or below the running version is loaded, so a package can gain one small layer for each game version that has needed a change, with the bulk of it still sitting in `ext_01`. They are applied in version order, lowest first: on 9.00, `ext_01_diff_v800` and `ext_01_diff_v900` both load, and where they hold the same path `ext_01_diff_v900` answers.
 
-No version before 9.00 has this catalog type. A package that also supports 8.00 keeps `ext_v800` or plain numbered catalogs for that version and uses diff catalogs only from 9.00 up.
+What a diff catalog does not change is the rest of the stack. **A version catalog still comes last**: where `ext_v900` and a diff catalog hold the same path, `ext_v900` answers. And **a diff catalog needs the numbered catalog it names**: `ext_03_diff_v900` with no `ext_03` beside it is never loaded, and neither is one whose version is below `v100`. All of this was measured on 9.00 with a probe extension in the same way as the four rules.
+
+**Diff catalogs are a 9.00 feature.** No earlier version has this catalog type: the 8.00 loader never looks for one, so it ignores the file. A package that also supports 8.00 keeps `ext_v800` or plain numbered catalogs for that version and uses diff catalogs only from 9.00 up.
 
 [↑ Contents](#toc)
 
