@@ -60,6 +60,8 @@ const pages = walk(CONTENT).map((file) => {
     wiki: data.wiki || '',
     wikiName: data.wikiName || '',
     wikiRef: data.wikiRef || '',
+    // Old addresses of a page that moved; the build writes a redirect at each.
+    movedFrom: (data.movedFrom || '').split(/[\s,]+/).filter(Boolean),
   };
 });
 

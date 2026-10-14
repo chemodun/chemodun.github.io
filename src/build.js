@@ -164,6 +164,28 @@ for (const p of pages) {
   written++;
 }
 
+/* ---------------------------------------------------------------- redirects */
+
+// A page that moved keeps its old address as a redirect, so a link posted elsewhere
+// still lands. The stub is not a page: no shell, not in the navigation, the sitemap or
+// the 404 list, and it tells search engines where the page now lives. check-pages.js
+// recognises the refresh tag and checks the target instead of driving the stub.
+let moved = 0;
+for (const p of pages) {
+  for (const from of p.movedFrom) {
+    if (byUrl.has(from)) throw new Error(`${p.url} is declared as moved from ${from}, which is a page`);
+    const file = path.join(OUT, ...from.split('/').filter(Boolean), 'index.html');
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, '<!doctype html>\n<html lang="en">\n<meta charset="utf-8">\n'
+      + `<title>${esc(p.title)}</title>\n`
+      + `<meta http-equiv="refresh" content="0; url=${p.url}">\n`
+      + `<link rel="canonical" href="${SITE.origin}${p.url}">\n`
+      + '<meta name="robots" content="noindex">\n'
+      + `<p>This page has moved to <a href="${p.url}">${esc(p.title)}</a>.</p>\n</html>\n`, 'utf8');
+    moved++;
+  }
+}
+
 /* ------------------------------------------------------- root-level files */
 
 // Everything in src/assets/ is served from the root, unchanged. Sub-folders keep their
@@ -220,6 +242,7 @@ fs.writeFileSync(path.join(OUT, 'robots.txt'),
 
 console.log(`${written} markdown pages -> ${path.relative(process.cwd(), OUT)}`);
 console.log(`root files: favicon.ico, 404.html, sitemap.xml (${urls.length} urls), robots.txt`);
+if (moved) console.log(`${moved} redirect(s) at the old addresses of moved pages`);
 for (const p of pages.filter((x) => x.generated)) console.log(`  (generated elsewhere: ${p.url})`);
 // Not a failure: the page is written here first and exported afterwards, so this is the
 // list of exports still owed - and it empties itself once the wiki snapshot is refreshed.

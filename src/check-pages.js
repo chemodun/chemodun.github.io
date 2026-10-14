@@ -22,12 +22,19 @@ const { wait, findBrowser, launch, connect, openPage } = require('./cdp');
 const KEEP_OPEN = process.argv.includes('--keep-open');
 const PAGE_TIMEOUT = 20000;
 
-// Every built page, as the URL path Pages would serve it under.
+// Every built page, as the URL path Pages would serve it under. A redirect stub at a
+// moved page's old address has no shell to probe, so it is set aside and its target
+// is checked for existence instead.
+const redirects = [];
 function pageUrls(dir = ROOT, base = '') {
   const out = [];
   for (const e of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
     if (e.isDirectory()) out.push(...pageUrls(path.join(dir, e.name), base + '/' + e.name));
-    else if (e.name === 'index.html') out.push(base + '/');
+    else if (e.name === 'index.html') {
+      const to = /<meta http-equiv="refresh" content="0; url=([^"]+)">/.exec(fs.readFileSync(path.join(dir, e.name), 'utf8'));
+      if (to) redirects.push({ from: base + '/', to: to[1] });
+      else out.push(base + '/');
+    }
     else if (e.name.endsWith('.html')) out.push(base + '/' + e.name);
   }
   return out;
@@ -169,7 +176,14 @@ async function main() {
   if (!KEEP_OPEN) browser.child.kill();
   server.close();
 
-  console.log('\n' + (bad ? bad + ' of ' + urls.length + ' pages failed' : 'all ' + urls.length + ' pages clean'));
+  for (const r of redirects) {
+    const exists = fs.existsSync(path.join(ROOT, ...r.to.split('/').filter(Boolean), 'index.html'));
+    if (!exists) bad++;
+    console.log((exists ? 'ok   ' : 'FAIL ') + r.from + '  ->  ' + r.to + (exists ? '' : '  (target is not a page)'));
+  }
+
+  console.log('\n' + (bad ? bad + ' of ' + (urls.length + redirects.length) + ' pages failed'
+    : 'all ' + urls.length + ' pages clean' + (redirects.length ? ', ' + redirects.length + ' redirect(s) resolve' : '')));
   if (bad) process.exitCode = 1;
 }
 

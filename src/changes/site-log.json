@@ -76,7 +76,7 @@
           ]
         },
         {
-          "path": "/x4/modding-support/god-xml/",
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/god-xml/",
           "title": "god.xml",
           "kind": "",
           "lines": [
@@ -84,7 +84,7 @@
           ]
         },
         {
-          "path": "/x4/modding-support/jobs-xml/",
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/jobs-xml/",
           "title": "jobs.xml",
           "kind": "",
           "lines": [
@@ -105,7 +105,7 @@
       "date": "2026-10-02",
       "pages": [
         {
-          "path": "/x4/modding-support/jobs-xml/",
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/jobs-xml/",
           "title": "jobs.xml",
           "kind": "new",
           "lines": [
@@ -114,7 +114,7 @@
           ]
         },
         {
-          "path": "/x4/modding-support/god-xml/",
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/god-xml/",
           "title": "god.xml",
           "kind": "",
           "lines": [
@@ -128,7 +128,7 @@
       "date": "2026-10-01",
       "pages": [
         {
-          "path": "/x4/modding-support/god-xml/",
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/god-xml/",
           "title": "god.xml",
           "kind": "new",
           "lines": [
