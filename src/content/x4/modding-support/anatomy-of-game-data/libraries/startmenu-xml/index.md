@@ -18,7 +18,7 @@ This article covers the file: its format, how the expansions change it, how a sc
 
 ## Terms
 
-- **Scene entry**: one `<scene>` in `startmenu.xml`, named by the cutscene it plays.
+- **Scene entry**: one `<scene>` in `startmenu.xml`. It names the cutscene the scene plays, the background cluster whose sky it shows, the music played with it, and the regions placed around it.
 - **Default scene**: the scene shown when the player has not chosen one.
 - **Background cluster**: the cluster content that gives a scene its sky: the skybox, planets, nebulae and the sun's light.
 - **Scene object**: the object the cutscene places in the scene, holding the camera, the lights, and the ships and stations that move in it.
@@ -94,10 +94,10 @@ A Kingdom End scene, with every element vanilla uses:
 | Attribute or element | Meaning |
 |---|---|
 | `cutscene` | The cutscene that builds the scene, by its `<director key>`. It is also the scene's id. |
-| `music` | The music played with the scene. |
+| `music` | The music played with the scene: the id of a `<sound>` in `libraries/sound_library.xml`, such as `music_menu_main_music`. Kingdom End defines its `music_menu_main_bor_music` with a diff on that file, and an extension's own start menu music needs a `<sound>` entry added the same way. |
 | `map` | The galaxy the scene is built in; every vanilla scene uses the black galaxy, `blackgalaxy_macro`. |
 | `<cluster name background>` | `name` is the cluster of that galaxy, `cluster_black_macro` in every vanilla scene; `background` is a macro of class `celestialbody` whose sky the scene shows. |
-| `<regions>` | Regions placed in the cluster, each `<region name>` naming a region macro, with a `<position>`. |
+| `<regions>` | Regions placed in the cluster, each `<region name>` naming a region macro, with a `<position>`; [Start menu background](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/background/#regions) explains how the position depends on the region's shape. |
 | `<unlock>` | `<userdata ref value>` entries that have to be met for the scene to be offered. |
 | `<paintmod default>` | Set by the Boron and Timelines scenes. |
 
@@ -193,7 +193,7 @@ A new scene entry is an `add` on `/startmenu/background`:
       <cluster name="cluster_black_macro" background="cluster_sm2_background_macro" />
       <regions>
         <region name="example_sm_asteroids_macro">
-          <position x="0" y="-20000" z="0" />
+          <position x="0" y="-2500" z="0" />
         </region>
       </regions>
     </scene>

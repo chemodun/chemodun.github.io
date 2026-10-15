@@ -20,7 +20,7 @@ The intro animations a gamestart plays in this scene are described in [gamestart
 
 ## Terms
 
-- **Scene entry**: one `<scene>` in `libraries/startmenu.xml`, named by the cutscene it plays.
+- **Scene entry**: one `<scene>` in `libraries/startmenu.xml`. It names the cutscene the scene plays, the background cluster whose sky it shows, the music played with it, and the regions placed around it.
 - **Background cluster**: the cluster content that gives the scene its sky: the skybox, planets, nebulae and the sun's light.
 - **Scene object**: a macro of class `cutsceneanchor` with its component, holding the camera, the lights, and the dummies everything in the scene is attached to.
 - **Dummy**: an invisible part of the scene object. A ship, a station module or an asteroid is attached to a dummy, and moves with it.
@@ -40,6 +40,14 @@ The `background` attribute of `<cluster>` names a macro of class `celestialbody`
 ```
 
 `cluster_sm_basegame_background_macro` points at the same component as `cluster_sm3_background_macro`, and the Pirate one at `cluster_sm500_background`, the content of a game map cluster. A new background macro can point at the content component of any cluster in the game the same way, and a copy of an existing cluster with small changes makes a background of its own.
+
+A background macro is an asset macro like any other. The base game keeps its background macros in `assets/environments/cluster/macros/<name>_macro.xml` and their components in `assets/environments/cluster/<name>.xml`; an expansion keeps them under its own folder, such as `extensions/ego_dlc_pirate/assets/environments/cluster/macros/`. Each macro has an entry in `index/macros.xml`, and each component one in `index/components.xml`:
+
+```xml
+<entry name="cluster_sm_pir_macro" value="extensions\ego_dlc_pirate\assets\environments\cluster\macros\cluster_sm_pir_macro" />
+```
+
+An extension's own background macro follows the same pattern: the macro file in the extension's `assets/` tree, and a diff on `index/macros.xml` adding its entry.
 
 The vanilla background macros:
 
@@ -96,6 +104,12 @@ Two vanilla cutscenes can use the same scene object: after the Terran diff, the 
 
 ### The macro
 
+The base game keeps the scene object's macro in `assets/cutscenecore/macros/<name>_macro.xml`; an expansion keeps it under its own folder, such as `extensions/ego_dlc_pirate/assets/cutscenecore/macros/startmenu_pirate_final_macro.xml`. The macro has an entry in `index/macros.xml`:
+
+```xml
+<entry name="startmenu_pirate_final_macro" value="extensions\ego_dlc_pirate\assets\cutscenecore\macros\startmenu_pirate_final_macro" />
+```
+
 The macro has class `cutsceneanchor`. It names its component and fills the component's connections with objects:
 
 ```xml
@@ -118,9 +132,11 @@ The macro has class `cutsceneanchor`. It names its component and fills the compo
 
 Each connection holds an ordinary game macro: a ship, a gate, a station module, an asteroid, or, in the Pirate scenes, a whole landmark station. Because the scene names a ship by its macro, the game fits the ship's equipment, weapons and shields itself and matches the engine flames to the ship's speed, so none of it has to be built into the scene. A ship can also be given a macro made for the start menu only, for a particular loadout.
 
+**A scene object has to include a playable ship**, or the start menu loads blank. Every vanilla scene object has small player-class ships among its connections: `ship_arg_s_scout_01_a_macro`, `ship_arg_s_fighter_02_a_macro` and `ship_par_s_fighter_01_a_macro` in all of them but the Timelines one, which has `ship_gen_s_racer_01_a_macro`.
+
 ### The component
 
-The component, in `assets/cutscenecore/`, holds:
+The component lives in `assets/cutscenecore/<name>.xml`, or under an expansion's folder, such as `extensions/ego_dlc_pirate/assets/cutscenecore/startmenu_pirate_final.xml`, with an entry in `index/components.xml`. It holds:
 
 - **Lights**, in `<layers><layer><lights>`: an omni light with a `lenseffect` for the sun, more omni lights for colour, and an ambient light.
 - **The camera**: `<camera name="Camera01" fov="90"/>` on a connection with the part `anim_anchor`. That connection carries the animations: `cutsceneloop`, the loop shown in the menu, and `gamestart1`, `gamestart3`, `gamestart4` and, in later scenes, `gamestart5`, the intros a gamestart can play. The Timelines scene uses names of its own (`startmenu_begin`, `startmenu_diorama1` to `startmenu_diorama6`) and has none of these.
@@ -174,7 +190,7 @@ Asteroid fields, fog and nebulae come from regions, as they do in the game map. 
 </macros>
 ```
 
-A region in the game map is defined inline in its cluster's connection; a start menu scene names it by macro, so the macro needs a file of its own. The expansions keep these macros in `libraries/macro.xml`, a plain `<macros>` file, not a diff.
+A region in the game map is defined inline in its cluster's connection; a start menu scene names it by macro, so the macro needs a file of its own. The expansions keep these macros in `libraries/macro.xml`, structured as a plain `<macros>` file, not a diff.
 
 **An index entry** in `index/macros.xml`, pointing the macro name at that file:
 
@@ -192,9 +208,14 @@ The scene entry then places the region by its macro name:
 </regions>
 ```
 
-Vanilla places all its start menu regions straight below the scene's origin, between 4 and 50 kilometres down (`y` from `-4000` to `-50000`).
+The position is where the region's boundary starts, and the shape decides what that means:
 
-When the game reads `region_definitions.xml` as a macro file, as it does when an index entry points a region macro at it, the log fills with lines like these, one for each element of the definitions; moving the region macros into a file of their own ends them:
+- **A cylinder** starts at its position and extends upward by its `linear` size. To centre it on the scene, place it at minus half its `linear`: Kingdom End's `c605s1_region1sm`, with `linear="100000"`, sits at `y="-50000"`.
+- **A sphere** is centred on its position, so `y="0"` puts it exactly on the scene.
+
+Vanilla follows this for every start menu cylinder, sometimes with a small extra offset: the Pirate cylinders sit 2 km lower than the half, the Timelines one 5 km.
+
+Two things make the game load the region macros correctly: `libraries/macro.xml` is a plain `<macros>` file like the base game's, not a diff, and the index entry points at that file. When the game reads the region definitions as a macro file instead, the log fills with lines like these, one for each element of the definitions:
 
 ```text
 LookupKeyName::LookupName(): The key name "step" is not recognized in lookup ComponentXML. Originated from: extensions\...\libraries\region_definitions(.xml|.xml.gz)
@@ -246,7 +267,7 @@ The example below is a complete background scene for a fictional extension `exam
       <cluster name="cluster_black_macro" background="cluster_sm2_background_macro" />
       <regions>
         <region name="example_sm_asteroids_macro">
-          <position x="0" y="-20000" z="0" />
+          <position x="0" y="-2500" z="0" />
         </region>
       </regions>
     </scene>
@@ -315,7 +336,8 @@ Some points about the example:
 - **The scene appears under the extension's name** in Settings, Game, "Start Menu Background Scene". It does not replace the default; a scene that should is a `replace` of the default entry, as the expansions do, and then it competes with the expansions that replace the same entry.
 - **A vanilla region** can be placed instead of a new one: the macro names a vanilla definition in `ref`, and `region_definitions.xml` is not needed.
 - **The index path** is the extension's folder name and the file without its extension.
-- **A scene object of its own** replaces `startmenu_final_macro` in the cutscene with a macro of the extension's, of class `cutsceneanchor`, with its component and the geometry exported for it. The cutscene and the scene entry stay as they are.
+- **A scene object of its own** replaces `startmenu_final_macro` in the cutscene with a macro of the extension's, of class `cutsceneanchor`, with its component and the geometry exported for it, both in the extension's `assets/` tree with entries added to `index/macros.xml` and `index/components.xml`. It has to include a playable ship, as the vanilla ones do. The cutscene and the scene entry stay as they are.
+- **The region's position** is minus half its `linear`, so the cylinder is centred on the scene.
 
 The extension itself, its folder, `content.xml` and diff files, is covered in [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/) and [XML diff patching](/x4/modding-support/anatomy-of-an-extension/xml-diff-patching/).
 
