@@ -1,5 +1,5 @@
 {
-  "through": "985fc8205c0dd49d2e2805739b7d00c0f0c97d82",
+  "through": "f56b1a52a70056a370e7e2d5c79d1dff4d57b4d9",
   "days": [
     {
       "date": "2026-10-15",
@@ -27,7 +27,8 @@
           "kind": "new",
           "lines": [
             "introduce the Anatomy of game data section with the libraries article",
-            "add the gamestarts.xml and startmenu.xml articles, with Start menu background"
+            "add the gamestarts.xml and startmenu.xml articles, with Start menu background",
+            "add the factions.xml and races.xml articles"
           ]
         },
         {
@@ -35,7 +36,8 @@
           "title": "god.xml",
           "kind": "gone",
           "lines": [
-            "move jobs.xml and god.xml under Anatomy of game data, libraries"
+            "move jobs.xml and god.xml under Anatomy of game data, libraries",
+            "add the factions.xml and races.xml articles"
           ]
         },
         {
@@ -43,7 +45,8 @@
           "title": "jobs.xml",
           "kind": "gone",
           "lines": [
-            "move jobs.xml and god.xml under Anatomy of game data, libraries"
+            "move jobs.xml and god.xml under Anatomy of game data, libraries",
+            "add the factions.xml and races.xml articles"
           ]
         },
         {
@@ -51,7 +54,8 @@
           "title": "gamestarts.xml",
           "kind": "new",
           "lines": [
-            "add the gamestarts.xml and startmenu.xml articles, with Start menu background"
+            "add the gamestarts.xml and startmenu.xml articles, with Start menu background",
+            "add the factions.xml and races.xml articles"
           ]
         },
         {
@@ -60,7 +64,8 @@
           "kind": "new",
           "lines": [
             "add the gamestarts.xml and startmenu.xml articles, with Start menu background",
-            "fixed startmenu.xml with Start menu background articles"
+            "fixed startmenu.xml with Start menu background articles",
+            "add the factions.xml and races.xml articles"
           ]
         },
         {
@@ -69,7 +74,24 @@
           "kind": "new",
           "lines": [
             "add the gamestarts.xml and startmenu.xml articles, with Start menu background",
-            "fixed startmenu.xml with Start menu background articles"
+            "fixed startmenu.xml with Start menu background articles",
+            "add the factions.xml and races.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/factions-xml/",
+          "title": "factions.xml",
+          "kind": "new",
+          "lines": [
+            "add the factions.xml and races.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/races-xml/",
+          "title": "races.xml",
+          "kind": "new",
+          "lines": [
+            "add the factions.xml and races.xml articles"
           ]
         }
       ]
