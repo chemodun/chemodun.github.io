@@ -1,7 +1,6 @@
 ---
 title: startmenu.xml
 description: How libraries/startmenu.xml lists the background scenes of the X4 start menu - the default scene, each scene's cutscene, music, map, background cluster, regions and unlock - how the expansions change it, how the player picks a scene, and how an extension adds one.
-order: 4
 ---
 
 # startmenu.xml

@@ -62,8 +62,8 @@ Who lives in the universe, and the crews that fly it.
 
 | File | Root | Holds | Expansions |
 | --- | --- | --- | --- |
-| `factions.xml` | `<factions>` | Every faction: name, race, colour and icon, account, licences, relations to the others and the signals it reacts to; the file's comment carries the relation ranges for ally, friend, neutral and enemy | diff |
-| `races.xml` | `<races>` | The races: name, icon, relations, and per-race settings for characters, agents, spacesuits, engine effects, trails and flight speed | |
+| [`factions.xml`](/x4/modding-support/anatomy-of-game-data/libraries/factions-xml/) | `<factions>` | Every faction: name, race, colour and icon, account, licences, relations to the others and the signals it reacts to; the linked article covers it in full | diff |
+| [`races.xml`](/x4/modding-support/anatomy-of-game-data/libraries/races-xml/) | `<races>` | The races: name and name pool, icon, relations, and per-race settings for characters, agents, spacesuits, engine effects and trails; the linked article covers it in full | |
 | `diplomacy.xml` | `<diplomacy>` | The diplomacy system: actions, events, gifts, the experience and rank tables, and the influence cost curve | diff |
 | `characters.xml` | `<characters>` | The character table for selection by faction, entity type and tags; each entry names a character macro and its categories | diff |
 | `charactergroups.xml` | `<characters>` | Named groups of character macros | diff |

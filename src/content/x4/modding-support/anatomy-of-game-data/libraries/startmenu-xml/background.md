@@ -132,7 +132,7 @@ The macro has class `cutsceneanchor`. It names its component and fills the compo
 
 Each connection holds an ordinary game macro: a ship, a gate, a station module, an asteroid, or, in the Pirate scenes, a whole landmark station. Because the scene names a ship by its macro, the game fits the ship's equipment, weapons and shields itself and matches the engine flames to the ship's speed, so none of it has to be built into the scene. A ship can also be given a macro made for the start menu only, for a particular loadout.
 
-**A scene object has to include a playable ship**, or the start menu loads blank. Every vanilla scene object has small player-class ships among its connections: `ship_arg_s_scout_01_a_macro`, `ship_arg_s_fighter_02_a_macro` and `ship_par_s_fighter_01_a_macro` in all of them but the Timelines one, which has `ship_gen_s_racer_01_a_macro`.
+**A scene object has to include a playable ship** for the custom game starts. The start menu itself shows a scene without one, but the Custom Game editor of the two custom starts then has black screens where the player picks and equips ships, and the log reports that a room was not found. Every vanilla scene object has small player-class ships among its connections: `ship_arg_s_scout_01_a_macro`, `ship_arg_s_fighter_02_a_macro` and `ship_par_s_fighter_01_a_macro` in all of them but the Timelines one, which has `ship_gen_s_racer_01_a_macro`.
 
 ### The component
 
@@ -336,7 +336,7 @@ Some points about the example:
 - **The scene appears under the extension's name** in Settings, Game, "Start Menu Background Scene". It does not replace the default; a scene that should is a `replace` of the default entry, as the expansions do, and then it competes with the expansions that replace the same entry.
 - **A vanilla region** can be placed instead of a new one: the macro names a vanilla definition in `ref`, and `region_definitions.xml` is not needed.
 - **The index path** is the extension's folder name and the file without its extension.
-- **A scene object of its own** replaces `startmenu_final_macro` in the cutscene with a macro of the extension's, of class `cutsceneanchor`, with its component and the geometry exported for it, both in the extension's `assets/` tree with entries added to `index/macros.xml` and `index/components.xml`. It has to include a playable ship, as the vanilla ones do. The cutscene and the scene entry stay as they are.
+- **A scene object of its own** replaces `startmenu_final_macro` in the cutscene with a macro of the extension's, of class `cutsceneanchor`, with its component and the geometry exported for it, both in the extension's `assets/` tree with entries added to `index/macros.xml` and `index/components.xml`. It has to include a playable ship, as the vanilla ones do, or the Custom Game editor's ship screens stay black. The cutscene and the scene entry stay as they are.
 - **The region's position** is minus half its `linear`, so the cylinder is centred on the scene.
 
 The extension itself, its folder, `content.xml` and diff files, is covered in [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/) and [XML diff patching](/x4/modding-support/anatomy-of-an-extension/xml-diff-patching/).

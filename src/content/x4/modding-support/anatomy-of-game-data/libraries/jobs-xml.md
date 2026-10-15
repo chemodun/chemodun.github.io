@@ -1,7 +1,6 @@
 ---
 title: jobs.xml
 description: How libraries/jobs.xml keeps the universe's NPC ships in place - the job format, quotas and locations, how the job engine populates, replaces and retires job ships, what an extension needs to add jobs, and the script actions, events and properties that work with them.
-order: 2
 movedFrom: /x4/modding-support/jobs-xml/
 ---
 

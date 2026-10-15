@@ -1,7 +1,6 @@
 ---
 title: god.xml
 description: How libraries/god.xml places stations, factories and objects (and, in some Timelines scenarios, ships) - the entry format, quotas and locations, when the game generates from it, what an extension needs to add entries, and the script actions and properties that work with them.
-order: 1
 movedFrom: /x4/modding-support/god-xml/
 ---
 

@@ -1,7 +1,6 @@
 ---
 title: gamestarts.xml
 description: How libraries/gamestarts.xml defines every game start - the menu entry, the cutscene and intro, the start location, the player and the universe settings - what god.xml and the MD scripts add for a start, the custom game starts and scenarios, the script side, and how an extension adds a start of its own.
-order: 3
 ---
 
 # gamestarts.xml
