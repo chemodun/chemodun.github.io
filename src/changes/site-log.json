@@ -1,5 +1,5 @@
 {
-  "through": "976662c8cad863fc9fac14e63274f8be04ec839c",
+  "through": "985fc8205c0dd49d2e2805739b7d00c0f0c97d82",
   "days": [
     {
       "date": "2026-10-15",
@@ -59,7 +59,8 @@
           "title": "Start menu background",
           "kind": "new",
           "lines": [
-            "add the gamestarts.xml and startmenu.xml articles, with Start menu background"
+            "add the gamestarts.xml and startmenu.xml articles, with Start menu background",
+            "fixed startmenu.xml with Start menu background articles"
           ]
         },
         {
@@ -67,7 +68,8 @@
           "title": "startmenu.xml",
           "kind": "new",
           "lines": [
-            "add the gamestarts.xml and startmenu.xml articles, with Start menu background"
+            "add the gamestarts.xml and startmenu.xml articles, with Start menu background",
+            "fixed startmenu.xml with Start menu background articles"
           ]
         }
       ]
