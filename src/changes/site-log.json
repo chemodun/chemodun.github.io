@@ -1,5 +1,5 @@
 {
-  "through": "c101f58bbdf349f464b2dff6e4be01cff37f5a4f",
+  "through": "976662c8cad863fc9fac14e63274f8be04ec839c",
   "days": [
     {
       "date": "2026-10-15",
@@ -17,7 +17,8 @@
           "title": "Anatomy of game data",
           "kind": "new",
           "lines": [
-            "introduce the Anatomy of game data section with the libraries article"
+            "introduce the Anatomy of game data section with the libraries article",
+            "add the gamestarts.xml and startmenu.xml articles, with Start menu background"
           ]
         },
         {
@@ -25,7 +26,8 @@
           "title": "libraries",
           "kind": "new",
           "lines": [
-            "introduce the Anatomy of game data section with the libraries article"
+            "introduce the Anatomy of game data section with the libraries article",
+            "add the gamestarts.xml and startmenu.xml articles, with Start menu background"
           ]
         },
         {
@@ -42,6 +44,30 @@
           "kind": "gone",
           "lines": [
             "move jobs.xml and god.xml under Anatomy of game data, libraries"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/gamestarts-xml/",
+          "title": "gamestarts.xml",
+          "kind": "new",
+          "lines": [
+            "add the gamestarts.xml and startmenu.xml articles, with Start menu background"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/background/",
+          "title": "Start menu background",
+          "kind": "new",
+          "lines": [
+            "add the gamestarts.xml and startmenu.xml articles, with Start menu background"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/",
+          "title": "startmenu.xml",
+          "kind": "new",
+          "lines": [
+            "add the gamestarts.xml and startmenu.xml articles, with Start menu background"
           ]
         }
       ]
