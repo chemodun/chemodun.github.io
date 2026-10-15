@@ -37,29 +37,41 @@ function findBrowser() {
 // The window size is the viewport every measurement is taken against, so it is an
 // argument rather than a constant: a layout that is right at one width can be wrong at
 // another, which is the whole point of measuring.
-async function launch(exe, { width = 1280, height = 900 } = {}) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'x4docs-cdp-'));
-  const child = spawn(exe, [
-    '--headless=new', '--disable-gpu', '--no-sandbox', '--no-first-run',
-    '--no-default-browser-check', '--disable-extensions', '--disable-background-networking',
-    '--disable-search-engine-choice-screen', '--window-size=' + width + ',' + height,
-    '--user-data-dir=' + dir, '--remote-debugging-port=0', 'about:blank',
-  ], { stdio: ['ignore', 'ignore', 'pipe'] });
+//
+// A cold Chrome on a fresh CI runner can take well over ten seconds to open its
+// debugging port, with nothing on stderr to show for it, so the wait is long and a
+// launch that still does not answer is killed and tried once more before giving up.
+async function launch(exe, { width = 1280, height = 900, timeout = 60000, attempts = 2 } = {}) {
+  let last = '';
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'x4docs-cdp-'));
+    const child = spawn(exe, [
+      '--headless=new', '--disable-gpu', '--no-sandbox', '--no-first-run',
+      '--no-default-browser-check', '--disable-extensions', '--disable-background-networking',
+      '--disable-search-engine-choice-screen', '--window-size=' + width + ',' + height,
+      '--user-data-dir=' + dir, '--remote-debugging-port=0', 'about:blank',
+    ], { stdio: ['ignore', 'ignore', 'pipe'] });
 
-  let stderr = '';
-  child.stderr.on('data', (d) => { stderr += d; });
+    let stderr = '';
+    child.stderr.on('data', (d) => { stderr += d; });
 
-  // Chrome writes the chosen port and the browser endpoint here once it is up.
-  const portFile = path.join(dir, 'DevToolsActivePort');
-  for (let i = 0; i < 200; i++) {
-    if (child.exitCode !== null) throw new Error('browser exited (' + child.exitCode + ')\n' + stderr);
-    if (fs.existsSync(portFile)) {
-      const [port, endpoint] = fs.readFileSync(portFile, 'utf8').split('\n');
-      if (endpoint) return { child, dir, url: 'ws://127.0.0.1:' + port + endpoint.trim() };
+    // Chrome writes the chosen port and the browser endpoint here once it is up.
+    const portFile = path.join(dir, 'DevToolsActivePort');
+    const started = Date.now();
+    while (Date.now() - started < timeout) {
+      if (child.exitCode !== null) throw new Error('browser exited (' + child.exitCode + ')\n' + stderr);
+      if (fs.existsSync(portFile)) {
+        const [port, endpoint] = fs.readFileSync(portFile, 'utf8').split('\n');
+        if (endpoint) return { child, dir, url: 'ws://127.0.0.1:' + port + endpoint.trim() };
+      }
+      await wait(100);
     }
-    await wait(50);
+    child.kill();
+    last = 'attempt ' + attempt + ': browser did not open a debugging port in '
+      + Math.round(timeout / 1000) + 's' + (stderr ? '\n' + stderr : '');
+    console.error(last);
   }
-  throw new Error('browser did not open a debugging port in 10s\n' + stderr);
+  throw new Error(last);
 }
 
 function connect(url) {
