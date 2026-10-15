@@ -123,7 +123,7 @@ What the universe files under `maps/` refer to, and the defaults every object st
 
 | File | Root | Holds | Expansions |
 | --- | --- | --- | --- |
-| `gamestarts.xml` | `<gamestarts>` | Every game start: the player character, ships and property, location, known space and budgets, and the universe it runs in | diff |
+| [`gamestarts.xml`](/x4/modding-support/anatomy-of-game-data/libraries/gamestarts-xml/) | `<gamestarts>` | Every game start: the player character, ships and property, location, known space and budgets, and the universe it runs in; the linked article covers it in full | diff |
 | `missiongroups.xml` | `<missiongroups>` | The mission groups the generic missions belong to, by faction and enemy | whole |
 | `timeline.xml` | `<timeline>` | The history timeline the encyclopedia shows: dated entries with text, voice and video | |
 | `chapters.xml` | `<categories>` | Empty in the base game; filled by the ventures extension | |
@@ -132,7 +132,7 @@ What the universe files under `maps/` refer to, and the defaults every object st
 | `notificationtypes.xml` | `<notificationtypes>` | The notification categories and ids scripts raise, with their names | |
 | `voicesequences.xml` | `<voicesequences>` | Spoken sequences: delays and lines from a text page, by id | |
 | `news.xml` | `<news>` | The start menu news items, their icons and store links per platform | |
-| `startmenu.xml` | `<startmenu>` | The start menu background scenes: cutscene, music and map per scene | diff |
+| [`startmenu.xml`](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/) | `<startmenu>` | The start menu background scenes: cutscene, music and map per scene; the linked article covers it in full | diff |
 | `progressbar.xml` | `<progressbar>` | The expected duration of each loading step, for the loading bar | |
 | `influenceconfigurations.xml` | `<influencelistconfigurations>` | Status effects an object can be under (EMP, disabled boost or travel...), with their profile and duration per class | whole |
 
