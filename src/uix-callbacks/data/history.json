@@ -1,7 +1,7 @@
 {
  "repo": "kuertee/x4-mod-ui-extensions",
  "floor": "8.0.0.1",
- "generated": "2026-10-13",
+ "generated": "2026-10-16",
  "lines": {
   "8.x": [
    {
@@ -1025,6 +1025,36 @@
      }
     },
     "added": ["gameoptions::cleanup", "menu_crafting::cleanup", "menu_crafting::createCrafting_on_assemble_categories", "menu_crafting::createCrafting_on_create_category_rows", "menu_docked::display_on_create_turret_mode_dropdown", "menu_map::cleanup", "menu_map::setupLoadoutInfoSubmenuRows_on_create_turret_mode_dropdown"],
+    "removed": []
+   },
+   {
+    "tag": "9.0.0.18",
+    "name": "9.0.0.18",
+    "published": "2026-10-15",
+    "prerelease": false,
+    "counts": {
+     "files": 22,
+     "sites": 325,
+     "callbacks": 304,
+     "byAggregation": {
+      "none": 182,
+      "chained": 23,
+      "short-circuit": 15,
+      "last-wins": 69,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 182,
+      "override": 122
+     },
+     "byHolder": {
+      "menu": 287,
+      "uix_menu": 1,
+      "Helper": 16
+     }
+    },
+    "added": ["menu_map::createContextFrame_on_custom_mode", "menu_map::onUpdate_on_end", "menu_map::refreshContextFrame_on_custom_mode", "menu_playerinfo::getEmployeeList_on_end"],
     "removed": []
    }
   ]
