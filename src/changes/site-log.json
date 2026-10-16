@@ -1,6 +1,27 @@
 {
-  "through": "09412993c83b7337610e908ae582b7eb7c723f73",
+  "through": "8bb8e781045780c76acb7a19844e79d41f065d75",
   "days": [
+    {
+      "date": "2026-10-17",
+      "pages": [
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/",
+          "title": "libraries",
+          "kind": "",
+          "lines": [
+            "add the parameters.xml article"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/parameters-xml/",
+          "title": "parameters.xml",
+          "kind": "new",
+          "lines": [
+            "add the parameters.xml article"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-10-16",
       "pages": [
