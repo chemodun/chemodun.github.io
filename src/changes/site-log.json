@@ -1,5 +1,5 @@
 {
-  "through": "a18c8d5ed326efb0521cf699215dd43caf4ede6e",
+  "through": "09412993c83b7337610e908ae582b7eb7c723f73",
   "days": [
     {
       "date": "2026-10-16",
@@ -20,7 +20,8 @@
             "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles",
             "add the people.xml and stats.xml articles",
             "add the loadoutrules.xml and quotas.xml articles",
-            "add the objectspawnrules.xml and objectspawnpoints.xml article"
+            "add the objectspawnrules.xml and objectspawnpoints.xml article",
+            "add the diplomacy.xml article"
           ]
         },
         {
@@ -93,6 +94,14 @@
           "kind": "new",
           "lines": [
             "add the objectspawnrules.xml and objectspawnpoints.xml article"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/diplomacy-xml/",
+          "title": "diplomacy.xml",
+          "kind": "new",
+          "lines": [
+            "add the diplomacy.xml article"
           ]
         }
       ]
