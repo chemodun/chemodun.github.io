@@ -1,5 +1,5 @@
 {
-  "through": "5293199671afe540744b8d7841a6d184ff60be33",
+  "through": "0bdd258bcd23eec36a872111215804dacada2df8",
   "days": [
     {
       "date": "2026-10-16",
@@ -59,6 +59,14 @@
           "kind": "new",
           "lines": [
             "add the people.xml and stats.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/ui-modding/uix-callbacks/",
+          "title": "UIX callbacks",
+          "kind": "",
+          "lines": [
+            "cover UIX 9.0.0.18"
           ]
         }
       ]
