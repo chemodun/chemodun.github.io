@@ -1,5 +1,5 @@
 {
-  "through": "4d637872eabe81aa69f526ecedf8df9c003fbbf2",
+  "through": "5293199671afe540744b8d7841a6d184ff60be33",
   "days": [
     {
       "date": "2026-10-16",
@@ -17,7 +17,8 @@
           "title": "libraries",
           "kind": "",
           "lines": [
-            "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles"
+            "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles",
+            "add the people.xml and stats.xml articles"
           ]
         },
         {
@@ -42,6 +43,22 @@
           "kind": "new",
           "lines": [
             "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/people-xml/",
+          "title": "people.xml",
+          "kind": "new",
+          "lines": [
+            "add the people.xml and stats.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/stats-xml/",
+          "title": "stats.xml",
+          "kind": "new",
+          "lines": [
+            "add the people.xml and stats.xml articles"
           ]
         }
       ]
