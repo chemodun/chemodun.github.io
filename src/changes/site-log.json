@@ -1,5 +1,5 @@
 {
-  "through": "0bdd258bcd23eec36a872111215804dacada2df8",
+  "through": "974434134a052ec51b4959ac7f4158be3d9dcdfe",
   "days": [
     {
       "date": "2026-10-16",
@@ -18,7 +18,8 @@
           "kind": "",
           "lines": [
             "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles",
-            "add the people.xml and stats.xml articles"
+            "add the people.xml and stats.xml articles",
+            "add the loadoutrules.xml and quotas.xml articles"
           ]
         },
         {
@@ -67,6 +68,22 @@
           "kind": "",
           "lines": [
             "cover UIX 9.0.0.18"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/loadoutrules-xml/",
+          "title": "loadoutrules.xml",
+          "kind": "new",
+          "lines": [
+            "add the loadoutrules.xml and quotas.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/quotas-xml/",
+          "title": "quotas.xml",
+          "kind": "new",
+          "lines": [
+            "add the loadoutrules.xml and quotas.xml articles"
           ]
         }
       ]
