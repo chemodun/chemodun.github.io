@@ -34,7 +34,7 @@ What exists in the universe and what it is made of.
 | `waregroups.xml` | `<groups>` | The ware groups (agricultural, energy, food, hightech...), each with its name, icons and tier | |
 | `baskets.xml` | `<baskets>` | Named ware baskets, from a single ware up to a faction's whole trade list; what a trade job or a trader stock refers to | diff |
 | `stock.xml` | `<stocks>` | What an NPC trader of a given faction and entity type carries, as wares or baskets with min, max and chance | diff |
-| `drops.xml` | `<droplists>` | Drop lists: what a destroyed object or an opened lockbox leaves behind | whole |
+| [`drops.xml`](/x4/modding-support/anatomy-of-game-data/libraries/drops-xml/) | `<droplists>` | Drop lists: what a destroyed ship, a mined asteroid or an opened lockbox leaves behind, built from reusable ware and ammunition baskets; the linked article covers it in full | whole |
 | `ships.xml` | `<ships>` | The ship table used to select ships by faction, size and tags: each entry names a macro and its categories | whole |
 | `shipgroups.xml` | `<groups>` | Named groups of ship macros per faction and role (`arg_builder_xl`, ...), the `select` targets jobs and god entries use | whole |
 | `stations.xml` | `<stations>` | The station table for selection by faction and tags: each entry names a station group and its categories | both |
@@ -95,7 +95,7 @@ What the game places at the start of a game and keeps in place afterwards.
 | `objectspawnrules.xml` | `<objectspawnrules>` | Which drop a station or region spawns, by owner, type and hazard, first matching rule wins | |
 | `targetpoints.xml` | `<targetpoints>` | Points on a module macro that a scan or a similar action targets | |
 | `infounlocklist.xml` | `<infounlocklist>` | Which information about an object unlocks at which scan level, by secrecy level | |
-| `unlocks.xml` | `<unlocks>` | Discounts, commissions and blueprint unlocks a station can offer, with the conditions for each | |
+| [`unlocks.xml`](/x4/modding-support/anatomy-of-game-data/libraries/unlocks-xml/) | `<unlocks>` | Discounts, commissions and blueprint unlocks a station scan can reveal, with the conditions, amount and duration of each; the linked article covers it in full | |
 
 [↑ Contents](#toc)
 
@@ -124,12 +124,12 @@ What the universe files under `maps/` refer to, and the defaults every object st
 | File | Root | Holds | Expansions |
 | --- | --- | --- | --- |
 | [`gamestarts.xml`](/x4/modding-support/anatomy-of-game-data/libraries/gamestarts-xml/) | `<gamestarts>` | Every game start: the player character, ships and property, location, known space and budgets, and the universe it runs in; the linked article covers it in full | diff |
-| `missiongroups.xml` | `<missiongroups>` | The mission groups the generic missions belong to, by faction and enemy | whole |
+| [`missiongroups.xml`](/x4/modding-support/anatomy-of-game-data/libraries/missiongroups-xml/) | `<missiongroups>` | The mission groups offers are sorted into in the mission menu: guilds, wars, stories and game starts, each with its faction and enemy; the linked article covers it in full | whole |
 | `timeline.xml` | `<timeline>` | The history timeline the encyclopedia shows: dated entries with text, voice and video | |
 | `chapters.xml` | `<categories>` | Empty in the base game; filled by the ventures extension | |
 | `terraforming.xml` | `<terraforming>` | Terraforming: the planet stats and their ranges, the project groups and the projects with their resources and effects | diff |
 | `stats.xml` | `<stats>` | The statistics the game tracks (time played, distance flown, trades, missions, diplomacy, terraforming...), each with its name text and units | |
-| `notificationtypes.xml` | `<notificationtypes>` | The notification categories and ids scripts raise, with their names | |
+| [`notificationtypes.xml`](/x4/modding-support/anatomy-of-game-data/libraries/notificationtypes-xml/) | `<notificationtypes>` | The notification types the player can switch off in the settings, in three categories, which scripts check before showing a message; the linked article covers it in full | |
 | `voicesequences.xml` | `<voicesequences>` | Spoken sequences: delays and lines from a text page, by id | |
 | `news.xml` | `<news>` | The start menu news items, their icons and store links per platform | |
 | [`startmenu.xml`](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/) | `<startmenu>` | The start menu background scenes: cutscene, music and map per scene; the linked article covers it in full | diff |
