@@ -1,5 +1,5 @@
 {
-  "through": "974434134a052ec51b4959ac7f4158be3d9dcdfe",
+  "through": "a18c8d5ed326efb0521cf699215dd43caf4ede6e",
   "days": [
     {
       "date": "2026-10-16",
@@ -19,7 +19,8 @@
           "lines": [
             "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles",
             "add the people.xml and stats.xml articles",
-            "add the loadoutrules.xml and quotas.xml articles"
+            "add the loadoutrules.xml and quotas.xml articles",
+            "add the objectspawnrules.xml and objectspawnpoints.xml article"
           ]
         },
         {
@@ -84,6 +85,14 @@
           "kind": "new",
           "lines": [
             "add the loadoutrules.xml and quotas.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/objectspawnrules-xml/",
+          "title": "objectspawnrules.xml",
+          "kind": "new",
+          "lines": [
+            "add the objectspawnrules.xml and objectspawnpoints.xml article"
           ]
         }
       ]
