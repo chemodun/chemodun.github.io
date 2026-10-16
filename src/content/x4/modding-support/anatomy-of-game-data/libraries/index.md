@@ -142,7 +142,7 @@ What the universe files under `maps/` refer to, and the defaults every object st
 
 | File | Root | Holds | Expansions |
 | --- | --- | --- | --- |
-| `parameters.xml` | `<parameters>` | The game's tuning numbers in one place: player and AI flight, combat, first person, prices, skills and much more, one section per subject | diff |
+| [`parameters.xml`](/x4/modding-support/anatomy-of-game-data/libraries/parameters-xml/) | `<parameters>` | The game's tuning numbers in one place: player and AI flight, combat, first person, prices, skills and much more, one section per subject, plus the `scriptparams` table the scripts read through the `param` keyword; the linked article covers it in full | diff |
 | `behaviours.xml` | `<behaviours>` | Dogfight behaviour sets: which manoeuvres an AI pilot may pick in normal and evasive flight, with chance and minimum skill | |
 | `camerasettings.xml` | `<camerasettings>` | Follow camera speed and offsets per ship class | whole |
 | `aicompat.xml` | `<compatibility>` | For each AI script and version, where a script running in a save may be resumed after the script changed; the game's own save compatibility table for `aiscripts/` | |
