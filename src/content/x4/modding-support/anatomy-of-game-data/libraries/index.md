@@ -69,7 +69,7 @@ Who lives in the universe, and the crews that fly it.
 | `charactergroups.xml` | `<characters>` | Named groups of character macros | diff |
 | `character_components.xml`, `character_macros.xml` | `<components>`, `<macros>` | The character components and macros themselves, with the body parts, faces, animations and identification each is built from; the same shape as the components and macros under `assets/` | whole |
 | `bodypartgroups.xml` | `<bodypartgroups>` | The named groups a body part belongs to (casual, terran) | |
-| `people.xml` | `<peopledefinitions>` | Crew populations: for each definition, how full a ship's crew is and which roles are drawn from which factions and tags | whole |
+| [`people.xml`](/x4/modding-support/anatomy-of-game-data/libraries/people-xml/) | `<peopledefinitions>` | Crew populations: for each definition, how full a ship's crew is and which roles are drawn from which factions and tags; the linked article covers it in full | whole |
 | `entitytypes.xml` | `<entitytypes>` | The entity types an NPC can be (officer, trader, faction representative, shady guy, crowd, agent), with names and icons | |
 | `posts.xml` | `<posts>` | The control posts on a ship or station (pilot, manager, defence...), which skills each weighs and who may hold it | |
 | `roles.xml` | `<roles>` | The crew roles (service, marine, passenger, prisoner, worker, unassigned), the skills each weighs and its tier names | |
@@ -128,7 +128,7 @@ What the universe files under `maps/` refer to, and the defaults every object st
 | `timeline.xml` | `<timeline>` | The history timeline the encyclopedia shows: dated entries with text, voice and video | |
 | `chapters.xml` | `<categories>` | Empty in the base game; filled by the ventures extension | |
 | `terraforming.xml` | `<terraforming>` | Terraforming: the planet stats and their ranges, the project groups and the projects with their resources and effects | diff |
-| `stats.xml` | `<stats>` | The statistics the game tracks (time played, distance flown, trades, missions, diplomacy, terraforming...), each with its name text and units | |
+| [`stats.xml`](/x4/modding-support/anatomy-of-game-data/libraries/stats-xml/) | `<stats>` | The statistics the game tracks (time played, distance flown, trades, missions, diplomacy, terraforming...), each with its name text and units; the linked article covers it in full | |
 | [`notificationtypes.xml`](/x4/modding-support/anatomy-of-game-data/libraries/notificationtypes-xml/) | `<notificationtypes>` | The notification types the player can switch off in the settings, in three categories, which scripts check before showing a message; the linked article covers it in full | |
 | `voicesequences.xml` | `<voicesequences>` | Spoken sequences: delays and lines from a text page, by id | |
 | `news.xml` | `<news>` | The start menu news items, their icons and store links per platform | |
