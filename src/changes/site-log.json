@@ -1,6 +1,51 @@
 {
-  "through": "f56b1a52a70056a370e7e2d5c79d1dff4d57b4d9",
+  "through": "4d637872eabe81aa69f526ecedf8df9c003fbbf2",
   "days": [
+    {
+      "date": "2026-10-16",
+      "pages": [
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/drops-xml/",
+          "title": "drops.xml",
+          "kind": "new",
+          "lines": [
+            "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/",
+          "title": "libraries",
+          "kind": "",
+          "lines": [
+            "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/missiongroups-xml/",
+          "title": "missiongroups.xml",
+          "kind": "new",
+          "lines": [
+            "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/notificationtypes-xml/",
+          "title": "notificationtypes.xml",
+          "kind": "new",
+          "lines": [
+            "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/unlocks-xml/",
+          "title": "unlocks.xml",
+          "kind": "new",
+          "lines": [
+            "add the drops.xml, unlocks.xml, missiongroups.xml and notificationtypes.xml articles"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-10-15",
       "pages": [
