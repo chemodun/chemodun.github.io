@@ -44,7 +44,7 @@ What exists in the universe and what it is made of.
 | `modulegroups.xml` | `<groups>` | Named groups of module macros by purpose, used when a station is built up from parts | whole |
 | `modulesets.xml` | `<modulesets>` | The station kinds a faction can build (factory, wharf, shipyard...), which races get each, and whether a construction vessel is required | whole |
 | `loadouts.xml` | `<loadouts>` | Named ship loadouts: engines, shields, weapons, software and consumables for a given macro | whole |
-| `loadoutrules.xml` | `<rules>` | Which drone and deployable macros of which mark a unit may carry (transport, defence, build, mine, repair, lasertower, satellite...), by category and tags | diff |
+| [`loadoutrules.xml`](/x4/modding-support/anatomy-of-game-data/libraries/loadoutrules-xml/) | `<rules>` | Which drone and deployable macros of which mark a unit may carry (transport, defence, build, mine, repair, lasertower, satellite...), by category and tags; the linked article covers it in full | diff |
 | `equipmentcompatibilities.xml` | `<compatibilitytypes>` | The compatibility classes equipment and slots share (standard, missile, mining, highpower, venture...) | |
 | `equipmentmods.xml` | `<equipmentmods>` | Equipment modifications: for each weapon, engine, ship and shield mod ware, the bonus ranges by quality | diff |
 | `paintmods.xml` | `<paintmods>` | Paint modifications: hue, brightness, metal, dirt and pattern per paint ware | |
@@ -90,7 +90,7 @@ What the game places at the start of a game and keeps in place afterwards.
 | --- | --- | --- | --- |
 | [`god.xml`](/x4/modding-support/anatomy-of-game-data/libraries/god-xml/) | `<god>` | What the god engine places: stations, products, objects and landmarks, with quotas and locations; the linked article covers it in full | diff |
 | [`jobs.xml`](/x4/modding-support/anatomy-of-game-data/libraries/jobs-xml/) | `<jobs>` | What the job engine keeps flying: every NPC ship job with its ship, orders, quota and location; the linked article covers it in full | both |
-| `quotas.xml` | `<quotas>` | Galaxy-wide limits on offers (trade, fight, build, think) per zone, with overrides per cluster, sector and zone | |
+| [`quotas.xml`](/x4/modding-support/anatomy-of-game-data/libraries/quotas-xml/) | `<quotas>` | Galaxy-wide limits on offers (trade, fight, build, think) per zone, with overrides per cluster, sector and zone; the linked article covers it in full | |
 | `objectspawnpoints.xml` | `<objectspawnpoints>` | Fixed positions on a module or object macro where a lockbox or similar may be spawned | |
 | `objectspawnrules.xml` | `<objectspawnrules>` | Which drop a station or region spawns, by owner, type and hazard, first matching rule wins | |
 | `targetpoints.xml` | `<targetpoints>` | Points on a module macro that a scan or a similar action targets | |
