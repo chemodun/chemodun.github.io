@@ -1,6 +1,27 @@
 {
-  "through": "8bb8e781045780c76acb7a19844e79d41f065d75",
+  "through": "8cb3d778bbf830f37d24be5300cb9f926af16bfe",
   "days": [
+    {
+      "date": "2026-10-18",
+      "pages": [
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/",
+          "title": "libraries",
+          "kind": "",
+          "lines": [
+            "update terraforming.xml documentation and add new article"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/terraforming-xml/",
+          "title": "terraforming.xml",
+          "kind": "new",
+          "lines": [
+            "update terraforming.xml documentation and add new article"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-10-17",
       "pages": [
