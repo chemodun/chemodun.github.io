@@ -127,7 +127,7 @@ What the universe files under `maps/` refer to, and the defaults every object st
 | [`missiongroups.xml`](/x4/modding-support/anatomy-of-game-data/libraries/missiongroups-xml/) | `<missiongroups>` | The mission groups offers are sorted into in the mission menu: guilds, wars, stories and game starts, each with its faction and enemy; the linked article covers it in full | whole |
 | `timeline.xml` | `<timeline>` | The history timeline the encyclopedia shows: dated entries with text, voice and video | |
 | `chapters.xml` | `<categories>` | Empty in the base game; filled by the ventures extension | |
-| `terraforming.xml` | `<terraforming>` | Terraforming: the planet stats and their ranges, the project groups and the projects with their resources and effects | diff |
+| [`terraforming.xml`](/x4/modding-support/anatomy-of-game-data/libraries/terraforming-xml/) | `<terraforming>` | Terraforming: the planet stats and their ranges, the project groups and the projects with their resources and effects; the linked article covers it in full | diff |
 | [`stats.xml`](/x4/modding-support/anatomy-of-game-data/libraries/stats-xml/) | `<stats>` | The statistics the game tracks (time played, distance flown, trades, missions, diplomacy, terraforming...), each with its name text and units; the linked article covers it in full | |
 | [`notificationtypes.xml`](/x4/modding-support/anatomy-of-game-data/libraries/notificationtypes-xml/) | `<notificationtypes>` | The notification types the player can switch off in the settings, in three categories, which scripts check before showing a message; the linked article covers it in full | |
 | `voicesequences.xml` | `<voicesequences>` | Spoken sequences: delays and lines from a text page, by id | |
