@@ -1,7 +1,7 @@
 {
  "repo": "kuertee/x4-mod-ui-extensions",
  "floor": "8.0.0.1",
- "generated": "2026-10-16",
+ "generated": "2026-10-27",
  "lines": {
   "8.x": [
    {
@@ -1055,6 +1055,36 @@
      }
     },
     "added": ["menu_map::createContextFrame_on_custom_mode", "menu_map::onUpdate_on_end", "menu_map::refreshContextFrame_on_custom_mode", "menu_playerinfo::getEmployeeList_on_end"],
+    "removed": []
+   },
+   {
+    "tag": "9.0.0.19.1",
+    "name": "9.0.0.19.1",
+    "published": "2026-10-23",
+    "prerelease": false,
+    "counts": {
+     "files": 22,
+     "sites": 332,
+     "callbacks": 310,
+     "byAggregation": {
+      "none": 185,
+      "chained": 23,
+      "short-circuit": 15,
+      "last-wins": 72,
+      "multi-value": 14,
+      "unanimous": 1
+     },
+     "byKind": {
+      "event": 185,
+      "override": 125
+     },
+     "byHolder": {
+      "menu": 293,
+      "uix_menu": 1,
+      "Helper": 16
+     }
+    },
+    "added": ["menu_map::createPlotMode_after_size_sliders", "menu_map::getBuildMethodOptions", "menu_map::onRenderTargetSelect_on_plot_pick", "menu_map::utRenaming_createRenameContext_on_after_confirm_button", "menu_playerinfo::getBuildMethodOptions", "menu_station_configuration::getBuildMethodOptions"],
     "removed": []
    }
   ]
