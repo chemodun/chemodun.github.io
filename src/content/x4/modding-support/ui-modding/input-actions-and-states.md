@@ -72,9 +72,9 @@ The way to get it there is to ship a complete copy of a vanilla `ego_*` addon's 
 
 A new catalog is read when the game starts. Reloading the UI does not pick it up.
 
-## Example: a magnet watcher
+## Example: an input watcher
 
-A fictional extension `magnet_watch` reports how long the container magnet was held, and notes each pause, on the script side. Four files.
+A fictional extension `input_watch` reports how long the container magnet was held to the script side, and counts pauses on the Lua side. The split is deliberate: scripts do not run while the game is paused, so a reaction to the pause itself has to live in Lua, while the magnet is released in a running game and the script side can take it from there. Four files.
 
 ### `ui.xml` of the extension
 
@@ -82,10 +82,10 @@ The extension's own addon file, registering its Lua as usual:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<addon name="magnet_watch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<addon name="input_watch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="../../ui/core/addon.xsd">
   <environment type="menus">
-    <file name="ui/magnet_watch.lua" />
+    <file name="ui/input_watch.lua" />
   </environment>
 </addon>
 ```
@@ -99,7 +99,7 @@ The vanilla file with one group added. It is the whole file:
 <addon name="ego_targetmonitor" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../core/coreaddon.xsd">
   <environment type="menus">
     <file name="targetmonitor.lua" />
-    <bindinggroup id="magnetwatch" context="INPUT_CONTEXT_BASE" alwaysactive="true">
+    <bindinggroup id="inputwatch" context="INPUT_CONTEXT_BASE" alwaysactive="true">
       <binding state="INPUT_STATE_LOOTMAGNET" />
       <binding action="INPUT_ACTION_PAUSE" />
     </bindinggroup>
@@ -109,7 +109,7 @@ The vanilla file with one group added. It is the whole file:
 
 The catalog holds that one entry at that path.
 
-### `ui/magnet_watch.lua`
+### `ui/input_watch.lua`
 
 ```lua
 local ffi = require("ffi")
@@ -118,29 +118,33 @@ ffi.cdef[[
   const char* GetMappedInputName(const char* functionkey);
 ]]
 
-local magnetWatch = {
+local inputWatch = {
   heldSince = nil,
+  pauses = 0,
+  lastPause = nil,
 }
 
 local function onHotkey(id, active)
   if id == "INPUT_STATE_LOOTMAGNET" then
     if active then
-      magnetWatch.heldSince = getElapsedTime()
-    elseif magnetWatch.heldSince then
-      local held = getElapsedTime() - magnetWatch.heldSince
-      magnetWatch.heldSince = nil
-      AddUITriggeredEvent("MagnetWatch", "released", held)
+      inputWatch.heldSince = getElapsedTime()
+    elseif inputWatch.heldSince then
+      local held = getElapsedTime() - inputWatch.heldSince
+      inputWatch.heldSince = nil
+      AddUITriggeredEvent("InputWatch", "released", held)
     end
   elseif id == "INPUT_ACTION_PAUSE" then
-    -- an action arrives once, with active == true
-    AddUITriggeredEvent("MagnetWatch", "paused", 0)
+    -- an action arrives once, with active == true; the game is already
+    -- paused here, so this stays on the Lua side
+    inputWatch.pauses = inputWatch.pauses + 1
+    inputWatch.lastPause = getElapsedTime()
   end
 end
 
 local function init()
   SetScript("onHotkey", onHotkey)
   -- the key the player has mapped, for any text that names it
-  magnetWatch.keyName = ffi.string(C.GetMappedInputName("INPUT_STATE_LOOTMAGNET"))
+  inputWatch.keyName = ffi.string(C.GetMappedInputName("INPUT_STATE_LOOTMAGNET"))
 end
 
 init()
@@ -148,35 +152,27 @@ init()
 
 `getElapsedTime()` is real time, so a pause does not stretch the measured hold. The key name is read once for a display text; the `$INPUT_STATE_LOOTMAGNET$` placeholder inside a text page entry resolves to the same name when the text is read, as the game's own tutorial lines do.
 
-### `md/magnet_watch.xml`
+### `md/input_watch.xml`
 
-The script side receives both events. A cue per control keeps each reaction small:
+The script side receives the magnet event:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<mdscript name="MagnetWatch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+<mdscript name="InputWatch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <cues>
     <cue name="MagnetReleased" instantiate="true">
       <conditions>
-        <event_ui_triggered screen="'MagnetWatch'" control="'released'" />
+        <event_ui_triggered screen="'InputWatch'" control="'released'" />
       </conditions>
       <actions>
         <debug_text text="'magnet held for %s s'.[event.param3]" filter="general" />
-      </actions>
-    </cue>
-    <cue name="Paused" instantiate="true">
-      <conditions>
-        <event_ui_triggered screen="'MagnetWatch'" control="'paused'" />
-      </conditions>
-      <actions>
-        <debug_text text="'pause pressed'" filter="general" />
       </actions>
     </cue>
   </cues>
 </mdscript>
 ```
 
-With the files in place and the game started, holding the magnet key in a ship writes the held time on release, the magnet itself attracts containers as before, and the pause key still pauses.
+With the files in place and the game started, holding the magnet key in a ship writes the held time on release, the magnet itself attracts containers as before, and each press of the pause key still pauses and is counted in Lua.
 
 ## What to expect
 
