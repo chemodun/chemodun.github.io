@@ -1,6 +1,19 @@
 {
-  "through": "8cb3d778bbf830f37d24be5300cb9f926af16bfe",
+  "through": "2644b783771e64e0629474f4be4a643a63c52429",
   "days": [
+    {
+      "date": "2026-10-28",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/input-actions-and-states/",
+          "title": "Catching input actions and states",
+          "kind": "new",
+          "lines": [
+            "add the Catching input actions and states article"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-10-18",
       "pages": [
