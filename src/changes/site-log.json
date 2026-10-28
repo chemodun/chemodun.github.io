@@ -1,5 +1,5 @@
 {
-  "through": "2644b783771e64e0629474f4be4a643a63c52429",
+  "through": "abd5dbf08ce3ff0bff5168b93a927c23fb48dc53",
   "days": [
     {
       "date": "2026-10-28",
@@ -10,6 +10,19 @@
           "kind": "new",
           "lines": [
             "add the Catching input actions and states article"
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-10-27",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/uix-callbacks/",
+          "title": "UIX callbacks",
+          "kind": "",
+          "lines": [
+            "cover UIX 9.0.0.19.1"
           ]
         }
       ]
