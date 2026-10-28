@@ -1,6 +1,32 @@
 {
-  "through": "8cb3d778bbf830f37d24be5300cb9f926af16bfe",
+  "through": "abd5dbf08ce3ff0bff5168b93a927c23fb48dc53",
   "days": [
+    {
+      "date": "2026-10-28",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/input-actions-and-states/",
+          "title": "Catching input actions and states",
+          "kind": "new",
+          "lines": [
+            "add the Catching input actions and states article"
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-10-27",
+      "pages": [
+        {
+          "path": "/x4/modding-support/ui-modding/uix-callbacks/",
+          "title": "UIX callbacks",
+          "kind": "",
+          "lines": [
+            "cover UIX 9.0.0.19.1"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-10-18",
       "pages": [
