@@ -1,5 +1,5 @@
 {
-  "through": "43994d83609a09ee3055160c78a7211f746f422b",
+  "through": "6409a9d9a7bb95609d2a6d905205b4831b1e8460",
   "days": [
     {
       "date": "2026-11-13",
@@ -9,7 +9,8 @@
           "title": "libraries",
           "kind": "",
           "lines": [
-            "add the timeline.xml and voicesequences.xml articles"
+            "add the timeline.xml and voicesequences.xml articles",
+            "add the influenceconfigurations.xml and stances.xml articles"
           ]
         },
         {
@@ -26,6 +27,22 @@
           "kind": "new",
           "lines": [
             "add the timeline.xml and voicesequences.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/influenceconfigurations-xml/",
+          "title": "influenceconfigurations.xml",
+          "kind": "new",
+          "lines": [
+            "add the influenceconfigurations.xml and stances.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/stances-xml/",
+          "title": "stances.xml",
+          "kind": "new",
+          "lines": [
+            "add the influenceconfigurations.xml and stances.xml articles"
           ]
         }
       ]
