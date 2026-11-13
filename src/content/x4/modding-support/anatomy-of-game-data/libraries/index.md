@@ -78,7 +78,7 @@ Who lives in the universe, and the crews that fly it.
 | `experiences.xml` | `<experiences>` | How much skill an event gives: for each experience id, the skills it trains for the individual and for the group, with base, falloff and limit | |
 | `npc_tools.xml` | `<tools>` | The props an NPC carries in an animation (tools, mugs) | |
 | `emotedb.xml` | `<emotes>` | The emotes a character animation can show | |
-| `stances.xml` | `<stances>` | Stances (empty in the base game) | |
+| [`stances.xml`](/x4/modding-support/anatomy-of-game-data/libraries/stances-xml/) | `<stances>` | Ship stances, the modes a ship can be switched into, each with an influence list, durations, a cooldown and tags; empty in the base game; the linked article covers it in full | whole |
 
 [↑ Contents](#toc)
 
@@ -134,7 +134,7 @@ What the universe files under `maps/` refer to, and the defaults every object st
 | `news.xml` | `<news>` | The start menu news items, their icons and store links per platform | |
 | [`startmenu.xml`](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/) | `<startmenu>` | The start menu background scenes: cutscene, music and map per scene; the linked article covers it in full | diff |
 | `progressbar.xml` | `<progressbar>` | The expected duration of each loading step, for the loading bar | |
-| `influenceconfigurations.xml` | `<influencelistconfigurations>` | Status effects an object can be under (EMP, disabled boost or travel...), with their profile and duration per class | whole |
+| [`influenceconfigurations.xml`](/x4/modding-support/anatomy-of-game-data/libraries/influenceconfigurations-xml/) | `<influencelistconfigurations>` | Status effects an object can be under (EMP, disabled boost or travel...), with their profile and duration per class; the linked article covers it in full | whole |
 
 [↑ Contents](#toc)
 
