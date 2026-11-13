@@ -125,12 +125,12 @@ What the universe files under `maps/` refer to, and the defaults every object st
 | --- | --- | --- | --- |
 | [`gamestarts.xml`](/x4/modding-support/anatomy-of-game-data/libraries/gamestarts-xml/) | `<gamestarts>` | Every game start: the player character, ships and property, location, known space and budgets, and the universe it runs in; the linked article covers it in full | diff |
 | [`missiongroups.xml`](/x4/modding-support/anatomy-of-game-data/libraries/missiongroups-xml/) | `<missiongroups>` | The mission groups offers are sorted into in the mission menu: guilds, wars, stories and game starts, each with its faction and enemy; the linked article covers it in full | whole |
-| `timeline.xml` | `<timeline>` | The history timeline the encyclopedia shows: dated entries with text, voice and video | |
+| [`timeline.xml`](/x4/modding-support/anatomy-of-game-data/libraries/timeline-xml/) | `<timeline>` | The history timeline the encyclopedia shows: dated entries with text, voice and video, grouped on the page and uncovered one by one; the linked article covers it in full | |
 | `chapters.xml` | `<categories>` | Empty in the base game; filled by the ventures extension | |
 | [`terraforming.xml`](/x4/modding-support/anatomy-of-game-data/libraries/terraforming-xml/) | `<terraforming>` | Terraforming: the planet stats and their ranges, the project groups and the projects with their resources and effects; the linked article covers it in full | diff |
 | [`stats.xml`](/x4/modding-support/anatomy-of-game-data/libraries/stats-xml/) | `<stats>` | The statistics the game tracks (time played, distance flown, trades, missions, diplomacy, terraforming...), each with its name text and units; the linked article covers it in full | |
 | [`notificationtypes.xml`](/x4/modding-support/anatomy-of-game-data/libraries/notificationtypes-xml/) | `<notificationtypes>` | The notification types the player can switch off in the settings, in three categories, which scripts check before showing a message; the linked article covers it in full | |
-| `voicesequences.xml` | `<voicesequences>` | Spoken sequences: delays and lines from a text page, by id | |
+| [`voicesequences.xml`](/x4/modding-support/anatomy-of-game-data/libraries/voicesequences-xml/) | `<voicesequences>` | Spoken sequences: delays and lines from a text page, by id, as the game starts and the Timeline play them; the linked article covers it in full | |
 | `news.xml` | `<news>` | The start menu news items, their icons and store links per platform | |
 | [`startmenu.xml`](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/) | `<startmenu>` | The start menu background scenes: cutscene, music and map per scene; the linked article covers it in full | diff |
 | `progressbar.xml` | `<progressbar>` | The expected duration of each loading step, for the loading bar | |
