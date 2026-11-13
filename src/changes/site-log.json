@@ -1,6 +1,35 @@
 {
-  "through": "abd5dbf08ce3ff0bff5168b93a927c23fb48dc53",
+  "through": "43994d83609a09ee3055160c78a7211f746f422b",
   "days": [
+    {
+      "date": "2026-11-13",
+      "pages": [
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/",
+          "title": "libraries",
+          "kind": "",
+          "lines": [
+            "add the timeline.xml and voicesequences.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/timeline-xml/",
+          "title": "timeline.xml",
+          "kind": "new",
+          "lines": [
+            "add the timeline.xml and voicesequences.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/voicesequences-xml/",
+          "title": "voicesequences.xml",
+          "kind": "new",
+          "lines": [
+            "add the timeline.xml and voicesequences.xml articles"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-10-28",
       "pages": [
