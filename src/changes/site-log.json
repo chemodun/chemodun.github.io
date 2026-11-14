@@ -1,6 +1,43 @@
 {
-  "through": "6409a9d9a7bb95609d2a6d905205b4831b1e8460",
+  "through": "8ae95c70e346f9268bd46b3e76ef54aaf74adecb",
   "days": [
+    {
+      "date": "2026-11-14",
+      "pages": [
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/audiologs-xml/",
+          "title": "audiologs.xml",
+          "kind": "new",
+          "lines": [
+            "add the audiologs.xml and classcatalog.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/classcatalog-xml/",
+          "title": "classcatalog.xml",
+          "kind": "new",
+          "lines": [
+            "add the audiologs.xml and classcatalog.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/",
+          "title": "libraries",
+          "kind": "",
+          "lines": [
+            "add the audiologs.xml and classcatalog.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/timeline-xml/",
+          "title": "timeline.xml",
+          "kind": "",
+          "lines": [
+            "add the audiologs.xml and classcatalog.xml articles"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-11-13",
       "pages": [
