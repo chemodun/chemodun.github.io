@@ -112,7 +112,7 @@ What the universe files under `maps/` refer to, and the defaults every object st
 | `regionobjectgroups.xml` | `<groups>` | Named groups of asteroid and debris macros a region draws from | |
 | `region_lodvalues.xml` | `<regionlods>` | Fade and distance values for region levels of detail | |
 | `highwayconfigurations.xml` | `<highwayconfigurations>` | Tube, gate, blocker and booster configurations for local and super highways | |
-| `classcatalog.xml` | `<catalogs>` | Template names per component class the map editor offers | whole |
+| [`classcatalog.xml`](/x4/modding-support/anatomy-of-game-data/libraries/classcatalog-xml/) | `<catalogs>` | Names per component class: the background scenes of the clusters and the cluster macros; the linked article covers it in full | whole |
 | `component.xml`, `macro.xml` | `<components>`, `<macros>` | A few test components and macros kept outside `assets/` | whole (`macro.xml`) |
 | `macrohints.xml` | `<macros>` | Macros to load at start so their first use causes no stall | |
 | `patchactions.xml` | `<actions>` | Objects and components that a version replaced, and how saves are patched to the new state | whole |
@@ -188,7 +188,7 @@ These files describe how things look and sound rather than what they are, and ar
 | `stardust_library.xml` | `<stardust>` | The stardust configuration | |
 | `sound_library.xml` | `<soundlibrary>` | Every sound: its files, volume, range and variation | diff |
 | `sound_env_library.xml` | `<soundenvironmentlibrary>` | Sound environments (room size, density, occlusion) by place | |
-| `audiologs.xml` | `<audiologs>` | Audio logs (empty in the base game) | |
+| [`audiologs.xml`](/x4/modding-support/anatomy-of-game-data/libraries/audiologs-xml/) | `<audiologs>` | Audio logs, recorded messages found as collectable data, in the entry format of the Timeline; empty in the base game; the linked article covers it in full | |
 
 [↑ Contents](#toc)
 

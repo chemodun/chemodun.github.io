@@ -129,6 +129,7 @@ No expansion ships a `timeline.xml`; the base file is the whole timeline, and th
 | `player.encyclopedia.timeline.{$id}.name`, `.rawname`, `.description`, `.image`, `.video`, `.videomacro` | The entry's attributes as the player sees them |
 | `player.encyclopedia.timeline.{$id}.voice`, `.date`, `.group` | The voice sequence id, the date as a number and the group; these three exist for timeline and audio log entries only |
 | `event_player_collected_data` | The player picked up a data collectable: `param` is the type, `timeline` or `audiolog`, `param2` the entry id; the condition takes `type` and `id` to narrow it |
+| `add_data object="..." timeline="..."`, `remove_data` | Adds one entry id or a list of ids to a collectable, a crate or a lockbox, or removes them |
 | `$crate.timeline`, `$lockbox.timeline`, `$collectabledata.timeline` | The timeline entry ids a crate, lockbox or collectable data object carries, as a list |
 | `<data timeline="..."/>` in `libraries/drops.xml` | A collectable data drop carrying an entry, or a `<select>` list of them by weight; `audiolog` is the alternative and `timeline` wins when both are given |
 | `<timeline><entry ref="..."/></timeline>` in `libraries/gamestarts.xml` | Entries known from the start of a new game, under `<player>` |
@@ -203,5 +204,7 @@ The extension itself, its folder, `content.xml` and diff files, is covered in [A
 [drops.xml](/x4/modding-support/anatomy-of-game-data/libraries/drops-xml/) covers the drop lists in which a `<data>` collectable carrying an entry would be defined.
 
 [voicesequences.xml](/x4/modding-support/anatomy-of-game-data/libraries/voicesequences-xml/) covers the voice sequences an entry's `voice` names: their steps, the text page behind a spoken line and its recording.
+
+[audiologs.xml](/x4/modding-support/anatomy-of-game-data/libraries/audiologs-xml/) covers the audio logs, the second kind of entry in this format, which the base game defines but leaves empty.
 
 [↑ Contents](#toc)
