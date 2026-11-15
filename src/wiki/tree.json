@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-09-30",
+  "fetched": "2026-11-15",
   "root": "X4 Foundations Wiki",
   "branch": "Modding Support",
   "pages": [
@@ -284,6 +284,14 @@
       ],
       "title": "UI Modding support",
       "implied": true
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "UI Modding support",
+        "Catching input actions and states"
+      ],
+      "title": "Catching input actions and states"
     },
     {
       "segs": [

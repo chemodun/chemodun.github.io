@@ -180,13 +180,13 @@ These files describe how things look and sound rather than what they are, and ar
 | `trigger_events.xml` | `<effects>` | The events an effect can be triggered by (damage, activation, opening...) | |
 | `eventdefs.xml` | `<events>` | The events a cutscene can raise, with the meaning of each parameter | |
 | `animation_sequences.xml` | `<sequencestates>` | Animation state machines, such as a door's closed, opening, open and closing states and the triggers between them | diff |
-| `material_library.xml`, `material_library_1.xml` | `<materiallibrary>` | The materials every model refers to: shader, textures and parameters, in collections | diff |
+| [`material_library.xml`](/x4/modding-support/anatomy-of-game-data/libraries/material_library-xml/), `material_library_1.xml` | `<materiallibrary>` | The materials every model refers to: shader, textures and parameters, in collections; the linked article covers both files in full | diff |
 | `envmapprobes.xml` | `<envmapprobes>` | Environment map probe presets and templates for reflections | whole |
 | `renderparam_library.xml` | `<renderparameters>` | Level of detail and render rules by distance and size | |
 | `medium_library.xml` | `<library>` | The media light passes through: fog and air absorption and phase settings | |
 | `volume_library.xml` | `<volumes>` | Volumetric fog definitions and their textures | |
 | `stardust_library.xml` | `<stardust>` | The stardust configuration | |
-| `sound_library.xml` | `<soundlibrary>` | Every sound: its files, volume, range and variation | diff |
+| [`sound_library.xml`](/x4/modding-support/anatomy-of-game-data/libraries/sound_library-xml/) | `<soundlibrary>` | Every sound: its files, volume, range and variation, and the sound groups of engines and ships; the linked article covers it in full | diff |
 | `sound_env_library.xml` | `<soundenvironmentlibrary>` | Sound environments (room size, density, occlusion) by place | |
 | [`audiologs.xml`](/x4/modding-support/anatomy-of-game-data/libraries/audiologs-xml/) | `<audiologs>` | Audio logs, recorded messages found as collectable data, in the entry format of the Timeline; empty in the base game; the linked article covers it in full | |
 
