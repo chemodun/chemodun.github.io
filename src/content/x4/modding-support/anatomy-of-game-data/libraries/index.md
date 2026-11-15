@@ -157,10 +157,10 @@ What the universe files under `maps/` refer to, and the defaults every object st
 | `inputmap_defaults_*.xml` | `<inputmap>` | One default binding set per supported controller, joystick and HOTAS | |
 | `contexts.xml` | `<inputcontexts>` | The input contexts (flight, map, menu, first person...) and which actions are active in each | |
 | `controlschemes_*.xml` | `<controlschemes>` | The control schemes the options menu offers, default, experimental and movie capturing | |
-| `inputfeedback.xml` | `<inputfeedback>` | Which actions give a control message or a voice confirmation | |
+| [`inputfeedback.xml`](/x4/modding-support/anatomy-of-game-data/libraries/inputfeedback-xml/) | `<inputfeedback>` | Which actions, states and ranges give a text or a voice confirmation, and the default of each; the linked article covers it in full | |
 | `mousecursors.xml` | `<index>` | The cursor images in `mousecursors/`, by name | |
 | `icons.xml` | `<icons>` | Every named icon: its texture and size; the names an `icon="..."` in a library, a script or Lua refers to | whole |
-| `colors.xml` | `<colormap>` | The named colours the interface and the map use, the mappings between them, and the colour blindness transformations | |
+| [`colors.xml`](/x4/modding-support/anatomy-of-game-data/libraries/colors-xml/) | `<colormap>` | The named colours the interface and the map use, the mappings that give each feature its colour, and the colour blindness transformations; the linked article covers it in full | |
 | `fonts.xml`, `fonts-l0NN.xml` | `<fonts>` | The fonts and aliases, with one file per language that needs its own | |
 | `languages.xml` | `<languages>` | The languages the game offers, with their ids | |
 | `config.xml`, `config_*.xml` | `<root>` | The graphics options and the low, medium and ultra presets, plus the Linux and Steam Deck variants | |
