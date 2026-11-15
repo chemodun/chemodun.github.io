@@ -1,6 +1,35 @@
 {
-  "through": "8ae95c70e346f9268bd46b3e76ef54aaf74adecb",
+  "through": "dbc537fad2032bac5c5943a8c2c7db3d5e7d2004",
   "days": [
+    {
+      "date": "2026-11-15",
+      "pages": [
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/colors-xml/",
+          "title": "colors.xml",
+          "kind": "new",
+          "lines": [
+            "add the colors.xml and inputfeedback.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/",
+          "title": "libraries",
+          "kind": "",
+          "lines": [
+            "add the colors.xml and inputfeedback.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/inputfeedback-xml/",
+          "title": "inputfeedback.xml",
+          "kind": "new",
+          "lines": [
+            "add the colors.xml and inputfeedback.xml articles"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-11-14",
       "pages": [
