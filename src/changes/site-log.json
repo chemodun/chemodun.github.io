@@ -1,6 +1,67 @@
 {
-  "through": "4581333144573a1b229d0f506bcf1b7aa780b248",
+  "through": "e2d0757a22b06a9c339c69b40f633d3aaeacee4d",
   "days": [
+    {
+      "date": "2026-11-16",
+      "pages": [
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/maps/sector-layout-in-a-cluster/",
+          "title": "Sector layout in a cluster",
+          "kind": "new",
+          "lines": [
+            "add the maps section with Sector layout in a cluster and move Resource areas into it"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/",
+          "title": "Anatomy of game data",
+          "kind": "",
+          "lines": [
+            "add the maps section with Sector layout in a cluster and move Resource areas into it"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/",
+          "title": "libraries",
+          "kind": "",
+          "lines": [
+            "add the maps section with Sector layout in a cluster and move Resource areas into it"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/influenceconfigurations-xml/",
+          "title": "influenceconfigurations.xml",
+          "kind": "",
+          "lines": [
+            "add the maps section with Sector layout in a cluster and move Resource areas into it"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/objectspawnrules-xml/",
+          "title": "objectspawnrules.xml",
+          "kind": "",
+          "lines": [
+            "add the maps section with Sector layout in a cluster and move Resource areas into it"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/maps/",
+          "title": "maps",
+          "kind": "new",
+          "lines": [
+            "add the maps section with Sector layout in a cluster and move Resource areas into it"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/maps/resource-areas/",
+          "title": "Resource areas",
+          "kind": "gone",
+          "lines": [
+            "add the maps section with Sector layout in a cluster and move Resource areas into it"
+          ]
+        }
+      ]
+    },
     {
       "date": "2026-11-15",
       "pages": [
