@@ -1,5 +1,5 @@
 {
-  "through": "dbc537fad2032bac5c5943a8c2c7db3d5e7d2004",
+  "through": "4581333144573a1b229d0f506bcf1b7aa780b248",
   "days": [
     {
       "date": "2026-11-15",
@@ -17,7 +17,8 @@
           "title": "libraries",
           "kind": "",
           "lines": [
-            "add the colors.xml and inputfeedback.xml articles"
+            "add the colors.xml and inputfeedback.xml articles",
+            "add the sound_library.xml and material_library.xml articles"
           ]
         },
         {
@@ -26,6 +27,22 @@
           "kind": "new",
           "lines": [
             "add the colors.xml and inputfeedback.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/material_library-xml/",
+          "title": "material_library.xml",
+          "kind": "new",
+          "lines": [
+            "add the sound_library.xml and material_library.xml articles"
+          ]
+        },
+        {
+          "path": "/x4/modding-support/anatomy-of-game-data/libraries/sound_library-xml/",
+          "title": "sound_library.xml",
+          "kind": "new",
+          "lines": [
+            "add the sound_library.xml and material_library.xml articles"
           ]
         }
       ]
