@@ -1,7 +1,7 @@
 ---
 title: Resource areas
 description: How version 9.00 defines the resources miners gather - yield definitions in regionyields.xml, the areas each sector gets in mapdefaults.xml, what regions still do, depletion and respawn, and how an extension and a script add or change them.
-order: 10
+movedFrom: /x4/modding-support/resource-areas/
 ---
 
 # Resource areas

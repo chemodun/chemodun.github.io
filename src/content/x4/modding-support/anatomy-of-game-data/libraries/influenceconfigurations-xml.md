@@ -282,7 +282,7 @@ The extension itself, its folder, `content.xml` and diff files, is covered in [A
 
 ## Reading on
 
-[Resource areas](/x4/modding-support/resource-areas/) covers `libraries/region_definitions.xml`, the file in which a region's `<influence>` field is defined.
+[Resource areas](/x4/modding-support/anatomy-of-game-data/maps/resource-areas/) covers `libraries/region_definitions.xml`, the file in which a region's `<influence>` field is defined.
 
 [stances.xml](/x4/modding-support/anatomy-of-game-data/libraries/stances-xml/) covers ship stances, each of which works through an influence list for as long as it is active.
 

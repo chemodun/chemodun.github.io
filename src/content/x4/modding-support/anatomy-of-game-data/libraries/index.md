@@ -106,9 +106,9 @@ What the universe files under `maps/` refer to, and the defaults every object st
 | File | Root | Holds | Expansions |
 | --- | --- | --- | --- |
 | `defaults.xml` | `<defaults>` | Default properties per component class (a dataset per class: ship sizes, turrets, asteroids, adsigns...), including the relation changes for attacking, killing, scanning and hacking | |
-| `mapdefaults.xml` | `<defaults>` | The same mechanism per map macro: a dataset for the galaxy, each cluster and each sector with its balancing data, encyclopedia information and, since 9.00, its resource areas. See [Resource areas](/x4/modding-support/resource-areas/) | whole |
+| `mapdefaults.xml` | `<defaults>` | The same mechanism per map macro: a dataset for the galaxy, each cluster and each sector with its balancing data, encyclopedia information and, since 9.00, its resource areas. See [Resource areas](/x4/modding-support/anatomy-of-game-data/maps/resource-areas/) | whole |
 | `region_definitions.xml` | `<regions>` | The regions (asteroid fields, nebulae, debris) a cluster places: their shape, density, objects and effects | whole |
-| `regionyields.xml` | `<regionyields>` | The resource area definitions: yield boundaries, gather speeds and the sizes of each ware's areas. See [Resource areas](/x4/modding-support/resource-areas/) | |
+| `regionyields.xml` | `<regionyields>` | The resource area definitions: yield boundaries, gather speeds and the sizes of each ware's areas. See [Resource areas](/x4/modding-support/anatomy-of-game-data/maps/resource-areas/) | |
 | `regionobjectgroups.xml` | `<groups>` | Named groups of asteroid and debris macros a region draws from | |
 | `region_lodvalues.xml` | `<regionlods>` | Fade and distance values for region levels of detail | |
 | `highwayconfigurations.xml` | `<highwayconfigurations>` | Tube, gate, blocker and booster configurations for local and super highways | |

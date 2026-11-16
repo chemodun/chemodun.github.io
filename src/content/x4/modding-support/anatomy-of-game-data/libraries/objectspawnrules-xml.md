@@ -256,6 +256,6 @@ The extension itself, its folder, `content.xml` and diff files, is covered in [A
 
 ## Reading on
 
-[drops.xml](/x4/modding-support/anatomy-of-game-data/libraries/drops-xml/) holds the droplists a rule names and the ones the crystal clusters carry. [god.xml](/x4/modding-support/anatomy-of-game-data/libraries/god-xml/) places the stations and picks the module set a station is built from. [Resource areas](/x4/modding-support/resource-areas/) covers the regions and their fields.
+[drops.xml](/x4/modding-support/anatomy-of-game-data/libraries/drops-xml/) holds the droplists a rule names and the ones the crystal clusters carry. [god.xml](/x4/modding-support/anatomy-of-game-data/libraries/god-xml/) places the stations and picks the module set a station is built from. [Resource areas](/x4/modding-support/anatomy-of-game-data/maps/resource-areas/) covers the regions and their fields.
 
 [↑ Contents](#toc)

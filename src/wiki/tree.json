@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-11-15",
+  "fetched": "2026-11-16",
   "root": "X4 Foundations Wiki",
   "branch": "Modding Support",
   "pages": [
@@ -31,6 +31,30 @@
         "XML diff patching"
       ],
       "title": "XML diff patching"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Anatomy of game data"
+      ],
+      "title": "Anatomy of game data"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Anatomy of game data",
+        "Maps"
+      ],
+      "title": "Maps"
+    },
+    {
+      "segs": [
+        "Modding Support",
+        "Anatomy of game data",
+        "Maps",
+        "Sector layout in a cluster"
+      ],
+      "title": "Sector layout in a cluster"
     },
     {
       "segs": [

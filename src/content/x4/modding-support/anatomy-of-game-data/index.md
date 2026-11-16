@@ -12,7 +12,7 @@ wikiRef: also
 
 Everything the game does beyond its executable is described in files, and an extension changes the game by adding to those files or patching them. Knowing where a thing lives is the first step of nearly every modding task: which folder holds a ship's macro, where a faction is defined, which file names the sectors, what a text id points at. This article maps the game's own data as version 9.00 ships it, folder by folder, and says which article covers each part in more detail.
 
-It is the counterpart of [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/). That article describes the folder an extension is; this one describes the tree the extension merges into. The articles below this one go down one level at a time, starting with the data tables in `libraries/`.
+It is the counterpart of [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/). That article describes the folder an extension is; this one describes the tree the extension merges into. <!-- site-only -->The articles below this one go down one level at a time, starting with the data tables in `libraries/`.<!-- /site-only -->
 
 <a id="toc"></a>
 
@@ -65,12 +65,12 @@ Unpacked together, the nine catalogs make one tree, and every extension mirrors 
 
 | Folder | What it holds | Mostly | Covered in |
 | --- | --- | --- | --- |
-| [`libraries/`](/x4/modding-support/anatomy-of-game-data/libraries/) | The data tables: wares, ships, factions, jobs, god, loadouts, icons, parameters and over a hundred more, with the XSD schemas that describe them beside them | XML | [libraries](/x4/modding-support/anatomy-of-game-data/libraries/), with [jobs.xml](/x4/modding-support/anatomy-of-game-data/libraries/jobs-xml/), [god.xml](/x4/modding-support/anatomy-of-game-data/libraries/god-xml/), [gamestarts.xml](/x4/modding-support/anatomy-of-game-data/libraries/gamestarts-xml/) and [startmenu.xml](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/) |
+| [`libraries/`](/x4/modding-support/anatomy-of-game-data/libraries/) | The data tables: wares, ships, factions, jobs, god, loadouts, icons, parameters and over a hundred more, with the XSD schemas that describe them beside them | XML | <!-- site-only -->[libraries](/x4/modding-support/anatomy-of-game-data/libraries/), with [jobs.xml](/x4/modding-support/anatomy-of-game-data/libraries/jobs-xml/), [god.xml](/x4/modding-support/anatomy-of-game-data/libraries/god-xml/), [gamestarts.xml](/x4/modding-support/anatomy-of-game-data/libraries/gamestarts-xml/) and [startmenu.xml](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/)<!-- /site-only --> |
 | `md/` | Mission Director scripts: game start setup, faction logic, missions, tutorials, the shared `lib` and `gm` families | XML | [Scripting/MD/Libraries/Map](/x4/modding-support/scripting-md-libraries-map/) |
 | `aiscripts/` | AI scripts: orders, movement, trade, fight, mining, mass traffic and the interrupt handlers | XML | [Scripting/MD/Libraries/Map](/x4/modding-support/scripting-md-libraries-map/) |
-| `maps/` | The universe: the galaxy, clusters, sectors, zones and highways in `xu_ep2_universe/`, plus the small galaxies the tutorials, the main menu scene, the demo and the editor use | XML | [Resource areas](/x4/modding-support/resource-areas/) |
+| [`maps/`](/x4/modding-support/anatomy-of-game-data/maps/) | The universe: the galaxy, clusters, sectors, zones and highways in `xu_ep2_universe/`, plus the small galaxies the tutorials, the main menu scene, the demo and the editor use | XML | [maps](/x4/modding-support/anatomy-of-game-data/maps/), with <!-- site-only -->[Resource areas](/x4/modding-support/anatomy-of-game-data/maps/resource-areas/) and<!-- /site-only --> [Sector layout in a cluster](/x4/modding-support/anatomy-of-game-data/maps/sector-layout-in-a-cluster/) |
 | `index/` | `components.xml` and `macros.xml`: the name to path lookups that let every other file refer to an asset by name | XML | [Anatomy of an extension](/x4/modding-support/anatomy-of-an-extension/#adding-something-of-your-own) |
-| `assets/` | Everything physical: `structures/` (station modules), `units/` (ships by size), `props/` (weapons, engines, ad signs), `environments/`, `interiors/`, `characters/`, `fx/`, `wares/`; each thing has its XML component and macro beside the binary model | XML and binary | Assets Modding on the Egosoft wiki |
+| `assets/` | Everything physical: `structures/` (station modules), `units/` (ships by size), `props/` (weapons, engines, ad signs), `environments/`, `interiors/`, `characters/`, `fx/`, `wares/`; each thing has its XML component and macro beside the binary model | XML and binary | [Assets Modding](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/Assets%20Modding/) <!-- site-only -->on the Egosoft wiki<!-- /site-only --> |
 | `t/` | Text, one file per language, holding every page the game, the expansions and the interface use | XML | [Text and translations](/x4/modding-support/anatomy-of-an-extension/#text-and-translations) |
 | `ui/` | The interface: `core/` (the HUD, its Lua and its XML presentations), `widget/` (the widget layer), `addons/` (the menus) | Lua, XML | [UI Modding support](/x4/modding-support/ui-modding/) |
 | `cutscenes/` | Camera and scene sequences | XML | |
@@ -91,7 +91,7 @@ What can be done with a file depends on its kind, and the tree has three.
 
 **Lua** is the interface, under `ui/`. The menus in `ui/addons/` are extended by registering a file of the extension's own; the HUD in `ui/core/` is not. [UI Modding support](/x4/modding-support/ui-modding/) covers both sides.
 
-**Binary** is the rest: `.xmf` meshes, `.xac` characters and `.xsm` character animations, `.ani` animations, `.gz` and `.dds` textures, `.ogg` and `.wav` sound, `.psb` particles, `.glsl` shaders. A diff does not apply to these; a file of the same path replaces the original whole, and producing one needs the tools the Assets Modding guides on the Egosoft wiki describe.
+**Binary** is the rest: `.xmf` meshes, `.xac` characters and `.xsm` character animations, `.ani` animations, `.gz` and `.dds` textures, `.ogg` and `.wav` sound, `.psb` particles, `.glsl` shaders. A diff does not apply to these; a file of the same path replaces the original whole, and producing one needs the tools the [Assets Modding](https://wiki.egosoft.com/X4%20Foundations%20Wiki/Modding%20Support/Assets%20Modding/) guides <!-- site-only -->on the Egosoft wiki<!-- /site-only --> describe.
 
 [↑ Contents](#toc)
 
@@ -105,7 +105,11 @@ Two things an expansion does not carry. There is no `t/`: the texts for every ex
 
 ## Reading on
 
-The articles below take one folder each. `libraries/` comes first, because it is where the universe is defined: what wares exist, which factions own what, which ships and stations the game creates and where. [jobs.xml](/x4/modding-support/anatomy-of-game-data/libraries/jobs-xml/), [god.xml](/x4/modding-support/anatomy-of-game-data/libraries/god-xml/), [gamestarts.xml](/x4/modding-support/anatomy-of-game-data/libraries/gamestarts-xml/) and [startmenu.xml](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/) are the tables already covered in full, the last with [Start menu background](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/background/) below it, and [Resource areas](/x4/modding-support/resource-areas/) follows one subject across `libraries/` and `maps/`.
+<!-- site-only -->
+The articles below take one folder each. `libraries/` comes first, because it is where the universe is defined: what wares exist, which factions own what, which ships and stations the game creates and where. [jobs.xml](/x4/modding-support/anatomy-of-game-data/libraries/jobs-xml/), [god.xml](/x4/modding-support/anatomy-of-game-data/libraries/god-xml/), [gamestarts.xml](/x4/modding-support/anatomy-of-game-data/libraries/gamestarts-xml/) and [startmenu.xml](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/) are the tables already covered in full, the last with [Start menu background](/x4/modding-support/anatomy-of-game-data/libraries/startmenu-xml/background/) below it.
+<!-- /site-only -->
+
+Under [maps](/x4/modding-support/anatomy-of-game-data/maps/), <!-- site-only -->[Resource areas](/x4/modding-support/anatomy-of-game-data/maps/resource-areas/) follows one subject across `libraries/` and `maps/`, and<!-- /site-only --> [Sector layout in a cluster](/x4/modding-support/anatomy-of-game-data/maps/sector-layout-in-a-cluster/) explains how the map arranges the sectors of a cluster that holds more than one.
 
 For the two folders that are a language rather than a table, the sections of their own are the place: [Scripting/MD/Libraries/Map](/x4/modding-support/scripting-md-libraries-map/) for `md/` and `aiscripts/`, [UI Modding support](/x4/modding-support/ui-modding/) for `ui/`.
 
